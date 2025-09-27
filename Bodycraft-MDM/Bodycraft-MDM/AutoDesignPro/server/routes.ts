@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { 
   insertAssetSchema, 
@@ -14,8 +15,114 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Assets routes
-  app.get("/api/assets", async (req, res) => {
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+
+      // Get user by username
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+
+      // Check password
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+
+      // Check if user is active
+      if (user.status !== "active") {
+        return res.status(401).json({ message: "Account is inactive" });
+      }
+
+      // Update last login
+      await storage.updateUser(user.id, { lastLogin: new Date() });
+
+      // Regenerate session ID to prevent session fixation
+      req.session.regenerate((err) => {
+        if (err) {
+          return res.status(500).json({ message: "Session error" });
+        }
+        
+        // Create session (store in session)
+        req.session.userId = user.id;
+        req.session.username = user.username;
+        req.session.role = user.role;
+
+        // Return user info (without password hash)
+        const { passwordHash, ...userResponse } = user;
+        res.json({
+          message: "Login successful",
+          user: userResponse
+        });
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ message: "Could not log out" });
+        }
+        res.json({ message: "Logged out successfully" });
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/auth/session", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Get current user info
+      const user = await storage.getUserByUsername(req.session.username);
+      if (!user || user.status !== "active") {
+        return res.status(401).json({ message: "Invalid session" });
+      }
+
+      // Return user info (without password hash)
+      const { passwordHash, ...userResponse } = user;
+      res.json({ user: userResponse });
+    } catch (error) {
+      console.error("Session check error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Middleware to check authentication
+  const requireAuth = (req: any, res: any, next: any) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
+
+  // Middleware to check role permissions
+  const requireRole = (roles: string[]) => {
+    return (req: any, res: any, next: any) => {
+      if (!req.session.role || !roles.includes(req.session.role)) {
+        return res.status(403).json({ message: "Insufficient permissions" });
+      }
+      next();
+    };
+  };
+
+  // Assets routes - Protected with authentication
+  app.get("/api/assets", requireAuth, async (req, res) => {
     try {
       const assets = await storage.getAllAssets();
       res.json(assets);
@@ -36,7 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/assets", async (req, res) => {
+  app.post("/api/assets", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedAsset = insertAssetSchema.parse(req.body);
       const asset = await storage.createAsset(validatedAsset);
@@ -49,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/assets/:id", async (req, res) => {
+  app.patch("/api/assets/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedAsset = insertAssetSchema.partial().parse(req.body);
       const asset = await storage.updateAsset(req.params.id, validatedAsset);
@@ -65,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/assets/:id", async (req, res) => {
+  app.delete("/api/assets/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const success = await storage.deleteAsset(req.params.id);
       if (!success) {
@@ -78,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Employees routes
-  app.get("/api/employees", async (req, res) => {
+  app.get("/api/employees", requireAuth, async (req, res) => {
     try {
       const employees = await storage.getAllEmployees();
       res.json(employees);
@@ -141,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Locations routes
-  app.get("/api/locations", async (req, res) => {
+  app.get("/api/locations", requireAuth, async (req, res) => {
     try {
       const locations = await storage.getAllLocations();
       res.json(locations);
@@ -192,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Assignment History routes
-  app.get("/api/assignments", async (req, res) => {
+  app.get("/api/assignments", requireAuth, async (req, res) => {
     try {
       const assetId = req.query.assetId as string;
       const employeeId = req.query.employeeId ? parseInt(req.query.employeeId as string) : undefined;

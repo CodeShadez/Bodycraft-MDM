@@ -21,6 +21,7 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 8 * 60 * 60 * 1000, // 8 hours
+    sameSite: 'lax', // CSRF protection
   },
   name: 'bodycraft.sid',
 }));
