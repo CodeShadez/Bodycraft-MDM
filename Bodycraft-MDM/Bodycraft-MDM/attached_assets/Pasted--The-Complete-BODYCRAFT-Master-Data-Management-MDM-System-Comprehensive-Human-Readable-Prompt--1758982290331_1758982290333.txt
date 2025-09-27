@@ -1,0 +1,364 @@
+# The Complete BODYCRAFT Master Data Management (MDM) System: Comprehensive Human-Readable Prompt
+
+## Project Overview and Context
+
+I need you to build a complete Master Data Management (MDM) system for BODYCRAFT, a company with 32 outlets across India. This is a mission-critical system that will replace their current manual Excel-based asset tracking with a modern, automated, and integrated digital platform.
+
+**Current Situation:**
+BODYCRAFT currently manages IT assets manually using Excel spreadsheets across all their outlets. This creates major problems: when an employee like Rajesh gets a laptop and later returns it, and the same laptop is assigned to Priya, they lose all of Rajesh's assignment history. They have no way to track who had what equipment, when they had it, what condition it was in, or any backup details. This manual process is error-prone, time-consuming, and provides no audit trail.
+
+**The Vision:**
+Create a centralized web-based system where any IT administrator can instantly find any asset, see its complete assignment history, assign it to employees, track maintenance, and integrate with existing CCTV and biometric systems - all while preserving every piece of historical data forever.
+
+## Core Business Requirements
+
+### 1. Complete Asset Management
+**What I need:** A comprehensive system to manage all types of IT assets including:
+- Laptops (Dell, HP, Lenovo, Apple)
+- Desktop computers with components (monitors, CPUs, keyboards, mice)
+- Mobile devices (smartphones, tablets, iPads)
+- Networking equipment (routers, switches, access points, DVRs)
+- Communication devices (landline phones, billing printers)
+- Specialized equipment (security systems, UPS units, cables)
+
+**Key Features Required:**
+- Custom asset IDs following BODYCRAFT convention (BFC001, BFC002, etc.)
+- Complete asset specifications (model, brand, service tag, purchase date, warranty)
+- Real-time status tracking (Available, Assigned, Maintenance, Retired)
+- Condition assessment (Excellent, Good, Fair, Poor)
+- Location tracking across all 32 outlets
+- Advanced search across all fields simultaneously
+- Bulk import from existing Excel files
+- Export capabilities for reports and audits
+
+### 2. Employee and Assignment Management
+**What I need:** Complete employee database with sophisticated assignment tracking that NEVER overwrites historical data.
+
+**Critical Assignment Logic:**
+- When Rajesh (employee code BFC2024001) gets laptop BFC001, create assignment record
+- When Rajesh returns laptop (3 weeks later), update return date and condition but KEEP the assignment record
+- When Priya (employee code BFC2024002) gets the same laptop, create NEW assignment record
+- System must maintain complete chain of custody showing: Rajesh had it Jan 1-22, returned in Good condition, then Priya got it Jan 23-present
+
+**Features Required:**
+- Employee database with unique employee codes
+- Department and location assignment
+- Assignment workflow with reasons and dates
+- Return workflow with condition assessment and backup details
+- Transfer workflow between employees
+- Complete assignment history that is never overwritten
+- Search by employee name, code, or assigned assets
+
+### 3. Multi-Location Management
+**What I need:** Centralized management of all 32 outlets with location-specific views and controls.
+
+**Features Required:**
+- Complete outlet database (name, city, state, manager, contact details)
+- Location-wise asset distribution and reporting
+- Asset transfer between locations with full tracking
+- Location-specific dashboards and permissions
+- Regional grouping and management hierarchy
+
+### 4. System Integration Capabilities
+**What I need:** Integration with existing systems to create a unified IT management platform.
+
+**CCTV Integration (Hikvision Systems):**
+- Connect to Hikvision devices using ISAPI (RESTful API)
+- Monitor device status (online/offline) across all locations
+- Automated configuration updates
+- Integration with asset location tracking
+
+**Biometric System Integration:**
+- Sync employee data with biometric attendance devices
+- Pull attendance records for asset location correlation
+- Automated employee status updates
+- Access control integration
+
+**Excel Integration:**
+- Import existing asset data from Excel files
+- Export reports and data in Excel format
+- Bulk operations support
+
+### 5. Backup and Compliance Management
+**What I need:** Comprehensive backup tracking to ensure data security compliance.
+
+**Features Required:**
+- Mandatory backup recording when laptops are returned
+- Backup details: date, size, type, location, who performed it
+- Backup verification and success tracking
+- Storage location management
+- Compliance reporting for audits
+
+### 6. Maintenance Management
+**What I need:** Proactive maintenance scheduling and tracking system.
+
+**Features Required:**
+- Scheduled preventive maintenance with automated alerts
+- Corrective maintenance request and tracking
+- Service history with costs and parts replaced
+- Vendor management and performance tracking
+- Warranty expiration alerts
+- Maintenance cost analysis and reporting
+
+### 7. Advanced Reporting and Analytics
+**What I need:** Comprehensive reporting system for management decision-making.
+
+**Dashboard Requirements:**
+- Real-time statistics (total assets, assigned, available, maintenance due)
+- Asset distribution across locations
+- Assignment trends and utilization rates
+- Recent activities feed
+- System health status for integrations
+
+**Reports Required:**
+- Asset utilization by location, department, time period
+- Assignment history for any asset or employee
+- Maintenance costs and schedules
+- Warranty expiration reports
+- Compliance audit reports
+- Custom report builder with export options
+
+## Technical Specifications
+
+### Technology Stack (Must Use Exactly)
+- **Backend:** Django 4.2+ (Python web framework) - provides robust ORM, admin interface, security features
+- **Database:** SQLite for development, PostgreSQL for production - ensures scalability and performance
+- **Frontend:** Django Templates + Bootstrap 5 + jQuery - professional, responsive design
+- **Development Environment:** Windows 11 compatible (Dell laptop with 16GB RAM)
+- **Integration APIs:** RESTful APIs for CCTV and biometric systems
+
+### Database Architecture (Critical Structure)
+
+**Assets Table:**
+```sql
+asset_id (Primary Key, custom format like BFC001)
+model_name (ThinkPad E15, OptiPlex 3080, etc.)
+brand (Dell, Lenovo, HP, Apple)
+service_tag (unique manufacturer identifier)
+asset_type (Laptop, Desktop, Monitor, Mobile, etc.)
+purchase_date, warranty_expiry
+status (available, assigned, maintenance, retired)
+condition (excellent, good, fair, poor)
+current_location_id (foreign key to locations)
+current_user_id (foreign key to employees, nullable)
+created_at, updated_at
+```
+
+**Employees Table:**
+```sql
+employee_id (Primary Key)
+employee_code (unique, like BFC2024001)
+first_name, last_name, department, designation
+email, phone, status (active, inactive)
+location_id (foreign key to primary work location)
+```
+
+**Assignment History Table (MOST CRITICAL):**
+```sql
+assignment_id (Primary Key)
+asset_id (foreign key)
+employee_id (foreign key)
+assigned_date (required)
+returned_date (nullable for active assignments)
+assignment_reason, return_reason
+condition_on_assignment, condition_on_return
+backup_details (for returned devices)
+created_by (who processed the assignment)
+```
+
+**Additional Tables:**
+- Locations (outlet_name, city, state, manager details)
+- Maintenance Records (maintenance history with costs and parts)
+- CCTV Systems (device management and status)
+- Biometric Systems (device integration and sync status)
+- Backup Records (comprehensive backup tracking)
+
+### User Interface Requirements
+
+**Design Standards:**
+- Professional corporate design suitable for IT departments
+- Bootstrap 5 responsive framework for mobile compatibility
+- Clean, modern interface with intuitive navigation
+- Font Awesome icons for consistency
+- Professional color scheme (blues, grays with status color coding)
+
+**Page Structure:**
+1. **Dashboard:** Statistics, charts, recent activities, quick actions
+2. **Assets Page:** Searchable table, add/edit modals, detailed asset views
+3. **Employees Page:** Employee directory with assigned assets
+4. **Assignments Page:** Assignment workflows and history
+5. **Locations Page:** Outlet management and asset distribution
+6. **Reports Page:** Analytics, custom reports, export functions
+7. **Integrations Page:** System status and integration controls
+
+**Key UX Requirements:**
+- Advanced search across multiple fields simultaneously
+- Sortable, filterable data tables with pagination
+- Modal forms for add/edit operations
+- Real-time notifications for user actions
+- Mobile-responsive design for field operations
+- Keyboard shortcuts for power users
+
+## Functional Workflows
+
+### Asset Assignment Workflow:
+1. Select available asset from inventory
+2. Choose active employee from dropdown
+3. Fill assignment form (reason, expected return date, condition)
+4. System updates asset status to "assigned"
+5. Creates new record in assignment_history table
+6. Sends confirmation notification
+
+### Asset Return Workflow:
+1. Find assigned asset (search by asset ID or employee)
+2. Fill return form (return reason, condition assessment)
+3. If laptop: record backup details (required)
+4. System updates assignment record with return_date
+5. Changes asset status to "available"
+6. Maintains complete assignment record
+
+### Asset Transfer Workflow:
+1. Select currently assigned asset
+2. Choose new employee recipient
+3. System closes current assignment (sets return_date)
+4. Creates new assignment for new employee
+5. Preserves complete chain of custody
+
+### Search and Discovery:
+- Global search bar searches across assets, employees, assignments
+- Quick filters: "Available laptops in Bangalore"
+- Advanced search with multiple criteria
+- Saved searches for common queries
+- Export search results to Excel
+
+## Integration Specifications
+
+### Hikvision CCTV Integration:
+- **Protocol:** ISAPI (HTTP-based RESTful API)
+- **Authentication:** Digest Authentication with encrypted credential storage
+- **Key Functions:**
+  - Device status monitoring (GET /ISAPI/System/status)
+  - Configuration management (PUT /ISAPI/System/Network/interfaces)
+  - Event streaming for location updates
+  - Automated health checks across all 32 locations
+
+### Biometric System Integration:
+- **Protocol:** Web API/HTTP integration
+- **Functions:**
+  - Employee data synchronization
+  - Attendance record retrieval
+  - Device status monitoring
+  - Real-time employee presence correlation
+
+## Security and Performance Requirements
+
+### Security Features:
+- Django's built-in user authentication system
+- Role-based access control (Admin, Manager, Technician, Employee)
+- HTTPS/SSL encryption for all communications
+- Password hashing and secure credential storage
+- Complete audit logging of all system changes
+- Input validation and sanitization
+- Session management with timeout controls
+
+### Performance Requirements:
+- Page load times under 2 seconds
+- Support for 10,000+ assets and 1,000+ employees
+- Concurrent access for 100+ users
+- Efficient database queries with proper indexing
+- Caching for frequently accessed data
+- Mobile-optimized performance
+
+## Implementation Approach
+
+### Development Methodology:
+- **Agile/Iterative Development:** Build and test features incrementally
+- **Test-Driven Development:** Write tests for critical business logic
+- **Database-First Design:** Establish solid data foundation first
+- **User-Centered Design:** Continuously validate with actual users
+
+### Development Phases:
+**Phase 1 (Foundation):** Django setup, database models, admin interface
+**Phase 2 (Core Features):** Asset management, assignment workflows, basic UI
+**Phase 3 (Integration):** CCTV and biometric system connectivity
+**Phase 4 (Advanced Features):** Analytics, reporting, mobile optimization
+
+### Data Migration Strategy:
+- Import existing Excel data with validation and error reporting
+- Data cleansing and standardization procedures
+- Parallel running period to ensure data accuracy
+- Complete backup and rollback procedures
+
+## Success Criteria and Expected Outcomes
+
+### Operational Improvements:
+- Reduce asset assignment time from 30+ minutes to under 2 minutes
+- Reduce asset search time from 10+ minutes to under 30 seconds
+- Achieve 100% assignment history preservation (zero data loss)
+- Improve asset utilization rates from ~65% to 85%+
+- Reduce maintenance costs through predictive scheduling
+
+### Business Benefits:
+- Complete elimination of manual Excel processes
+- Audit-ready compliance with full history preservation
+- Real-time visibility across all 32 outlets
+- Automated integration with security systems
+- Improved cost control and asset accountability
+- Enhanced decision-making through analytics
+
+### Technical Achievements:
+- Scalable architecture supporting future growth
+- 99.5%+ system uptime and reliability
+- Secure, compliant data handling
+- Mobile-responsive access for field operations
+- Comprehensive API ecosystem for future integrations
+
+## Special Considerations
+
+### Critical Business Rules:
+- **NEVER overwrite assignment history** - always create new records
+- **Mandatory backup tracking** for all returned laptops
+- **Complete audit trail** for all system changes
+- **Role-based access** ensuring data security
+- **Real-time synchronization** across all outlets
+
+### Current Data Integration:
+Based on the JP Nagar audit data provided, the system must handle:
+- 53 existing assets across multiple categories
+- Various asset types: desktops, laptops, mobile devices, networking equipment
+- Multiple departments: Salon, Skin, Clinic
+- Location hierarchy: JPN outlet with floor-level organization
+- Existing condition and verification status data
+
+### Future Scalability:
+- Architecture must support expansion beyond 32 outlets
+- Database design should handle 50,000+ assets
+- Integration framework for additional systems
+- API development for third-party connectivity
+- AI/ML readiness for predictive analytics
+
+## Development Environment Setup
+
+### Required Software:
+- Python 3.9+ with pip package manager
+- Django 4.2+ web framework
+- SQLite (development) / PostgreSQL (production)
+- Bootstrap 5 + jQuery for frontend
+- Git version control
+- Code editor with Python support
+
+### Project Structure:
+```
+bodycraft_mdm/
+├── manage.py
+├── bodycraft_mdm/ (main project)
+├── asset_management/ (core app)
+├── employee_management/
+├── integrations/
+├── reports/
+├── static/ (CSS, JS, images)
+├── templates/ (HTML templates)
+└── requirements.txt
+```
+
+This comprehensive specification covers every aspect of the BODYCRAFT MDM system, from detailed business requirements to technical implementation, ensuring a complete understanding of what needs to be built and how it should function in the real-world environment of a multi-location organization managing hundreds of IT assets.
