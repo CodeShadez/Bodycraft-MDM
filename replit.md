@@ -2,7 +2,9 @@
 
 ## Overview
 
-The BODYCRAFT Master Data Management (MDM) System is a comprehensive web application designed to manage IT assets across 32 retail outlets throughout India. The system replaces manual Excel-based tracking with a centralized, web-based solution that provides complete asset lifecycle management, employee tracking, and location-based operations. The application serves as a single source of truth for asset management, ensuring data integrity through historical preservation and comprehensive audit trails. Currently, the system exists as a visual prototype that requires complete functionality implementation to become a production-ready business tool.
+The BODYCRAFT Master Data Management (MDM) System is a comprehensive web application designed to manage IT assets across 32 retail outlets throughout India. The system replaces manual Excel-based tracking with a centralized platform that maintains complete audit trails, manages asset assignments, and integrates with existing infrastructure systems like CCTV and biometric devices.
+
+The application serves as a single source of truth for asset management, employee tracking, and location-based operations, ensuring data integrity through historical preservation and comprehensive logging of all transactions.
 
 ## User Preferences
 
@@ -11,81 +13,82 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **React 18** with TypeScript for type-safe component development and modern React patterns
-- **Vite** as the build tool providing fast development server and optimized production builds
-- **Wouter** for lightweight client-side routing without the overhead of React Router
-- **TanStack Query** for sophisticated server state management, caching, and data synchronization
-- **Shadcn/ui** component library built on Radix UI primitives, providing accessible and customizable UI components
-- **Tailwind CSS** with extensive custom design system including dual theme support (light/dark mode)
-- **Class Variance Authority** for type-safe component variant management
+- **React 18** with TypeScript for type safety and modern component patterns
+- **Vite** as the build tool for fast development and optimized production builds
+- **Wouter** for lightweight client-side routing
+- **TanStack Query** for server state management and caching
+- **Shadcn/ui** component library built on Radix UI primitives for accessible, customizable components
+- **Tailwind CSS** with custom design system for consistent styling
 
 ### Backend Architecture
-- **Node.js** with Express.js providing RESTful API architecture
-- **TypeScript** throughout the entire stack ensuring type safety from database to frontend
-- **Zod** for comprehensive runtime schema validation and automatic type inference
-- **Modular storage interface** design allowing flexible database implementations and easy testing
-- **Session-based authentication** with PostgreSQL session store for scalable user management
-- **RESTful API design** with consistent error handling and response formatting
+- **Node.js** with Express.js providing RESTful API endpoints
+- **TypeScript** throughout the stack for consistent type safety
+- **Zod** for runtime schema validation and type inference
+- **Modular storage interface** allowing for flexible database implementations
+- **Session-based architecture** with PostgreSQL session store
 
 ### Data Storage Solutions
-- **PostgreSQL** as the primary relational database with Neon serverless hosting for scalability
-- **Drizzle ORM** providing type-safe database queries, migrations, and schema management
-- **Historical data preservation** architecture where assignment history is never overwritten, ensuring complete audit trails
-- **Multi-tenant data isolation** supporting all 32 outlet locations with location-based data filtering
-- **Comprehensive audit logging** for all data modifications with timestamps and user attribution
+- **PostgreSQL** as the primary database with Neon serverless hosting
+- **Drizzle ORM** for type-safe database queries and schema management
+- **Historical data preservation** - assignment history is never overwritten
+- **Comprehensive audit trails** for all data modifications
+- **Multi-tenant data isolation** supporting all 32 outlet locations
 
 ### Authentication and Authorization
-- **Session-based authentication** using connect-pg-simple for reliable PostgreSQL session storage
-- **Role-based access control** framework designed for different permission levels (administrators, managers, users)
-- **Location-based data filtering** ensuring users only access relevant outlet information
-- **Security-first design** with data encryption and compliance-ready audit trails
+- **Session-based authentication** using connect-pg-simple for PostgreSQL session storage
+- **Role-based access control** framework ready for implementation
+- **Location-based data filtering** ensuring users see relevant outlet information
 
-### Design System and UI Architecture
-- **Modern design approach** inspired by productivity tools like Canva, Figma, Notion, and Linear
-- **Purple-based color palette** (264 100% 50%) for creative energy with carefully crafted light and dark theme variants
-- **Typography system** using Inter for interface text and Plus Jakarta Sans for headings
-- **Responsive design** supporting desktop, tablet, and mobile devices with consistent spacing using Tailwind's systematic approach
-- **Accessibility-first** component library with keyboard navigation, screen reader support, and WCAG compliance
-- **Comprehensive component library** including navigation, data management, and content creation interfaces
+### Design System
+- **Modern design approach** inspired by Canva and Figma
+- **Dual theme support** (light/dark) with purple primary branding
+- **Responsive design** supporting desktop, tablet, and mobile devices
+- **Accessibility-first** component library with keyboard navigation and screen reader support
 
 ### Database Schema Design
 The system uses a relational model with core entities:
-- **Locations** - 32 BODYCRAFT outlets with contact information and management details
-- **Employees** - Staff members with unique employee codes, department assignments, and location associations
-- **Assets** - IT equipment with custom asset IDs, specifications, warranty tracking, and condition monitoring
-- **Assignment History** - Complete audit trail of asset assignments that preserves all historical data
-- **Maintenance Records** - Service history, costs, and scheduling for all assets
-- **CCTV Systems** - Security camera management with DVR integration
-- **Biometric Systems** - Access control and attendance tracking integration
-- **Backup Records** - Data protection and compliance tracking
+- **Locations** - 32 BODYCRAFT outlets with contact information
+- **Employees** - Staff members with department and designation tracking
+- **Assets** - IT equipment with detailed specifications and lifecycle management
+- **Assignment History** - Immutable record of asset-to-employee assignments
+- **Maintenance Records** - Service history and warranty tracking
+- **Integration Tables** - CCTV systems, biometric devices, and backup records
+
+### API Architecture
+- **RESTful endpoints** following standard HTTP conventions
+- **Consistent error handling** with proper status codes and error messages
+- **Input validation** using Zod schemas at API boundaries
+- **Structured logging** for debugging and audit purposes
 
 ## External Dependencies
 
-### Database and Hosting
-- **Neon PostgreSQL** - Serverless PostgreSQL hosting for production database
-- **Drizzle Kit** - Database migration and schema management tooling
+### Database Services
+- **Neon Database** - Serverless PostgreSQL hosting with automatic scaling
+- **Drizzle Kit** - Database migration and schema management tools
 
-### UI and Component Libraries
-- **Radix UI** - Accessible component primitives for building the design system
-- **Lucide React** - Icon library providing consistent iconography
-- **React Hook Form** - Form state management and validation
-- **Embla Carousel** - Touch-friendly carousel components for mobile interfaces
+### UI Framework
+- **Radix UI** - Headless component primitives for accessibility and customization
+- **Lucide React** - Modern icon library with consistent styling
+- **Embla Carousel** - Touch-friendly carousel components
+- **Class Variance Authority** - Type-safe component variant management
 
-### Data Processing and Export
-- **XLSX** - Excel file processing for bulk import/export functionality
-- **File-saver** - Client-side file download capabilities for reports and exports
-- **Date-fns** - Date manipulation and formatting utilities
+### Development Tools
+- **Vite Plugins** - Development enhancements including error overlay and development banner
+- **PostCSS with Autoprefixer** - CSS processing and vendor prefix management
+- **TypeScript** - Static type checking across the entire application
 
-### Development and Build Tools
-- **ESBuild** - Fast JavaScript bundler for production builds
-- **TSX** - TypeScript execution environment for development
-- **PostCSS** - CSS processing with Tailwind CSS integration
-- **Autoprefixer** - Automatic CSS vendor prefixing
+### Google Fonts Integration
+- **Inter** - Primary interface font for excellent readability
+- **Plus Jakarta Sans** - Display font for headings and emphasis
+- **Additional fonts** - Extended typography palette for various use cases
 
-### Session Management
-- **Connect-pg-simple** - PostgreSQL session store for secure user authentication
-- **Express Session** - Server-side session management middleware
+### Form Management
+- **React Hook Form** - Performance-optimized form handling
+- **Hookform Resolvers** - Zod integration for form validation
 
-### Validation and Type Safety
-- **Zod** - Runtime schema validation and TypeScript type inference
-- **Drizzle-zod** - Integration between Drizzle ORM and Zod validation schemas
+### Utilities
+- **Date-fns** - Date manipulation and formatting
+- **clsx and tailwind-merge** - Conditional CSS class management
+- **nanoid** - Unique ID generation for sessions and records
+
+The system is architected for scalability and maintainability, with clear separation of concerns and comprehensive type safety throughout the stack.
