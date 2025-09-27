@@ -17,6 +17,7 @@ import Compliance from "@/pages/compliance";
 import CCTV from "@/pages/cctv";
 import Biometric from "@/pages/biometric";
 import Reports from "@/pages/reports";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/cctv" component={CCTV} />
       <Route path="/biometric" component={Biometric} />
       <Route path="/reports" component={Reports} />
+      <Route path="/settings" component={Settings} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

@@ -209,6 +209,88 @@ export type InsertBackup = z.infer<typeof insertBackupSchema>;
 export type ReportExecution = typeof reportExecutions.$inferSelect;
 export type InsertReportExecution = z.infer<typeof insertReportExecutionSchema>;
 
-// Legacy types for compatibility (can be removed once storage.ts is updated)
-export type User = Employee;
-export type InsertUser = InsertEmployee;
+// USER AUTHENTICATION AND SETTINGS TABLES
+
+// 10. USERS - Authentication and system access (separate from employees)
+export const users = pgTable("users", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  username: varchar("username", { length: 100 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }).notNull(),
+  lastName: varchar("last_name", { length: 100 }).notNull(),
+  role: varchar("role", { length: 50 }).notNull().default("user"), // super_admin, admin, manager, user
+  status: varchar("status", { length: 20 }).notNull().default("active"), // active, inactive, locked
+  lastLogin: timestamp("last_login"),
+  employeeId: integer("employee_id").references(() => employees.id), // Link to employee record if applicable
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 11. USER SESSIONS - Track active user sessions
+export const userSessions = pgTable("user_sessions", {
+  id: varchar("id", { length: 255 }).primaryKey(), // Session ID
+  userId: integer("user_id").notNull().references(() => users.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 12. COMPANY SETTINGS - System configuration
+export const companySettings = pgTable("company_settings", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  companyName: varchar("company_name", { length: 255 }).notNull().default("BODYCRAFT"),
+  logoUrl: varchar("logo_url", { length: 500 }),
+  timezone: varchar("timezone", { length: 100 }).notNull().default("Asia/Kolkata"),
+  dateFormat: varchar("date_format", { length: 20 }).notNull().default("DD/MM/YYYY"),
+  language: varchar("language", { length: 10 }).notNull().default("en"),
+  sessionTimeout: integer("session_timeout").notNull().default(480), // minutes
+  passwordMinLength: integer("password_min_length").notNull().default(8),
+  emailNotificationsEnabled: boolean("email_notifications_enabled").notNull().default(true),
+  maintenanceMode: boolean("maintenance_mode").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 13. ASSET TYPES - Configurable asset categories
+export const assetTypes = pgTable("asset_types", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).notNull().unique(), // Laptop, Desktop, Monitor, etc.
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert Schemas for new tables
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  createdAt: true,
+});
+
+export const insertCompanySettingsSchema = createInsertSchema(companySettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAssetTypeSchema = createInsertSchema(assetTypes).omit({
+  id: true,
+  createdAt: true,
+});
+
+// TypeScript Types for new tables
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+
+export type CompanySettings = typeof companySettings.$inferSelect;
+export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
+
+export type AssetType = typeof assetTypes.$inferSelect;
+export type InsertAssetType = z.infer<typeof insertAssetTypeSchema>;

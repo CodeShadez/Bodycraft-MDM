@@ -26,7 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/assets/:id", async (req, res) => {
     try {
-      const asset = await storage.getAssetById(req.params.id);
+      const asset = await storage.getAsset(req.params.id);
       if (!asset) {
         return res.status(404).json({ error: "Asset not found" });
       }
@@ -89,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/employees/:id", async (req, res) => {
     try {
-      const employee = await storage.getEmployeeById(parseInt(req.params.id));
+      const employee = await storage.getEmployee(parseInt(req.params.id));
       if (!employee) {
         return res.status(404).json({ error: "Employee not found" });
       }
@@ -548,7 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
           
         case "maintenance-summary":
-          data = await storage.getAllMaintenance();
+          data = await storage.getMaintenanceRecords();
           filename = "Maintenance_Summary_Report";
           headers = ["Asset ID", "Type", "Description", "Scheduled Date", "Completed Date", "Cost", "Vendor", "Status"];
           
@@ -576,7 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
           
         case "assignment-history":
-          data = await storage.getAllAssignments();
+          data = await storage.getAssignmentHistory();
           filename = "Assignment_History_Report";
           headers = ["Asset ID", "Employee ID", "Assigned Date", "Returned Date", "Notes"];
           
@@ -607,7 +607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
           
         case "compliance-audit":
-          data = await storage.getAllBackups();
+          data = await storage.getBackups();
           filename = "Compliance_Audit_Report";
           headers = ["Location ID", "Backup Type", "Backup Date", "Verification Status", "Evidence", "Audit Result"];
           
