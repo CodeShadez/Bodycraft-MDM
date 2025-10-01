@@ -92,3 +92,52 @@ The system uses a relational model with core entities:
 - **nanoid** - Unique ID generation for sessions and records
 
 The system is architected for scalability and maintainability, with clear separation of concerns and comprehensive type safety throughout the stack.
+
+## Recent Changes
+
+### October 1, 2025 - Initial Replit Setup
+- Created PostgreSQL database for permanent data storage
+- Pushed database schema using Drizzle ORM (`npm run db:push`)
+- Configured application to use DatabaseStorage for persistent data
+- Seeded database with initial sample data including locations, employees, assets, and demo users
+- Set up workflow with webview output for frontend on port 5000
+- Verified application is running successfully with authentication system
+
+### Running the Application
+
+**Development Mode:**
+```bash
+npm run dev
+```
+This starts the Express server with Vite for the frontend on port 5000.
+
+**Database Commands:**
+```bash
+npm run db:push         # Push schema changes to database
+npm run db:push --force # Force push if there are warnings
+npm run seed            # Seed database with sample data
+```
+
+### Demo Login Credentials
+
+The system comes pre-configured with demo accounts:
+
+**Super Admin:**
+- Username: `admin`
+- Password: `admin123`
+- Email: admin@bodycraft.com
+
+Additional demo accounts are available through the login page interface (Admin, Manager, User roles).
+
+### Project Structure
+- `/client` - React frontend with Vite
+- `/server` - Express backend API
+- `/shared` - Shared TypeScript types and Drizzle schema
+- `/attached_assets` - Static assets for the frontend
+
+### Environment Variables
+The application uses the following environment variables (automatically configured in Replit):
+- `DATABASE_URL` - PostgreSQL connection string
+- `PORT` - Server port (default: 5000)
+- `NODE_ENV` - Environment (development/production)
+- `SESSION_SECRET` - Session encryption key (auto-generated)
