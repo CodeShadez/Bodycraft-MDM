@@ -941,6 +941,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid user data", errors: validation.error.issues });
       }
 
+      // Check for existing username or email
+      const existingUsername = await storage.getUserByUsername(validation.data.username);
+      if (existingUsername) {
+        return res.status(409).json({ message: "Username already exists" });
+      }
+
+      const existingEmail = await storage.getUserByEmail(validation.data.email);
+      if (existingEmail) {
+        return res.status(409).json({ message: "Email already exists" });
+      }
+
       const { password, ...userData } = validation.data;
       const passwordHash = await bcrypt.hash(password, 10);
 
@@ -961,13 +972,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/users/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const updateData = req.body;
+      const updateData = { ...req.body };
+
+      // Only super_admin can change roles and status
+      if (updateData.role && req.session.role !== 'super_admin') {
+        return res.status(403).json({ message: "Only super admins can change user roles" });
+      }
+
+      if (updateData.status && req.session.role !== 'super_admin') {
+        return res.status(403).json({ message: "Only super admins can change user status" });
+      }
+
+      // Check email uniqueness if being updated
+      if (updateData.email) {
+        const existingEmail = await storage.getUserByEmail(updateData.email);
+        if (existingEmail && existingEmail.id !== id) {
+          return res.status(409).json({ message: "Email already exists" });
+        }
+      }
 
       // If password is being updated, hash it
       if (updateData.password) {
         updateData.passwordHash = await bcrypt.hash(updateData.password, 10);
         delete updateData.password;
       }
+
+      // Never allow direct passwordHash updates from client
+      delete updateData.passwordHash;
 
       const user = await storage.updateUser(id, updateData);
       if (!user) {
