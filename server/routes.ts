@@ -890,6 +890,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dashboard Stats - Get real-time dashboard statistics
+  app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard statistics" });
+    }
+  });
+
+  // Dashboard Recent Activities
+  app.get("/api/dashboard/activities", requireAuth, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const activities = await storage.getRecentActivities(limit);
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching recent activities:", error);
+      res.status(500).json({ message: "Failed to fetch recent activities" });
+    }
+  });
+
+  // User Management Routes
+  app.get("/api/users", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      // Remove password hashes from response
+      const sanitizedUsers = users.map(({ passwordHash, ...user }) => user);
+      res.json(sanitizedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/users", requireAuth, requireRole(['super_admin']), async (req, res) => {
+    try {
+      const validation = z.object({
+        username: z.string().min(3),
+        email: z.string().email(),
+        firstName: z.string().min(1),
+        lastName: z.string().min(1),
+        password: z.string().min(8),
+        role: z.enum(['super_admin', 'admin', 'manager', 'user']),
+      }).safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({ message: "Invalid user data", errors: validation.error.issues });
+      }
+
+      const { password, ...userData } = validation.data;
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const user = await storage.createUser({
+        ...userData,
+        passwordHash,
+      });
+
+      // Remove password hash from response
+      const { passwordHash: _, ...userResponse } = user;
+      res.status(201).json(userResponse);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.patch("/api/users/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateData = req.body;
+
+      // If password is being updated, hash it
+      if (updateData.password) {
+        updateData.passwordHash = await bcrypt.hash(updateData.password, 10);
+        delete updateData.password;
+      }
+
+      const user = await storage.updateUser(id, updateData);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Remove password hash from response
+      const { passwordHash: _, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Company Settings Routes
+  app.get("/api/settings/company", requireAuth, async (req, res) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      res.json(settings || {});
+    } catch (error) {
+      console.error("Error fetching company settings:", error);
+      res.status(500).json({ message: "Failed to fetch company settings" });
+    }
+  });
+
+  app.patch("/api/settings/company", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const settings = await storage.updateCompanySettings(req.body);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating company settings:", error);
+      res.status(500).json({ message: "Failed to update company settings" });
+    }
+  });
+
+  // Asset Types Routes
+  app.get("/api/asset-types", requireAuth, async (req, res) => {
+    try {
+      const assetTypes = await storage.getAllAssetTypes();
+      res.json(assetTypes);
+    } catch (error) {
+      console.error("Error fetching asset types:", error);
+      res.status(500).json({ message: "Failed to fetch asset types" });
+    }
+  });
+
+  app.post("/api/asset-types", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const validation = z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+      }).safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({ message: "Invalid asset type data", errors: validation.error.issues });
+      }
+
+      const assetType = await storage.createAssetType(validation.data);
+      res.status(201).json(assetType);
+    } catch (error) {
+      console.error("Error creating asset type:", error);
+      res.status(500).json({ message: "Failed to create asset type" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -6,7 +6,10 @@ import {
   type AssetMaintenance, type InsertAssetMaintenance,
   type CctvSystem, type InsertCctvSystem,
   type BiometricSystem, type InsertBiometricSystem,
-  type Backup, type InsertBackup
+  type Backup, type InsertBackup,
+  type User, type InsertUser,
+  type CompanySettings, type InsertCompanySettings,
+  type AssetType, type InsertAssetType
 } from "@shared/schema";
 
 // BODYCRAFT MDM Storage Interface
@@ -59,6 +62,25 @@ export interface IStorage {
   createBackup(backup: InsertBackup): Promise<Backup>;
   updateBackup(id: number, backup: Partial<InsertBackup>): Promise<Backup | undefined>;
   deleteBackup(id: number): Promise<boolean>;
+  
+  // Users (Authentication & Management)
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  
+  // Company Settings
+  getCompanySettings(): Promise<CompanySettings | undefined>;
+  updateCompanySettings(settings: Partial<InsertCompanySettings>): Promise<CompanySettings>;
+  
+  // Asset Types
+  getAllAssetTypes(): Promise<AssetType[]>;
+  createAssetType(assetType: InsertAssetType): Promise<AssetType>;
+  
+  // Dashboard Statistics
+  getDashboardStats(): Promise<any>;
+  getRecentActivities(limit?: number): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
