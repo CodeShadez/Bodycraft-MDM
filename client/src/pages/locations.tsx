@@ -18,7 +18,9 @@ import {
   User,
   Package,
   BarChart3,
-  Clock
+  Clock,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -107,6 +109,7 @@ export default function LocationsPage() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [expandedLocationId, setExpandedLocationId] = useState<number | null>(null)
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -517,15 +520,27 @@ export default function LocationsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredLocations.map((location) => {
+              {filteredLocations.flatMap((location) => {
                 const locationAssets = getLocationAssets(location.id)
                 const locationEmployees = getLocationEmployees(location.id)
                 const activeAssignments = getActiveAssignments(location.id)
-                
-                return (
-                  <TableRow key={location.id}>
+                const isExpanded = expandedLocationId === location.id
+                const rows = [
+                  <TableRow 
+                    key={`main-${location.id}`}
+                    onClick={() => setExpandedLocationId(isExpanded ? null : location.id)}
+                    className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                    data-testid={`row-location-${location.id}`}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </div>
                         <Building2 className="h-8 w-8 p-1.5 bg-muted rounded-full" />
                         <div>
                           <div className="font-medium">{location.outletName}</div>
@@ -572,10 +587,10 @@ export default function LocationsPage() {
                         {location.contactDetails}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${location.id}`}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -586,6 +601,7 @@ export default function LocationsPage() {
                               setSelectedLocation(location)
                               setIsViewDialogOpen(true)
                             }}
+                            data-testid={`menu-view-${location.id}`}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
@@ -595,11 +611,12 @@ export default function LocationsPage() {
                               setSelectedLocation(location)
                               setIsEditDialogOpen(true)
                             }}
+                            data-testid={`menu-edit-${location.id}`}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Location
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem data-testid={`menu-analytics-${location.id}`}>
                             <BarChart3 className="mr-2 h-4 w-4" />
                             View Analytics
                           </DropdownMenuItem>
@@ -607,6 +624,7 @@ export default function LocationsPage() {
                           <DropdownMenuItem
                             onClick={() => deleteLocationMutation.mutate(location.id)}
                             className="text-red-600"
+                            data-testid={`menu-delete-${location.id}`}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Location
@@ -615,7 +633,133 @@ export default function LocationsPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                ]
+
+                if (isExpanded) {
+                  rows.push(
+                    <TableRow key={`expanded-${location.id}`} className="bg-muted/10 hover:bg-muted/10">
+                      <TableCell colSpan={7} className="p-6">
+                        <div className="grid grid-cols-3 gap-6">
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Location Details</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Outlet Name</div>
+                                <div className="text-sm mt-1 font-medium">{location.outletName}</div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Address</div>
+                                <div className="text-sm mt-1">{location.address}</div>
+                                <div className="text-sm mt-1">{location.city}, {location.state}</div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Manager</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  {location.managerName}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Contact Details</div>
+                                <div className="text-sm mt-1">{location.contactDetails}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Asset Inventory</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Total Assets</div>
+                                <div className="text-2xl font-bold mt-1">{locationAssets.length}</div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Available</span>
+                                  <span className="font-medium">{locationAssets.filter(a => a.status === 'available').length}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Assigned</span>
+                                  <span className="font-medium">{locationAssets.filter(a => a.status === 'assigned').length}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Maintenance</span>
+                                  <span className="font-medium">{locationAssets.filter(a => a.status === 'maintenance').length}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Retired</span>
+                                  <span className="font-medium">{locationAssets.filter(a => a.status === 'retired').length}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Personnel & Activity</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Total Employees</div>
+                                <div className="text-2xl font-bold mt-1">{locationEmployees.length}</div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Active</span>
+                                  <span className="font-medium">{locationEmployees.filter(e => e.status === 'active').length}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">On Leave</span>
+                                  <span className="font-medium">{locationEmployees.filter(e => e.status === 'on_leave').length}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Inactive</span>
+                                  <span className="font-medium">{locationEmployees.filter(e => e.status === 'inactive').length}</span>
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Active Assignments</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                                  <span className="font-medium">{activeAssignments.length}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedLocation(location)
+                              setIsViewDialogOpen(true)
+                            }}
+                            data-testid={`button-view-details-${location.id}`}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Full Analytics
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedLocation(location)
+                              setIsEditDialogOpen(true)
+                            }}
+                            data-testid={`button-edit-location-${location.id}`}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Location
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                return rows
               })}
             </TableBody>
           </Table>

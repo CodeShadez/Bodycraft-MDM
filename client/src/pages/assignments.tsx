@@ -19,7 +19,9 @@ import {
   Undo,
   Package,
   MapPin,
-  AlertTriangle
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -117,6 +119,7 @@ export default function AssignmentsPage() {
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null)
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -596,15 +599,28 @@ export default function AssignmentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAssignments.map((assignment, index) => {
+              {filteredAssignments.flatMap((assignment, index) => {
                 const asset = getAssetInfo(assignment.assetId)
                 const employee = getEmployeeInfo(assignment.employeeId)
                 const isActive = !assignment.returnedDate
-                
-                return (
-                  <TableRow key={`${assignment.assetId}-${assignment.employeeId}-${index}`}>
+                const assignmentId = `${assignment.assetId}-${assignment.employeeId}-${assignment.assignedDate}`
+                const isExpanded = expandedAssignmentId === assignmentId
+                const rows = [
+                  <TableRow 
+                    key={`main-${assignmentId}`}
+                    onClick={() => setExpandedAssignmentId(isExpanded ? null : assignmentId)}
+                    className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                    data-testid={`row-assignment-${assignmentId}`}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </div>
                         <Laptop className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <div className="font-medium">{assignment.assetId}</div>
@@ -683,10 +699,10 @@ export default function AssignmentsPage() {
                         {assignment.assignmentReason}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${assignmentId}`}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -697,6 +713,7 @@ export default function AssignmentsPage() {
                               setSelectedAssignment(assignment)
                               setIsViewDialogOpen(true)
                             }}
+                            data-testid={`menu-view-${assignmentId}`}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
@@ -708,6 +725,7 @@ export default function AssignmentsPage() {
                                   setSelectedAssignment(assignment)
                                   setIsReturnDialogOpen(true)
                                 }}
+                                data-testid={`menu-return-${assignmentId}`}
                               >
                                 <Undo className="mr-2 h-4 w-4" />
                                 Return Asset
@@ -717,6 +735,7 @@ export default function AssignmentsPage() {
                                   setSelectedAssignment(assignment)
                                   setIsTransferDialogOpen(true)
                                 }}
+                                data-testid={`menu-transfer-${assignmentId}`}
                               >
                                 <ArrowRightLeft className="mr-2 h-4 w-4" />
                                 Transfer Asset
@@ -727,7 +746,167 @@ export default function AssignmentsPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                ]
+
+                if (isExpanded) {
+                  rows.push(
+                    <TableRow key={`expanded-${assignmentId}`} className="bg-muted/10 hover:bg-muted/10">
+                      <TableCell colSpan={8} className="p-6">
+                        <div className="grid grid-cols-3 gap-6">
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Assignment Timeline</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Assigned Date</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <Calendar className="h-3 w-3" />
+                                  {formatDate(assignment.assignedDate)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Return Date</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <Calendar className="h-3 w-3" />
+                                  {assignment.returnedDate ? formatDate(assignment.returnedDate) : 'Still Active'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Assignment Status</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-400' : 'bg-blue-400'}`} />
+                                  {isActive ? 'Active' : 'Returned'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Asset & Employee</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Asset ID</div>
+                                <div className="text-sm mt-1 font-mono">{assignment.assetId}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {asset?.brand} {asset?.modelName} ({asset?.assetType})
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Employee</div>
+                                <div className="text-sm mt-1">{employee?.firstName} {employee?.lastName}</div>
+                                <div className="text-xs text-muted-foreground font-mono mt-1">
+                                  {employee?.employeeCode}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Location</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  {getLocationName(employee?.locationId ?? null)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Condition & Notes</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Condition on Assignment</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    assignment.conditionOnAssignment === 'excellent' ? 'bg-green-400' :
+                                    assignment.conditionOnAssignment === 'good' ? 'bg-blue-400' :
+                                    assignment.conditionOnAssignment === 'fair' ? 'bg-yellow-400' : 'bg-red-400'
+                                  }`} />
+                                  <span className="capitalize">{assignment.conditionOnAssignment}</span>
+                                </div>
+                              </div>
+                              {assignment.conditionOnReturn && (
+                                <div>
+                                  <div className="text-xs text-muted-foreground">Condition on Return</div>
+                                  <div className="text-sm mt-1 flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${
+                                      assignment.conditionOnReturn === 'excellent' ? 'bg-green-400' :
+                                      assignment.conditionOnReturn === 'good' ? 'bg-blue-400' :
+                                      assignment.conditionOnReturn === 'fair' ? 'bg-yellow-400' : 'bg-red-400'
+                                    }`} />
+                                    <span className="capitalize">{assignment.conditionOnReturn}</span>
+                                  </div>
+                                </div>
+                              )}
+                              <div>
+                                <div className="text-xs text-muted-foreground">Assignment Reason</div>
+                                <div className="text-sm mt-1">{assignment.assignmentReason}</div>
+                              </div>
+                              {assignment.returnReason && (
+                                <div>
+                                  <div className="text-xs text-muted-foreground">Return Reason</div>
+                                  <div className="text-sm mt-1">{assignment.returnReason}</div>
+                                </div>
+                              )}
+                              {assignment.backupDetails && (
+                                <div>
+                                  <div className="text-xs text-muted-foreground">Backup Details</div>
+                                  <div className="text-sm mt-1 p-2 bg-muted/30 rounded">
+                                    {assignment.backupDetails}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedAssignment(assignment)
+                              setIsViewDialogOpen(true)
+                            }}
+                            data-testid={`button-view-details-${assignmentId}`}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Full Details
+                          </Button>
+                          {isActive && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedAssignment(assignment)
+                                  setIsReturnDialogOpen(true)
+                                }}
+                                data-testid={`button-return-${assignmentId}`}
+                              >
+                                <Undo className="mr-2 h-4 w-4" />
+                                Return Asset
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedAssignment(assignment)
+                                  setIsTransferDialogOpen(true)
+                                }}
+                                data-testid={`button-transfer-${assignmentId}`}
+                              >
+                                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                                Transfer Asset
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                return rows
               })}
             </TableBody>
           </Table>

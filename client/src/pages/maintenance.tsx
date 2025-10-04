@@ -21,7 +21,9 @@ import {
   Laptop,
   MapPin,
   FileText,
-  Settings
+  Settings,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -119,6 +121,7 @@ export default function MaintenancePage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false)
+  const [expandedMaintenanceId, setExpandedMaintenanceId] = useState<number | null>(null)
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -598,14 +601,26 @@ export default function MaintenancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredMaintenance.map((record) => {
+              {filteredMaintenance.flatMap((record) => {
                 const asset = getAssetInfo(record.assetId)
                 const status = getMaintenanceStatus(record)
-                
-                return (
-                  <TableRow key={record.id}>
+                const isExpanded = expandedMaintenanceId === record.id
+                const rows = [
+                  <TableRow 
+                    key={`main-${record.id}`}
+                    onClick={() => setExpandedMaintenanceId(isExpanded ? null : record.id)}
+                    className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                    data-testid={`row-maintenance-${record.id}`}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </div>
                         <Laptop className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <div className="font-medium">{record.assetId}</div>
@@ -659,10 +674,10 @@ export default function MaintenancePage() {
                         {record.technicianName || "Not assigned"}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${record.id}`}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -673,6 +688,7 @@ export default function MaintenancePage() {
                               setSelectedMaintenance(record)
                               setIsViewDialogOpen(true)
                             }}
+                            data-testid={`menu-view-${record.id}`}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
@@ -682,6 +698,7 @@ export default function MaintenancePage() {
                               setSelectedMaintenance(record)
                               setIsEditDialogOpen(true)
                             }}
+                            data-testid={`menu-edit-${record.id}`}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Maintenance
@@ -692,6 +709,7 @@ export default function MaintenancePage() {
                                 setSelectedMaintenance(record)
                                 setIsCompleteDialogOpen(true)
                               }}
+                              data-testid={`menu-complete-${record.id}`}
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
                               Mark Complete
@@ -701,6 +719,7 @@ export default function MaintenancePage() {
                           <DropdownMenuItem
                             onClick={() => deleteMaintenanceMutation.mutate(record.id)}
                             className="text-red-600"
+                            data-testid={`menu-delete-${record.id}`}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Record
@@ -709,7 +728,151 @@ export default function MaintenancePage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                ]
+
+                if (isExpanded) {
+                  rows.push(
+                    <TableRow key={`expanded-${record.id}`} className="bg-muted/10 hover:bg-muted/10">
+                      <TableCell colSpan={8} className="p-6">
+                        <div className="grid grid-cols-3 gap-6">
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Service Details</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Maintenance Type</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${typeColors[record.maintenanceType]}`} />
+                                  <span className="capitalize">{record.maintenanceType}</span>
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Status</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${statusColors[status]}`} />
+                                  <span className="capitalize">{status.replace('_', ' ')}</span>
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Description</div>
+                                <div className="text-sm mt-1 p-2 bg-muted/30 rounded">
+                                  {record.description}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Timeline & Technician</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Scheduled Date</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <Calendar className="h-3 w-3" />
+                                  {formatDate(record.scheduledDate)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Completed Date</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <Calendar className="h-3 w-3" />
+                                  {record.completedDate ? formatDate(record.completedDate) : 'Not completed'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Technician</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  {record.technicianName || 'Not assigned'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Asset & Cost</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Asset ID</div>
+                                <div className="text-sm mt-1 font-mono">{record.assetId}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {asset?.brand} {asset?.modelName} ({asset?.assetType})
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Location</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  {getLocationName(asset?.locationId || null)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Maintenance Cost</div>
+                                <div className="text-sm mt-1 flex items-center gap-2 font-semibold">
+                                  <DollarSign className="h-3 w-3" />
+                                  {formatCurrency(record.cost)}
+                                </div>
+                              </div>
+                              {record.partsReplaced && (
+                                <div>
+                                  <div className="text-xs text-muted-foreground">Parts Replaced</div>
+                                  <div className="text-sm mt-1 p-2 bg-muted/30 rounded">
+                                    {record.partsReplaced}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedMaintenance(record)
+                              setIsViewDialogOpen(true)
+                            }}
+                            data-testid={`button-view-details-${record.id}`}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Full Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedMaintenance(record)
+                              setIsEditDialogOpen(true)
+                            }}
+                            data-testid={`button-edit-maintenance-${record.id}`}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Maintenance
+                          </Button>
+                          {!record.completedDate && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedMaintenance(record)
+                                setIsCompleteDialogOpen(true)
+                              }}
+                              data-testid={`button-complete-${record.id}`}
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Mark Complete
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                return rows
               })}
             </TableBody>
           </Table>
