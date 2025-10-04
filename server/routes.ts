@@ -592,6 +592,252 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hikvision Integration routes
+  app.get("/api/cctv/:id/snapshot", requireAuth, async (req, res) => {
+    try {
+      const { HikvisionClient } = await import('./hikvision-client');
+      const systemId = parseInt(req.params.id);
+      const allSystems = await storage.getAllCctvSystems();
+      const system = allSystems.find(s => s.id === systemId);
+
+      if (!system) {
+        return res.status(404).json({ error: "CCTV system not found" });
+      }
+
+      if (!canAccessLocation(req, system.locationId)) {
+        return res.status(403).json({ error: "Access denied to this CCTV system" });
+      }
+
+      if (!system.ipAddress || !system.username || !system.passwordHash) {
+        return res.status(400).json({ error: "CCTV system not configured with credentials" });
+      }
+
+      const client = new HikvisionClient(
+        `http://${system.ipAddress}`,
+        system.username,
+        system.passwordHash
+      );
+
+      const channel = parseInt(req.query.channel as string) || 1;
+      const snapshot = await client.getSnapshot(channel);
+
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.send(snapshot);
+    } catch (error) {
+      console.error("Error getting snapshot:", error);
+      res.status(500).json({ error: "Failed to get camera snapshot" });
+    }
+  });
+
+  app.get("/api/cctv/:id/stream-url", requireAuth, async (req, res) => {
+    try {
+      const { HikvisionClient } = await import('./hikvision-client');
+      const systemId = parseInt(req.params.id);
+      const allSystems = await storage.getAllCctvSystems();
+      const system = allSystems.find(s => s.id === systemId);
+
+      if (!system) {
+        return res.status(404).json({ error: "CCTV system not found" });
+      }
+
+      if (!canAccessLocation(req, system.locationId)) {
+        return res.status(403).json({ error: "Access denied to this CCTV system" });
+      }
+
+      if (!system.ipAddress || !system.username || !system.passwordHash) {
+        return res.status(400).json({ error: "CCTV system not configured with credentials" });
+      }
+
+      const client = new HikvisionClient(
+        `http://${system.ipAddress}`,
+        system.username,
+        system.passwordHash
+      );
+
+      const channel = parseInt(req.query.channel as string) || 1;
+      const streamType = (req.query.streamType as 'main' | 'sub') || 'main';
+
+      const rtspUrl = client.getRtspUrl(channel, streamType);
+      const httpPreviewUrl = client.getHttpPreviewUrl(channel, streamType);
+
+      res.json({
+        rtspUrl,
+        httpPreviewUrl,
+        channel,
+        streamType
+      });
+    } catch (error) {
+      console.error("Error getting stream URL:", error);
+      res.status(500).json({ error: "Failed to get stream URL" });
+    }
+  });
+
+  app.get("/api/cctv/:id/device-info", requireAuth, async (req, res) => {
+    try {
+      const { HikvisionClient } = await import('./hikvision-client');
+      const systemId = parseInt(req.params.id);
+      const allSystems = await storage.getAllCctvSystems();
+      const system = allSystems.find(s => s.id === systemId);
+
+      if (!system) {
+        return res.status(404).json({ error: "CCTV system not found" });
+      }
+
+      if (!canAccessLocation(req, system.locationId)) {
+        return res.status(403).json({ error: "Access denied to this CCTV system" });
+      }
+
+      if (!system.ipAddress || !system.username || !system.passwordHash) {
+        return res.status(400).json({ error: "CCTV system not configured with credentials" });
+      }
+
+      const client = new HikvisionClient(
+        `http://${system.ipAddress}`,
+        system.username,
+        system.passwordHash
+      );
+
+      const deviceInfo = await client.getDeviceInfo();
+      res.json(deviceInfo);
+    } catch (error) {
+      console.error("Error getting device info:", error);
+      res.status(500).json({ error: "Failed to get device information" });
+    }
+  });
+
+  app.get("/api/cctv/:id/status", requireAuth, async (req, res) => {
+    try {
+      const { HikvisionClient } = await import('./hikvision-client');
+      const systemId = parseInt(req.params.id);
+      const allSystems = await storage.getAllCctvSystems();
+      const system = allSystems.find(s => s.id === systemId);
+
+      if (!system) {
+        return res.status(404).json({ error: "CCTV system not found" });
+      }
+
+      if (!canAccessLocation(req, system.locationId)) {
+        return res.status(403).json({ error: "Access denied to this CCTV system" });
+      }
+
+      if (!system.ipAddress || !system.username || !system.passwordHash) {
+        return res.status(400).json({ error: "CCTV system not configured with credentials" });
+      }
+
+      const client = new HikvisionClient(
+        `http://${system.ipAddress}`,
+        system.username,
+        system.passwordHash
+      );
+
+      const status = await client.checkCameraStatus();
+      
+      if (status.online && status.lastOnline) {
+        await storage.updateCctvSystem(systemId, {
+          status: 'online',
+          lastOnline: status.lastOnline
+        });
+      } else {
+        await storage.updateCctvSystem(systemId, {
+          status: 'offline'
+        });
+      }
+
+      res.json(status);
+    } catch (error) {
+      console.error("Error checking camera status:", error);
+      res.status(500).json({ error: "Failed to check camera status" });
+    }
+  });
+
+  app.post("/api/cctv/:id/recordings/search", requireAuth, async (req, res) => {
+    try {
+      const { HikvisionClient } = await import('./hikvision-client');
+      const systemId = parseInt(req.params.id);
+      const allSystems = await storage.getAllCctvSystems();
+      const system = allSystems.find(s => s.id === systemId);
+
+      if (!system) {
+        return res.status(404).json({ error: "CCTV system not found" });
+      }
+
+      if (!canAccessLocation(req, system.locationId)) {
+        return res.status(403).json({ error: "Access denied to this CCTV system" });
+      }
+
+      if (!system.ipAddress || !system.username || !system.passwordHash) {
+        return res.status(400).json({ error: "CCTV system not configured with credentials" });
+      }
+
+      const { startTime, endTime, channel = 1 } = req.body;
+      
+      if (!startTime || !endTime) {
+        return res.status(400).json({ error: "startTime and endTime are required" });
+      }
+
+      const client = new HikvisionClient(
+        `http://${system.ipAddress}`,
+        system.username,
+        system.passwordHash
+      );
+
+      const recordings = await client.searchRecordings(
+        new Date(startTime),
+        new Date(endTime),
+        channel
+      );
+
+      res.json(recordings);
+    } catch (error) {
+      console.error("Error searching recordings:", error);
+      res.status(500).json({ error: "Failed to search recordings" });
+    }
+  });
+
+  app.get("/api/cctv/:id/recordings/playback-url", requireAuth, async (req, res) => {
+    try {
+      const { HikvisionClient } = await import('./hikvision-client');
+      const systemId = parseInt(req.params.id);
+      const allSystems = await storage.getAllCctvSystems();
+      const system = allSystems.find(s => s.id === systemId);
+
+      if (!system) {
+        return res.status(404).json({ error: "CCTV system not found" });
+      }
+
+      if (!canAccessLocation(req, system.locationId)) {
+        return res.status(403).json({ error: "Access denied to this CCTV system" });
+      }
+
+      if (!system.ipAddress || !system.username || !system.passwordHash) {
+        return res.status(400).json({ error: "CCTV system not configured with credentials" });
+      }
+
+      const { startTime, endTime, channel = 1 } = req.query;
+      
+      if (!startTime || !endTime) {
+        return res.status(400).json({ error: "startTime and endTime are required" });
+      }
+
+      const client = new HikvisionClient(
+        `http://${system.ipAddress}`,
+        system.username,
+        system.passwordHash
+      );
+
+      const playbackUrl = client.getPlaybackUrl(
+        new Date(startTime as string),
+        new Date(endTime as string),
+        parseInt(channel as string)
+      );
+
+      res.json({ playbackUrl });
+    } catch (error) {
+      console.error("Error getting playback URL:", error);
+      res.status(500).json({ error: "Failed to get playback URL" });
+    }
+  });
+
   // Biometric Systems routes
   app.get("/api/biometric", requireAuth, async (req, res) => {
     try {
