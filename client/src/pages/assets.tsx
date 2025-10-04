@@ -157,8 +157,6 @@ export default function AssetsPage() {
       const newType = params.get('type')
       const newStatus = params.get('status')
       
-      console.log("URL changed - applying filters:", { type: newType, status: newStatus, fullUrl: window.location.href })
-      
       if (newStatus) {
         setStatusFilter(newStatus)
       } else if (params.toString() === '' || !params.has('status')) {
@@ -1192,10 +1190,7 @@ export default function AssetsPage() {
                   const rows = [
                     <TableRow 
                       key={`main-${asset.assetId}`}
-                      onClick={() => {
-                        console.log("Asset row clicked:", asset.assetId, "Current expanded:", expandedAssetId)
-                        setExpandedAssetId(isExpanded ? null : asset.assetId)
-                      }}
+                      onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
                       className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
                       data-testid={`row-asset-${asset.assetId}`}
                     >

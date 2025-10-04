@@ -164,30 +164,12 @@ export default function ReportsPage() {
     }
   }
 
-  // Debug logging
-  console.log('Report Templates from API:', reportTemplates)
-  console.log('Custom Reports from API:', customReports)
-  
-  // Log the first template to see structure
-  if (reportTemplates.length > 0) {
-    console.log('First template structure:', reportTemplates[0])
-    console.log('First template totalRuns:', reportTemplates[0].totalRuns)
-    console.log('First template lastRun:', reportTemplates[0].lastRun)
-  }
-
   // Add icons and colors to templates (using real data from API)
   const enrichedTemplates = reportTemplates.map(template => ({
     ...template,
     icon: getCategoryIcon(template.category),
     color: getCategoryColorClass(template.category)
-    // lastRun and totalRuns now come directly from API
   }))
-
-  console.log('Enriched Templates:', enrichedTemplates)
-  if (enrichedTemplates.length > 0) {
-    console.log('First enriched template:', enrichedTemplates[0])
-    console.log('First enriched totalRuns:', enrichedTemplates[0].totalRuns)
-  }
 
   // Entity field mappings for custom report builder
   const entityFields = {

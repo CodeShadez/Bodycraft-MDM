@@ -35,9 +35,7 @@ export default function LoginPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log("Login successful:", data);
-        
+        await response.json();
         window.location.href = "/";
       } else {
         const errorData = await response.json();

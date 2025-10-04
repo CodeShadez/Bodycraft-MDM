@@ -242,7 +242,6 @@ export default function Dashboard() {
           data-testid="card-total-assets" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           onClick={() => {
-            console.log("Total Assets card clicked - navigating to /assets")
             setLocation("/assets")
             window.history.pushState({}, '', '/assets')
           }}
@@ -273,7 +272,6 @@ export default function Dashboard() {
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.1s" }}
           onClick={() => {
-            console.log("Asset Utilization card clicked - navigating to /assets?status=assigned")
             navigateWithParams("/assets", { status: "assigned" })
           }}
           role="button"
@@ -315,7 +313,6 @@ export default function Dashboard() {
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.2s" }}
           onClick={() => {
-            console.log("Maintenance Activities card clicked - navigating to /assets?status=maintenance")
             navigateWithParams("/assets", { status: "maintenance" })
           }}
           role="button"
