@@ -1187,12 +1187,15 @@ export default function AssetsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAssets.flatMap((asset) => {
+                {filteredAssets && filteredAssets.length > 0 ? filteredAssets.flatMap((asset) => {
                   const isExpanded = expandedAssetId === asset.assetId
                   const rows = [
                     <TableRow 
                       key={`main-${asset.assetId}`}
-                      onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
+                      onClick={() => {
+                        console.log("Asset row clicked:", asset.assetId, "Current expanded:", expandedAssetId)
+                        setExpandedAssetId(isExpanded ? null : asset.assetId)
+                      }}
                       className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
                       data-testid={`row-asset-${asset.assetId}`}
                     >
@@ -1416,7 +1419,15 @@ export default function AssetsPage() {
                   }
 
                   return rows
-                })}
+                }) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                      <Package className="mx-auto h-12 w-12 mb-4 opacity-40" />
+                      <p className="text-lg font-medium mb-1">No assets found</p>
+                      <p className="text-sm">Try adjusting your filters or create a new asset</p>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
