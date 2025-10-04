@@ -267,6 +267,16 @@ export default function AssignmentsPage() {
 
   const handleAssignAsset = (event: React.FormEvent) => {
     event.preventDefault()
+    
+    if (!currentUser?.user?.id) {
+      toast({
+        title: "Authentication Error",
+        description: "User not authenticated. Please refresh the page and try again.",
+        variant: "destructive",
+      })
+      return
+    }
+    
     const formData = new FormData(event.target as HTMLFormElement)
     
     const assignmentData = {
@@ -275,7 +285,7 @@ export default function AssignmentsPage() {
       assignmentReason: formData.get('assignmentReason'),
       conditionOnAssignment: formData.get('conditionOnAssignment'),
       backupDetails: formData.get('backupDetails') || null,
-      createdBy: currentUser?.user?.id || 1,
+      createdBy: currentUser.user.id,
     }
 
     assignAssetMutation.mutate(assignmentData)
