@@ -100,16 +100,26 @@ function AppContent() {
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full relative overflow-hidden">
+        {/* Animated Gradient Background */}
+        <div className="fixed inset-0 glass-bg -z-10"></div>
+        
+        {/* Animated Background Shapes */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-float-slow"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-float-slower"></div>
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        </div>
+
         <AppSidebar />
         <div className="flex flex-col flex-1">
-          <header className="flex items-center justify-between p-2 border-b bg-background">
-            <SidebarTrigger data-testid="button-sidebar-toggle" />
+          <header className="flex items-center justify-between p-3 glass-card border-0">
+            <SidebarTrigger data-testid="button-sidebar-toggle" className="text-white/80 hover:text-white" />
             <div className="flex items-center gap-2">
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex-1 overflow-auto bg-background">
+          <main className="flex-1 overflow-auto">
             <Router />
           </main>
         </div>

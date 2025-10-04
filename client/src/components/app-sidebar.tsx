@@ -107,12 +107,12 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar data-testid="sidebar-main">
-      <SidebarContent>
+    <Sidebar data-testid="sidebar-main" className="glass-card border-r-0">
+      <SidebarContent className="bg-transparent">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-semibold flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            BODYCRAFT MDM
+          <SidebarGroupLabel className="text-lg font-semibold flex items-center gap-2 text-white/90">
+            <Building2 className="h-5 w-5 text-purple-400" />
+            <span className="glass-gradient-text">BODYCRAFT</span>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -131,7 +131,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Integrations</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/70">Integrations</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {integrationItems.map((item) => (
@@ -149,7 +149,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>System</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/70">System</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {systemItems.map((item) => (
