@@ -2,8 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LIGHT MODE */
+/* BODYCRAFT GLASSMORPHISM DESIGN SYSTEM */
 :root {
+  /* Glassmorphism Color Palette */
+  --glass-gradient-start: #0f172a;
+  --glass-gradient-mid: #1e293b;
+  --glass-gradient-end: #6366f1;
+  
+  --glass-purple: #a855f7;
+  --glass-pink: #ec4899;
+  --glass-blue: #3b82f6;
+  --glass-teal: #14b8a6;
+  
+  /* Glass Surface Colors */
+  --glass-bg: rgba(255, 255, 255, 0.13);
+  --glass-bg-hover: rgba(255, 255, 255, 0.18);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(8, 7, 16, 0.6);
+  
+  /* Text Colors */
+  --glass-text-primary: #e0e7ff;
+  --glass-text-secondary: rgba(255, 255, 255, 0.7);
+  --glass-text-muted: rgba(255, 255, 255, 0.5);
+  
+  /* Button Outline & Badges */
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
 
@@ -15,59 +37,36 @@
   --elevate-2: rgba(0,0,0, .08);
 
   --background: 0 0% 98%;
-
   --foreground: 222 20% 15%;
-
   --border: 0 0% 88%;
-
   --card: 0 0% 100%;
-
   --card-foreground: 222 20% 15%;
-
   --card-border: 0 0% 94%;
-
+  
   --sidebar: 0 0% 96%;
-
   --sidebar-foreground: 222 20% 15%;
-
   --sidebar-border: 0 0% 92%;
-
   --sidebar-primary: 264 100% 50%;
-
   --sidebar-primary-foreground: 0 0% 98%;
-
   --sidebar-accent: 0 0% 90%;
-
   --sidebar-accent-foreground: 222 20% 15%;
-
   --sidebar-ring: 264 100% 50%;
-
+  
   --popover: 0 0% 99%;
-
   --popover-foreground: 222 20% 15%;
-
   --popover-border: 0 0% 92%;
-
+  
   --primary: 264 100% 50%;
-
   --primary-foreground: 0 0% 98%;
-
   --secondary: 0 0% 92%;
-
   --secondary-foreground: 222 20% 15%;
-
   --muted: 0 0% 94%;
-
   --muted-foreground: 222 15% 40%;
-
   --accent: 0 0% 93%;
-
   --accent-foreground: 222 20% 15%;
-
   --destructive: 0 84% 60%;
-
   --destructive-foreground: 0 0% 98%;
-
+  
   --input: 0 0% 80%;
   --ring: 264 100% 50%;
   --chart-1: 264 100% 50%;
@@ -79,7 +78,7 @@
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: .5rem; /* 8px */
+  --radius: .5rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.02);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.03);
   --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.03), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
@@ -91,33 +90,19 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
-
-  /* Fallback for older browsers */
+  /* Automatically computed borders */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --sidebar-accent-border: hsl(var(--sidebar-accent));
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --primary-border: hsl(var(--primary));
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --secondary-border: hsl(var(--secondary));
   --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --muted-border: hsl(var(--muted));
   --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --accent-border: hsl(var(--accent));
   --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
@@ -125,67 +110,39 @@
 .dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
-
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
-
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
   --background: 222 20% 12%;
-
   --foreground: 210 40% 85%;
-
   --border: 220 15% 18%;
-
   --card: 220 15% 16%;
-
   --card-foreground: 210 40% 85%;
-
   --card-border: 220 15% 22%;
-
+  
   --sidebar: 222 18% 14%;
-
   --sidebar-foreground: 210 40% 85%;
-
   --sidebar-border: 220 15% 20%;
-
   --sidebar-primary: 264 100% 60%;
-
   --sidebar-primary-foreground: 222 20% 12%;
-
   --sidebar-accent: 220 15% 20%;
-
   --sidebar-accent-foreground: 210 40% 85%;
-
   --sidebar-ring: 264 100% 60%;
-
+  
   --popover: 220 15% 18%;
-
   --popover-foreground: 210 40% 85%;
-
   --popover-border: 220 15% 24%;
-
   --primary: 264 100% 60%;
-
   --primary-foreground: 222 20% 12%;
-
   --secondary: 220 15% 22%;
-
   --secondary-foreground: 210 40% 85%;
-
   --muted: 220 15% 20%;
-
   --muted-foreground: 210 30% 65%;
-
   --accent: 220 15% 21%;
-
   --accent-foreground: 210 40% 85%;
-
   --destructive: 0 84% 55%;
-
   --destructive-foreground: 222 20% 12%;
-
   --input: 220 15% 25%;
   --ring: 264 100% 60%;
   --chart-1: 264 100% 65%;
@@ -202,7 +159,6 @@
   --shadow-lg: 0px 2px 0px 0px hsl(0 0% 0% / 0.25), 0px 4px 6px -1px hsl(0 0% 0% / 0.35);
   --shadow-xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.30), 0px 8px 10px -1px hsl(0 0% 0% / 0.40);
   --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.35);
-
 }
 
 @layer base {
@@ -215,29 +171,45 @@
   }
 }
 
-/**
- * Using the elevate system.
- * Automatic contrast adjustment.
- *
- * <element className="hover-elevate" />
- * <element className="active-elevate-2" />
- *
- * // Using the tailwind utility when a data attribute is "on"
- * <element className="toggle-elevate data-[state=on]:toggle-elevated" />
- * // Or manually controlling the toggle state
- * <element className="toggle-elevate toggle-elevated" />
- *
- * Elevation systems have to handle many states.
- * - not-hovered, vs. hovered vs. active  (three mutually exclusive states)
- * - toggled or not
- * - focused or not (this is not handled with these utilities)
- *
- * Even without handling focused or not, this is six possible combinations that
- * need to be distinguished from eachother visually.
- */
-@layer utilities {
+/* GLASSMORPHISM ANIMATIONS */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
 
-  /* Hide ugly search cancel button in Chrome until we can style it properly */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-20px) translateX(20px); }
+}
+
+@keyframes float-slower {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(20px) translateX(-20px); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@layer utilities {
+  /* Hide ugly search cancel button in Chrome */
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
   }
@@ -249,42 +221,104 @@
     pointer-events: none;
   }
 
-  /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
-   * buttons/badges can remove the automatic brightness adjustment on interactions
-   * and program their own. */
-  .no-default-hover-elevate {}
+  /* Glassmorphism Utilities */
+  .glass-bg {
+    background: linear-gradient(to bottom right, var(--glass-gradient-start), var(--glass-gradient-mid), var(--glass-gradient-end));
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+  }
+  
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 0 40px var(--glass-shadow);
+  }
+  
+  .glass-card-hover:hover {
+    background: var(--glass-bg-hover);
+  }
+  
+  .glass-input {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--glass-text-primary);
+  }
+  
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: var(--glass-purple);
+  }
+  
+  .glass-gradient-text {
+    background: linear-gradient(135deg, var(--glass-purple) 0%, var(--glass-pink) 50%, var(--glass-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .animate-gradient-shift {
+    animation: gradient-shift 15s ease infinite;
+  }
+  
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
+  
+  .animate-float-slower {
+    animation: float-slower 10s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 6s ease-in-out infinite;
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.8s ease-out;
+  }
+  
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+  
+  /* Auto-fill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--glass-text-primary) !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
 
+  /* Elevation system */
+  .no-default-hover-elevate {}
   .no-default-active-elevate {}
 
-
-  /**
-   * Toggleable backgrounds go behind the content. Hoverable/active goes on top.
-   * This way they can stack/compound. Both will overlap the parent's borders!
-   * So borders will be automatically adjusted both on toggle, and hover/active,
-   * and they will be compounded.
-   */
   .toggle-elevate::before,
   .toggle-elevate-2::before {
     content: "";
     pointer-events: none;
     position: absolute;
     inset: 0px;
-    /*border-radius: inherit;   match rounded corners */
     border-radius: inherit;
     z-index: -1;
-    /* sits behind content but above backdrop */
   }
 
   .toggle-elevate.toggle-elevated::before {
     background-color: var(--elevate-2);
   }
 
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
   .border.toggle-elevate::before {
     inset: -1px;
   }
 
-  /* Does not work on elements with overflow:hidden! */
   .hover-elevate:not(.no-default-hover-elevate),
   .active-elevate:not(.no-default-active-elevate),
   .hover-elevate-2:not(.no-default-hover-elevate),
@@ -301,10 +335,8 @@
     pointer-events: none;
     position: absolute;
     inset: 0px;
-    /*border-radius: inherit;   match rounded corners */
     border-radius: inherit;
     z-index: 999;
-    /* sits in front of content */
   }
 
   .hover-elevate:hover:not(.no-default-hover-elevate)::after,
@@ -317,12 +349,20 @@
     background-color: var(--elevate-2);
   }
 
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
   .border.active-elevate:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after {
     inset: -1px;
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-gradient-shift,
+    .animate-float-slow,
+    .animate-float-slower,
+    .animate-pulse-slow {
+      animation: none;
+    }
   }
 }
