@@ -789,6 +789,20 @@ export default function LocationsPage() {
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Location
                           </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (window.confirm(`Are you sure you want to delete ${location.outletName}? This action cannot be undone.`)) {
+                                deleteLocationMutation.mutate(location.id)
+                              }
+                            }}
+                            data-testid={`button-delete-location-${location.id}`}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Location
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

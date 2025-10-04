@@ -242,6 +242,24 @@ export default function AssignmentsPage() {
     }
   })
 
+  // Delete assignment mutation
+  const deleteAssignmentMutation = useMutation({
+    mutationFn: async (data: { assetId: string, employeeId: number }) => {
+      const response = await fetch(`/api/assignments/${data.assetId}/${data.employeeId}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) throw new Error('Failed to delete assignment')
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/assignments"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] })
+      toast({ title: "Success", description: "Assignment deleted successfully" })
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete assignment", variant: "destructive" })
+    }
+  })
+
   // Transfer asset mutation (return + new assignment in one operation)
   const transferAssetMutation = useMutation({
     mutationFn: async (transferData: any) => {
@@ -960,6 +978,20 @@ export default function AssignmentsPage() {
                               </Button>
                             </>
                           )}
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (window.confirm(`Are you sure you want to delete this assignment record? This action cannot be undone.`)) {
+                                deleteAssignmentMutation.mutate({ assetId: assignment.assetId, employeeId: assignment.employeeId })
+                              }
+                            }}
+                            data-testid={`button-delete-assignment-${assignmentId}`}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Assignment
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

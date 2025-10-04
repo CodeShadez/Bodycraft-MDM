@@ -882,6 +882,20 @@ export default function EmployeesPage() {
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Employee
                           </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (window.confirm(`Are you sure you want to delete ${employee.firstName} ${employee.lastName}? This action cannot be undone.`)) {
+                                deleteEmployeeMutation.mutate(employee.id)
+                              }
+                            }}
+                            data-testid={`button-delete-employee-${employee.id}`}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Employee
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

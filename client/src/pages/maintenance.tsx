@@ -904,6 +904,20 @@ export default function MaintenancePage() {
                               Mark Complete
                             </Button>
                           )}
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (window.confirm(`Are you sure you want to delete this maintenance record? This action cannot be undone.`)) {
+                                deleteMaintenanceMutation.mutate(record.id)
+                              }
+                            }}
+                            data-testid={`button-delete-maintenance-${record.id}`}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Record
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

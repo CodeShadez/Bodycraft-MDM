@@ -1408,6 +1408,20 @@ export default function AssetsPage() {
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit Asset
                               </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (window.confirm(`Are you sure you want to delete asset ${asset.assetId}? This action cannot be undone.`)) {
+                                    deleteAssetMutation.mutate(asset.assetId)
+                                  }
+                                }}
+                                data-testid={`button-delete-asset-${asset.assetId}`}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Asset
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
