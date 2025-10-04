@@ -98,6 +98,30 @@ The system is architected for scalability and maintainability, with clear separa
 
 ## Recent Changes
 
+### October 4, 2025 - Hikvision CCTV Integration Completed
+- Implemented comprehensive Hikvision ISAPI integration for CCTV camera management
+- Created HikvisionClient module (server/hikvision-client.ts):
+  - HTTP Digest Authentication for secure API access
+  - Proper XML parsing using fast-xml-parser for nested responses
+  - Device information and system status retrieval
+  - Camera snapshot capture (JPEG format)
+  - RTSP and HTTP preview stream URL generation (main/sub streams)
+  - Recording search with time range filtering
+  - Playback URL generation for recorded footage
+  - Online/offline status monitoring with auto-update to database
+- Added comprehensive API routes with RBAC protection:
+  - GET /api/cctv/:id/snapshot - Capture camera snapshot (supports multi-channel)
+  - GET /api/cctv/:id/stream-url - Get live stream URLs (RTSP and HTTP preview)
+  - GET /api/cctv/:id/device-info - Retrieve Hikvision device information
+  - GET /api/cctv/:id/status - Check camera status and update database
+  - POST /api/cctv/:id/recordings/search - Search recordings by time range
+  - GET /api/cctv/:id/recordings/playback-url - Get playback URL for recordings
+- All routes include location-based access control and credential validation
+- Fixed critical bugs:
+  - Corrected XML parsing to handle nested Hikvision responses
+  - Fixed typo in recording search XML payload (searchResultPosition)
+- Ready for production deployment with real Hikvision cameras
+
 ### October 4, 2025 - Approval Workflow System Implemented
 - Implemented multi-level approval workflow system for sensitive operations
 - Added database schema for approval requests and approval actions (audit trail)
