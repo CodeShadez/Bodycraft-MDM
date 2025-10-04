@@ -1,5 +1,7 @@
-import { Building2, Users, Laptop, MapPin, BarChart3, Cable, Fingerprint, Calendar, Settings, Wrench, Shield } from "lucide-react"
+import { Building2, Users, Laptop, MapPin, BarChart3, Cable, Fingerprint, Calendar, Settings, Wrench, Shield, LogOut } from "lucide-react"
 import { Link, useLocation } from "wouter"
+import { apiRequest, queryClient } from "@/lib/queryClient"
+import { useToast } from "@/hooks/use-toast"
 
 import {
   Sidebar,
@@ -80,7 +82,29 @@ const systemItems = [
 ]
 
 export function AppSidebar() {
-  const [location] = useLocation()
+  const [location, setLocation] = useLocation()
+  const { toast } = useToast()
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest("POST", "/api/auth/logout")
+      
+      queryClient.clear()
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of the system",
+      })
+      
+      setLocation("/login")
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: "An error occurred while logging out",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <Sidebar data-testid="sidebar-main">
@@ -94,7 +118,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild data={location === item.url ? { active: "true" } : {}}>
+                  <SidebarMenuButton asChild isActive={location === item.url}>
                     <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -112,7 +136,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {integrationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild data={location === item.url ? { active: "true" } : {}}>
+                  <SidebarMenuButton asChild isActive={location === item.url}>
                     <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -130,7 +154,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {systemItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild data={location === item.url ? { active: "true" } : {}}>
+                  <SidebarMenuButton asChild isActive={location === item.url}>
                     <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -138,6 +162,12 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleLogout} data-testid="button-logout">
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
