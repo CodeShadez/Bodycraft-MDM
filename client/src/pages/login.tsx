@@ -67,14 +67,14 @@ export default function LoginPage() {
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
       </div>
 
-      <div className="w-full max-w-md space-y-8 relative z-10">
+      <div className="w-full max-w-md relative z-10">
         {/* BODYCRAFT Branding */}
-        <div className="text-center space-y-6 animate-fade-in">
+        <div className="text-center mb-10 animate-fade-in">
           {/* Modern Logo Design */}
-          <div className="flex flex-col items-center justify-center mb-6 transform hover:scale-105 transition-transform duration-500">
+          <div className="flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-500">
             {/* Glass Logo Container */}
             <div 
-              className="relative p-8 rounded-3xl backdrop-blur-xl border border-white/20 mb-6"
+              className="relative p-6 rounded-3xl backdrop-blur-xl border border-white/20 mb-5"
               style={{
                 background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
                 boxShadow: '0 8px 32px rgba(99, 102, 241, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
@@ -82,13 +82,13 @@ export default function LoginPage() {
             >
               {/* Animated Flame Icon */}
               <div className="relative">
-                <Flame className="h-16 w-16 text-transparent bg-clip-text" 
+                <Flame className="h-14 w-14 text-transparent bg-clip-text" 
                   style={{
                     filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.8))',
                   }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Flame className="h-16 w-16 animate-pulse-slow" 
+                  <Flame className="h-14 w-14 animate-pulse-slow" 
                     style={{
                       fill: 'url(#flame-gradient)',
                       stroke: 'url(#flame-gradient)',
@@ -111,7 +111,7 @@ export default function LoginPage() {
             
             {/* Brand Name with Gradient */}
             <h1 
-              className="text-5xl font-bold mb-2 tracking-tight"
+              className="text-4xl font-bold mb-3 tracking-tight"
               style={{
                 background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #3b82f6 100%)',
                 WebkitBackgroundClip: 'text',
@@ -124,19 +124,17 @@ export default function LoginPage() {
             </h1>
             
             {/* Tagline */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-px w-8 bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
-              <p className="text-purple-300/90 text-xs font-light tracking-[0.3em] uppercase">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-px w-6 bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
+              <p className="text-purple-300/80 text-[10px] font-light tracking-[0.25em] uppercase">
                 Salon · Skin · Clinic · Spa
               </p>
-              <div className="h-px w-8 bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
+              <div className="h-px w-6 bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <h2 className="text-white/90 text-lg font-light tracking-wide">Master Data Management</h2>
-            <p className="text-white/60 text-sm font-light">
-              Sign in to access your Master Data Management
+
+            {/* Subtitle */}
+            <p className="text-white/70 text-base font-light">
+              Master Data Management System
             </p>
           </div>
         </div>
@@ -151,14 +149,14 @@ export default function LoginPage() {
         >
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="flex items-center justify-center gap-3 mb-3">
               <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl">
-                <Lock className="h-6 w-6 text-white" />
+                <Lock className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-3xl font-light text-white">Sign In</h1>
+              <h2 className="text-2xl font-light text-white">Sign In</h2>
             </div>
-            <p className="text-white/60 text-sm font-light mt-2">
-              Enter your credentials to access the BODYCRAFT MDM system
+            <p className="text-white/50 text-sm font-light">
+              Access your secure management portal
             </p>
           </div>
 
@@ -242,22 +240,22 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Remember Me Toggle */}
+            {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-3 cursor-pointer group">
                 <div 
-                  className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                  className={`relative w-11 h-6 rounded-full transition-all duration-300 ${
                     rememberMe ? 'bg-gradient-to-r from-purple-500 to-blue-500' : 'bg-white/20'
                   }`}
                   onClick={() => setRememberMe(!rememberMe)}
                 >
                   <div 
                     className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
-                      rememberMe ? 'transform translate-x-6' : ''
+                      rememberMe ? 'transform translate-x-5' : ''
                     }`}
                   ></div>
                 </div>
-                <span className="text-white/70 text-sm font-light group-hover:text-white/90 transition-colors duration-300">
+                <span className="text-white/60 text-sm font-light group-hover:text-white/90 transition-colors duration-300">
                   Remember me
                 </span>
               </label>
@@ -292,8 +290,8 @@ export default function LoginPage() {
                 <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-4 text-white/50 bg-transparent font-light tracking-wider">
-                  Quick Login
+                <span className="px-4 text-white/40 bg-transparent font-light tracking-wider">
+                  Quick Access
                 </span>
               </div>
             </div>
@@ -304,25 +302,27 @@ export default function LoginPage() {
               variant="outline"
               onClick={handleSuperAdminLogin}
               data-testid="button-superadmin-login"
-              className="w-full py-6 rounded-xl border-2 border-white/20 bg-white/5 hover:bg-white/10 text-white font-light backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300"
+              className="w-full py-5 rounded-xl border-2 border-white/20 bg-white/5 hover:bg-white/10 text-white font-light backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300"
             >
-              <Zap className="h-5 w-5 mr-2" />
-              Use Super Admin Credentials
+              <Zap className="h-4 w-4 mr-2" />
+              Super Admin Login
             </Button>
 
-            <p className="text-center text-white/40 text-xs font-light mt-4">
-              Username: <span className="text-purple-300">admin</span> | Password: <span className="text-purple-300">admin123</span>
+            <p className="text-center text-white/30 text-xs font-light mt-3">
+              Credentials: <span className="text-purple-300/80">admin</span> / <span className="text-purple-300/80">admin123</span>
             </p>
           </form>
         </div>
 
         {/* Footer */}
-        <div className="text-center text-white/40 text-xs font-light animate-fade-in-delay">
-          <p>BODYCRAFT Master Data Management</p>
-          <div className="flex items-center justify-center gap-2 mt-2">
+        <div className="text-center mt-8 space-y-2 animate-fade-in-delay">
+          <div className="flex items-center justify-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-green-400/80">System Secure</span>
+            <span className="text-green-400/90 text-xs font-light">Secure Connection</span>
           </div>
+          <p className="text-white/30 text-xs font-light">
+            © 2025 BODYCRAFT. All rights reserved.
+          </p>
         </div>
       </div>
 
