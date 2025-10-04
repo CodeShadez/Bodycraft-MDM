@@ -7,6 +7,7 @@ import {
   insertAssetSchema, 
   insertEmployeeSchema, 
   insertLocationSchema,
+  insertDepartmentSchema,
   insertAssetAssignmentHistorySchema,
   insertAssetMaintenanceSchema,
   insertCctvSystemSchema,
@@ -387,6 +388,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete location" });
+    }
+  });
+
+  // Department routes
+  app.get("/api/departments", requireAuth, async (req, res) => {
+    try {
+      const departments = await storage.getAllDepartments();
+      res.json(departments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch departments" });
+    }
+  });
+
+  app.post("/api/departments", requireAuth, requireRole(['super_admin']), async (req, res) => {
+    try {
+      const validatedDepartment = insertDepartmentSchema.parse({
+        ...req.body,
+        isCustom: true, // Custom departments created by admin are marked as custom
+      });
+      const department = await storage.createDepartment(validatedDepartment);
+      res.status(201).json(department);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid department data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create department" });
+    }
+  });
+
+  app.patch("/api/departments/:id", requireAuth, requireRole(['super_admin']), async (req, res) => {
+    try {
+      const validatedDepartment = insertDepartmentSchema.partial().parse(req.body);
+      const department = await storage.updateDepartment(parseInt(req.params.id), validatedDepartment);
+      if (!department) {
+        return res.status(404).json({ error: "Department not found" });
+      }
+      res.json(department);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid department data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update department" });
+    }
+  });
+
+  app.delete("/api/departments/:id", requireAuth, requireRole(['super_admin']), async (req, res) => {
+    try {
+      // Only allow deletion of custom departments
+      const department = await storage.getDepartment(parseInt(req.params.id));
+      if (!department) {
+        return res.status(404).json({ error: "Department not found" });
+      }
+      if (!department.isCustom) {
+        return res.status(403).json({ error: "Cannot delete predefined departments" });
+      }
+      
+      const success = await storage.deleteDepartment(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Department not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete department" });
     }
   });
 
