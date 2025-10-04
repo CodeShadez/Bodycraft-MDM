@@ -1172,7 +1172,7 @@ export default function AssetsPage() {
 
       {/* Assets Table */}
       <Card className="glass-card border-0 glass-card border-0">
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
