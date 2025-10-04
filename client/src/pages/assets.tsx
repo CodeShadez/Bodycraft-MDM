@@ -154,6 +154,11 @@ export default function AssetsPage() {
     modelName: '',
     serviceTag: '',
     locationId: '',
+    departmentId: '',
+    physicalLocation: '',
+    floor: '',
+    ownershipType: 'company',
+    assignmentType: 'person',
     purchaseDate: '',
     warrantyExpiry: '',
     status: 'available',
@@ -170,6 +175,10 @@ export default function AssetsPage() {
 
   const { data: locations } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
+  })
+
+  const { data: departments } = useQuery<any[]>({
+    queryKey: ["/api/departments"],
   })
 
   const { data: employees } = useQuery<Employee[]>({
@@ -300,6 +309,11 @@ export default function AssetsPage() {
       status: newAsset.status,
       condition: newAsset.condition,
       locationId: newAsset.locationId ? parseInt(newAsset.locationId) : null,
+      departmentId: newAsset.departmentId ? parseInt(newAsset.departmentId) : null,
+      physicalLocation: newAsset.physicalLocation?.trim() || null,
+      floor: newAsset.floor?.trim() || null,
+      ownershipType: newAsset.ownershipType,
+      assignmentType: newAsset.assignmentType,
     }
 
     createAssetMutation.mutate(assetData)
@@ -313,6 +327,11 @@ export default function AssetsPage() {
       modelName: '',
       serviceTag: '',
       locationId: '',
+      departmentId: '',
+      physicalLocation: '',
+      floor: '',
+      ownershipType: 'company',
+      assignmentType: 'person',
       purchaseDate: '',
       warrantyExpiry: '',
       status: 'available',
@@ -641,6 +660,81 @@ export default function AssetsPage() {
                             {location.outletName}, {location.city}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="departmentId">Department</Label>
+                    <Select 
+                      value={newAsset.departmentId} 
+                      onValueChange={(value) => setNewAsset({...newAsset, departmentId: value})}
+                    >
+                      <SelectTrigger data-testid="select-department">
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments?.filter(d => d.isActive).map(dept => (
+                          <SelectItem key={dept.id} value={dept.id.toString()}>
+                            {dept.name} ({dept.type})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="physicalLocation">Physical Location</Label>
+                    <Input
+                      id="physicalLocation"
+                      placeholder="Reception, Front Desk, Room 1..."
+                      value={newAsset.physicalLocation}
+                      onChange={(e) => setNewAsset({...newAsset, physicalLocation: e.target.value})}
+                      data-testid="input-physical-location"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="floor">Floor</Label>
+                    <Input
+                      id="floor"
+                      placeholder="Ground Floor, 1st Floor..."
+                      value={newAsset.floor}
+                      onChange={(e) => setNewAsset({...newAsset, floor: e.target.value})}
+                      data-testid="input-floor"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ownershipType">Ownership Type</Label>
+                    <Select 
+                      value={newAsset.ownershipType} 
+                      onValueChange={(value) => setNewAsset({...newAsset, ownershipType: value})}
+                    >
+                      <SelectTrigger data-testid="select-ownership-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="company">Company Owned</SelectItem>
+                        <SelectItem value="rented">Rented</SelectItem>
+                        <SelectItem value="personal">Personal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="assignmentType">Assignment Type</Label>
+                    <Select 
+                      value={newAsset.assignmentType} 
+                      onValueChange={(value) => setNewAsset({...newAsset, assignmentType: value})}
+                    >
+                      <SelectTrigger data-testid="select-assignment-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="person">Assigned to Person</SelectItem>
+                        <SelectItem value="outlet">Assigned to Outlet</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
