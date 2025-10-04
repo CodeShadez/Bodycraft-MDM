@@ -531,7 +531,7 @@
 
 /* Table Container with Compensated Horizontal Scroll - Prevents Layout Shift */
 .table-container-stable {
-  overflow-x: auto;
+  overflow-x: scroll;
   padding-bottom: var(--scrollbar-size);
   margin-bottom: calc(-1 * var(--scrollbar-size));
   position: relative;
