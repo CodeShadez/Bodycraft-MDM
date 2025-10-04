@@ -1,5 +1,6 @@
-import { useState, Fragment } from "react"
+import { useState, Fragment, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useLocation } from "wouter"
 import { 
   Laptop, 
   Monitor, 
@@ -139,6 +140,8 @@ interface Employee {
 }
 
 export default function AssetsPage() {
+  const [location] = useLocation()
+  
   // Get URL search params to check for filters
   const urlParams = new URLSearchParams(window.location.search)
   const urlType = urlParams.get('type')
@@ -151,6 +154,22 @@ export default function AssetsPage() {
   const [conditionFilter, setConditionFilter] = useState<string>("all")
   const [ownershipFilter, setOwnershipFilter] = useState<string>("all")
   const [departmentFilter, setDepartmentFilter] = useState<string>("all")
+  
+  // Update filters when URL changes
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const newType = params.get('type')
+    const newStatus = params.get('status')
+    
+    console.log("URL changed - applying filters:", { type: newType, status: newStatus })
+    
+    if (newStatus) {
+      setStatusFilter(newStatus)
+    }
+    if (newType) {
+      setTypeFilter(newType)
+    }
+  }, [location])
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
