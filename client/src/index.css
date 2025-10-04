@@ -36,6 +36,9 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
+  /* Scrollbar compensation for stable layout */
+  --scrollbar-size: 14px;
+
   --background: 0 0% 98%;
   --foreground: 222 20% 15%;
   --border: 0 0% 88%;
@@ -526,7 +529,37 @@
   }
 }
 
-/* Table Container with Horizontal Scroll */
+/* Table Container with Compensated Horizontal Scroll - Prevents Layout Shift */
 .table-container-stable {
   overflow-x: auto;
+  padding-bottom: var(--scrollbar-size);
+  margin-bottom: calc(-1 * var(--scrollbar-size));
+  position: relative;
+}
+
+/* Custom Scrollbar Styling for Glassmorphism */
+.table-container-stable::-webkit-scrollbar {
+  height: var(--scrollbar-size);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.table-container-stable::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.table-container-stable::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.table-container-stable::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.5);
+}
+
+/* Firefox scrollbar styling */
+.table-container-stable {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.3) rgba(255, 255, 255, 0.03);
 }
