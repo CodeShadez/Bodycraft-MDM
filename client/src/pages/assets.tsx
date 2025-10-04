@@ -1280,7 +1280,11 @@ export default function AssetsPage() {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => deleteAssetMutation.mutate(asset.assetId)}
+                                onClick={() => {
+                                  if (window.confirm(`Are you sure you want to delete asset ${asset.assetId}? This action cannot be undone.`)) {
+                                    deleteAssetMutation.mutate(asset.assetId)
+                                  }
+                                }}
                                 className="text-red-600"
                                 data-testid={`menu-delete-${asset.assetId}`}
                               >
@@ -1393,36 +1397,6 @@ export default function AssetsPage() {
                                   </div>
                                 </div>
                               </div>
-
-                            <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedAsset(asset)
-                                  setIsEditDialogOpen(true)
-                                }}
-                                data-testid={`button-edit-details-${asset.assetId}`}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Asset
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  if (window.confirm(`Are you sure you want to delete asset ${asset.assetId}? This action cannot be undone.`)) {
-                                    deleteAssetMutation.mutate(asset.assetId)
-                                  }
-                                }}
-                                data-testid={`button-delete-asset-${asset.assetId}`}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Asset
-                              </Button>
-                            </div>
                           </TableCell>
                         </TableRow>
                     )
