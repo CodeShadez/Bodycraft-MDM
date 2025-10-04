@@ -463,7 +463,7 @@ export default function AssetsPage() {
               <DialogHeader>
                 <DialogTitle>Import Assets from Excel</DialogTitle>
                 <DialogDescription>
-                  Upload an Excel file to import multiple assets. Download the template first if you need the correct format.
+                  Bulk import enterprise resources using standardized Excel templates for efficient data onboarding
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -544,7 +544,7 @@ export default function AssetsPage() {
               <DialogHeader>
                 <DialogTitle>Create New Asset</DialogTitle>
                 <DialogDescription>
-                  Register a new inventory item in the master data repository
+                  Add enterprise resources with complete lifecycle tracking and warranty information
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateAsset} className="space-y-4">
@@ -977,7 +977,7 @@ export default function AssetsPage() {
           <DialogHeader>
             <DialogTitle>Asset Details</DialogTitle>
             <DialogDescription>
-              Complete information for {selectedAsset?.assetId}
+              View comprehensive specifications, status history, and assignment records for {selectedAsset?.assetId}
             </DialogDescription>
           </DialogHeader>
           {selectedAsset && (
@@ -1083,7 +1083,7 @@ export default function AssetsPage() {
           <DialogHeader>
             <DialogTitle>Edit Asset</DialogTitle>
             <DialogDescription>
-              Update information for {selectedAsset?.assetId}
+              Modify specifications, status, warranty details, and location assignment for {selectedAsset?.assetId}
             </DialogDescription>
           </DialogHeader>
           {selectedAsset && (

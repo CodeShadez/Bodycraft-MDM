@@ -357,7 +357,7 @@ export default function MaintenancePage() {
               <DialogHeader>
                 <DialogTitle>Schedule Maintenance</DialogTitle>
                 <DialogDescription>
-                  Create a new maintenance record for an asset
+                  Plan preventive or corrective service with scheduling, cost tracking, and technician assignment
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateMaintenance} className="space-y-4">
@@ -627,7 +627,7 @@ export default function MaintenancePage() {
                       <div className="max-w-xs">
                         <div className="text-sm truncate">{record.description}</div>
                         <div className="text-xs text-muted-foreground">
-                          {getLocationName(asset?.locationId)}
+                          {getLocationName(asset?.locationId || null)}
                         </div>
                       </div>
                     </TableCell>
@@ -722,7 +722,7 @@ export default function MaintenancePage() {
           <DialogHeader>
             <DialogTitle>Maintenance Details</DialogTitle>
             <DialogDescription>
-              Complete maintenance record information
+              View service history, cost breakdowns, parts inventory, and technician performance records
             </DialogDescription>
           </DialogHeader>
           {selectedMaintenance && (
@@ -806,7 +806,7 @@ export default function MaintenancePage() {
           <DialogHeader>
             <DialogTitle>Edit Maintenance</DialogTitle>
             <DialogDescription>
-              Update maintenance information for {selectedMaintenance?.assetId}
+              Modify service details, scheduling, cost estimates, and resource allocation for {selectedMaintenance?.assetId}
             </DialogDescription>
           </DialogHeader>
           {selectedMaintenance && (
@@ -887,7 +887,7 @@ export default function MaintenancePage() {
           <DialogHeader>
             <DialogTitle>Complete Maintenance</DialogTitle>
             <DialogDescription>
-              Mark maintenance as completed for {selectedMaintenance?.assetId}
+              Finalize service record with completion date, final costs, and parts replacement documentation for {selectedMaintenance?.assetId}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCompleteMaintenance} className="space-y-4">

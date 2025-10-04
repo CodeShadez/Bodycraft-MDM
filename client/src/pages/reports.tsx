@@ -452,7 +452,7 @@ export default function ReportsPage() {
               <DialogHeader>
                 <DialogTitle>Create Custom Report</DialogTitle>
                 <DialogDescription>
-                  Build a custom report with specific fields and filters
+                  Design analytics dashboards with customizable data sources, field selection, and advanced filtering criteria
                 </DialogDescription>
               </DialogHeader>
               

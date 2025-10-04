@@ -316,7 +316,7 @@ export default function EmployeesPage() {
               <DialogHeader>
                 <DialogTitle>Create New Employee</DialogTitle>
                 <DialogDescription>
-                  Register a new personnel record in the master data system
+                  Onboard new personnel with complete organizational details and department assignment
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateEmployee} className="space-y-4">
@@ -711,7 +711,7 @@ export default function EmployeesPage() {
           <DialogHeader>
             <DialogTitle>Employee Details</DialogTitle>
             <DialogDescription>
-              Complete information for {selectedEmployee?.firstName} {selectedEmployee?.lastName}
+              View personnel profile, contact information, and resource allocation for {selectedEmployee?.firstName} {selectedEmployee?.lastName}
             </DialogDescription>
           </DialogHeader>
           {selectedEmployee && (
@@ -809,7 +809,7 @@ export default function EmployeesPage() {
           <DialogHeader>
             <DialogTitle>Edit Employee</DialogTitle>
             <DialogDescription>
-              Update information for {selectedEmployee?.firstName} {selectedEmployee?.lastName}
+              Modify personnel details, department assignment, and contact information for {selectedEmployee?.firstName} {selectedEmployee?.lastName}
             </DialogDescription>
           </DialogHeader>
           {selectedEmployee && (

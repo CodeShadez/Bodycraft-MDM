@@ -371,7 +371,7 @@ export default function AssignmentsPage() {
               <DialogHeader>
                 <DialogTitle>Assign Asset to Employee</DialogTitle>
                 <DialogDescription>
-                  Create a new asset assignment with complete tracking
+                  Allocate enterprise resources to personnel with full accountability, condition tracking, and audit trail
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAssignAsset} className="space-y-4">
@@ -740,7 +740,7 @@ export default function AssignmentsPage() {
           <DialogHeader>
             <DialogTitle>Assignment Details</DialogTitle>
             <DialogDescription>
-              Complete assignment information with history
+              View assignment timeline, condition reports, backup records, and complete responsibility chain
             </DialogDescription>
           </DialogHeader>
           {selectedAssignment && (
@@ -835,7 +835,7 @@ export default function AssignmentsPage() {
           <DialogHeader>
             <DialogTitle>Return Asset</DialogTitle>
             <DialogDescription>
-              Record the return of {selectedAssignment?.assetId} from {getEmployeeInfo(selectedAssignment?.employeeId || 0)?.firstName} {getEmployeeInfo(selectedAssignment?.employeeId || 0)?.lastName}
+              Process asset return with condition assessment and closure documentation for {selectedAssignment?.assetId}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleReturnAsset} className="space-y-4">
@@ -894,7 +894,7 @@ export default function AssignmentsPage() {
           <DialogHeader>
             <DialogTitle>Transfer Asset</DialogTitle>
             <DialogDescription>
-              Transfer {selectedAssignment?.assetId} from {getEmployeeInfo(selectedAssignment?.employeeId || 0)?.firstName} {getEmployeeInfo(selectedAssignment?.employeeId || 0)?.lastName} to another employee
+              Reassign resource ownership with seamless handover documentation and continuous tracking for {selectedAssignment?.assetId}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleTransferAsset} className="space-y-4">

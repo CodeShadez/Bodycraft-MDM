@@ -324,7 +324,7 @@ export default function CCTVPage() {
               <DialogHeader>
                 <DialogTitle>Add CCTV System</DialogTitle>
                 <DialogDescription>
-                  Register a new surveillance system or component
+                  Configure new surveillance infrastructure with network settings, capacity details, and security parameters
                 </DialogDescription>
               </DialogHeader>
               <form className="space-y-4">
@@ -749,7 +749,7 @@ export default function CCTVPage() {
           <DialogHeader>
             <DialogTitle>CCTV System Details</DialogTitle>
             <DialogDescription>
-              Complete information about this surveillance system
+              View surveillance system specifications, network configuration, storage capacity, and operational status
             </DialogDescription>
           </DialogHeader>
           {selectedSystem && (

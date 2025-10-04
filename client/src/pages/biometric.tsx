@@ -382,7 +382,7 @@ export default function BiometricPage() {
               <DialogHeader>
                 <DialogTitle>Add Biometric System</DialogTitle>
                 <DialogDescription>
-                  Register a new biometric access control or attendance system
+                  Deploy new biometric authentication infrastructure with access controls and attendance integration
                 </DialogDescription>
               </DialogHeader>
               <form className="space-y-4">
@@ -802,7 +802,7 @@ export default function BiometricPage() {
           <DialogHeader>
             <DialogTitle>Biometric System Details</DialogTitle>
             <DialogDescription>
-              Complete information about this biometric access control system
+              View authentication system specifications, enrolled user count, access permissions, and synchronization status
             </DialogDescription>
           </DialogHeader>
           {selectedSystem && (

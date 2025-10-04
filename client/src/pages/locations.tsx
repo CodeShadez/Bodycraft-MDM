@@ -308,7 +308,7 @@ export default function LocationsPage() {
               <DialogHeader>
                 <DialogTitle>Create New Location</DialogTitle>
                 <DialogDescription>
-                  Register a new organizational site in the master data system
+                  Establish new outlet with geographic details, contact information, and operational parameters
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateLocation} className="space-y-4">
@@ -628,7 +628,7 @@ export default function LocationsPage() {
           <DialogHeader>
             <DialogTitle>Location Analytics - {selectedLocation?.outletName}</DialogTitle>
             <DialogDescription>
-              Comprehensive overview of assets, employees, and activities
+              Real-time performance metrics, resource allocation, and operational insights with detailed breakdowns
             </DialogDescription>
           </DialogHeader>
           {selectedLocation && (
@@ -755,7 +755,7 @@ export default function LocationsPage() {
           <DialogHeader>
             <DialogTitle>Edit Location</DialogTitle>
             <DialogDescription>
-              Update information for {selectedLocation?.outletName}
+              Modify outlet details, management contacts, and regional configuration for {selectedLocation?.outletName}
             </DialogDescription>
           </DialogHeader>
           {selectedLocation && (
