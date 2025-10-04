@@ -2,7 +2,6 @@ import { Building2, Users, Laptop, MapPin, BarChart3, Cable, Fingerprint, Calend
 import { Link, useLocation } from "wouter"
 import { apiRequest, queryClient } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 import {
   Sidebar,
@@ -108,8 +107,8 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar data-testid="sidebar-main" className="glass-card border-r-0">
-      <SidebarContent className="bg-transparent">
+    <Sidebar data-testid="sidebar-main" className="border-0 bg-transparent backdrop-blur-xl">
+      <SidebarContent className="bg-transparent backdrop-blur-xl">
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold flex items-center gap-2 text-white/90">
             <Building2 className="h-5 w-5 text-purple-400" />
@@ -163,11 +162,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem>
-                <div className="px-2 py-1.5 flex items-center gap-2">
-                  <ThemeToggle />
-                </div>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout} data-testid="button-logout">
                   <LogOut className="h-4 w-4" />

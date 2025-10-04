@@ -365,4 +365,72 @@
       animation: none;
     }
   }
+  
+  /* Enhanced Professional Sidebar Styling */
+  [data-testid="sidebar-main"] {
+    background: rgba(15, 23, 42, 0.4) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+  
+  /* Sidebar menu buttons */
+  [data-testid="sidebar-main"] button,
+  [data-testid="sidebar-main"] a {
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+  }
+  
+  [data-testid="sidebar-main"] button:hover,
+  [data-testid="sidebar-main"] a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 1);
+  }
+  
+  /* Active menu item */
+  [data-testid="sidebar-main"] [data-active="true"],
+  [data-testid="sidebar-main"] .bg-sidebar-accent {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2)) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    border-left: 3px solid var(--glass-purple);
+  }
+  
+  /* Sidebar group labels */
+  [data-testid="sidebar-main"] [class*="SidebarGroupLabel"] {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Sidebar icons */
+  [data-testid="sidebar-main"] svg {
+    color: rgba(168, 85, 247, 0.8);
+    transition: all 0.2s ease;
+  }
+  
+  [data-testid="sidebar-main"] button:hover svg,
+  [data-testid="sidebar-main"] a:hover svg {
+    color: var(--glass-purple);
+    transform: scale(1.1);
+  }
+  
+  /* Logout button special styling */
+  [data-testid="button-logout"] {
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.75rem !important;
+  }
+  
+  [data-testid="button-logout"]:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: rgba(248, 113, 113, 1) !important;
+  }
+  
+  [data-testid="button-logout"]:hover svg {
+    color: rgba(248, 113, 113, 1) !important;
+  }
 }
