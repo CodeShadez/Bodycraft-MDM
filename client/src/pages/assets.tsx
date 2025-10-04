@@ -1171,20 +1171,19 @@ export default function AssetsPage() {
       </Card>
 
       {/* Assets Table */}
-      <Card className="glass-card border-0">
-        <CardContent className="p-6">
-          <div className="rounded-lg border border-border/40 overflow-hidden bg-card">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-2 border-border/60">
-                  <TableHead className="font-semibold text-foreground h-12 px-6">Asset Details</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 px-6">Type</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 px-4">Status</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 px-4">Location</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 px-4">Assigned To</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 px-4">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+      <Card className="glass-card border-0 glass-card border-0">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Asset Details</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Assigned To</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
               <TableBody>
                 {filteredAssets && filteredAssets.length > 0 ? filteredAssets.flatMap((asset) => {
                   const isExpanded = expandedAssetId === asset.assetId
@@ -1428,7 +1427,6 @@ export default function AssetsPage() {
                 )}
               </TableBody>
             </Table>
-          </div>
         </CardContent>
       </Card>
 
