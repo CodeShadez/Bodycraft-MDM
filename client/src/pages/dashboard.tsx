@@ -251,7 +251,7 @@ export default function Dashboard() {
           data-testid="card-assigned-assets" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.1s" }}
-          onClick={() => setLocation("/assignments")}
+          onClick={() => setLocation("/assets?status=assigned")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/90">Asset Utilization</CardTitle>
@@ -259,8 +259,26 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white" data-testid="text-assigned-assets">{assignmentRate}%</div>
-            <p className="text-xs text-white/60">
-              {activeAssignments} assigned • {availableAssets} available
+            <p className="text-xs text-white/60 flex gap-2">
+              <span 
+                className="hover:text-white underline decoration-dotted cursor-pointer transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setLocation("/assets?status=assigned")
+                }}
+              >
+                {activeAssignments} assigned
+              </span>
+              •
+              <span 
+                className="hover:text-white underline decoration-dotted cursor-pointer transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setLocation("/assets?status=available")
+                }}
+              >
+                {availableAssets} available
+              </span>
             </p>
             <Progress value={assignmentRate} className="mt-2 bg-white/10" />
           </CardContent>
@@ -270,7 +288,7 @@ export default function Dashboard() {
           data-testid="card-maintenance-status" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.2s" }}
-          onClick={() => setLocation("/maintenance")}
+          onClick={() => setLocation("/assets?status=maintenance")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/90">Maintenance Activities</CardTitle>
