@@ -133,7 +133,7 @@ export default function LoginPage() {
             {/* Username Field with Floating Label */}
             <div className="relative">
               <div className="relative">
-                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40 z-10 transition-colors duration-300" />
+                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-300/60 z-10 transition-colors duration-300" />
                 <Input
                   id="username"
                   type="text"
@@ -143,17 +143,20 @@ export default function LoginPage() {
                   onFocus={() => setUsernameFocused(true)}
                   onBlur={() => setUsernameFocused(false)}
                   required
+                  autoComplete="username"
                   data-testid="input-username"
-                  className="glass-input pl-12 pr-4 py-6 w-full rounded-xl border border-white/30 bg-white/7 text-white placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300"
+                  className="glass-input pl-12 pr-4 py-6 w-full rounded-xl border border-white/30 bg-white/10 placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/40 transition-all duration-300"
                   style={{
                     backdropFilter: 'blur(10px)',
+                    color: '#e0e7ff',
+                    fontWeight: '500',
                   }}
                 />
                 <label
                   htmlFor="username"
                   className={`absolute left-12 transition-all duration-300 pointer-events-none ${
                     usernameFocused || credentials.username
-                      ? 'top-2 text-xs text-purple-300'
+                      ? 'top-2 text-xs text-purple-300 font-medium'
                       : 'top-1/2 -translate-y-1/2 text-sm text-white/60'
                   }`}
                 >
@@ -165,40 +168,40 @@ export default function LoginPage() {
             {/* Password Field with Floating Label */}
             <div className="relative">
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40 z-10 transition-colors duration-300" />
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-300/60 z-10 transition-colors duration-300" />
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type="password"
                   placeholder=" "
                   value={credentials.password}
                   onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   required
+                  autoComplete="current-password"
                   data-testid="input-password"
-                  className="glass-input pl-12 pr-12 py-6 w-full rounded-xl border border-white/30 bg-white/7 text-white placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300"
+                  className="glass-input pl-12 pr-12 py-6 w-full rounded-xl border border-white/30 bg-white/10 placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/40 transition-all duration-300"
                   style={{
                     backdropFilter: 'blur(10px)',
+                    color: '#e0e7ff',
+                    fontWeight: '500',
+                    letterSpacing: '0.1em',
                   }}
                 />
                 <label
                   htmlFor="password"
                   className={`absolute left-12 transition-all duration-300 pointer-events-none ${
                     passwordFocused || credentials.password
-                      ? 'top-2 text-xs text-purple-300'
+                      ? 'top-2 text-xs text-purple-300 font-medium'
                       : 'top-1/2 -translate-y-1/2 text-sm text-white/60'
                   }`}
                 >
                   Password
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors duration-300 z-10"
-                  data-testid="button-toggle-password"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-1 text-purple-300/40 text-xs z-10 pointer-events-none">
+                  <Lock className="h-3 w-3" />
+                  <span className="font-light">Encrypted</span>
+                </div>
               </div>
             </div>
 
@@ -364,7 +367,15 @@ export default function LoginPage() {
         }
         
         .glass-input:focus {
-          background: rgba(255, 255, 255, 0.1) !important;
+          background: rgba(255, 255, 255, 0.15) !important;
+        }
+        
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #e0e7ff !important;
+          -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset !important;
+          transition: background-color 5000s ease-in-out 0s;
         }
       `}</style>
     </div>
