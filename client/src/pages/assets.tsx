@@ -978,7 +978,8 @@ export default function AssetsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-2 border-border/60">
-                  <TableHead className="font-semibold text-foreground h-12 px-6">Asset</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 px-6">Type</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 px-6">Asset Details</TableHead>
                   <TableHead className="font-semibold text-foreground h-12 px-4">Status</TableHead>
                   <TableHead className="font-semibold text-foreground h-12 px-4">Location</TableHead>
                   <TableHead className="font-semibold text-foreground h-12 px-4">Assigned To</TableHead>
@@ -995,26 +996,30 @@ export default function AssetsPage() {
                         className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
                         data-testid={`row-asset-${asset.assetId}`}
                       >
-                        {/* Asset Information */}
+                        {/* Asset Type */}
                         <TableCell className="py-4 px-6">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
                             <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
                               {getAssetIcon(asset.assetType)}
                             </div>
+                            <span className="text-sm font-medium" data-testid={`badge-type-${asset.assetId}`}>
+                              {asset.assetType}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        {/* Asset Details */}
+                        <TableCell className="py-4 px-6">
+                          <div className="flex items-center justify-between">
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-semibold text-sm text-foreground" data-testid={`text-asset-id-${asset.assetId}`}>
-                                  {asset.assetId}
-                                </span>
-                                <Badge variant="outline" className="text-xs px-1.5 py-0" data-testid={`badge-type-${asset.assetId}`}>
-                                  {asset.assetType}
-                                </Badge>
+                              <div className="font-semibold text-sm text-foreground mb-1" data-testid={`text-asset-id-${asset.assetId}`}>
+                                {asset.assetId}
                               </div>
                               <p className="text-sm text-muted-foreground truncate">
                                 {asset.brand} {asset.modelName}
                               </p>
                             </div>
-                            <div className="ml-2 text-muted-foreground">
+                            <div className="ml-3 text-muted-foreground flex-shrink-0">
                               {isExpanded ? (
                                 <ChevronUp className="h-4 w-4" />
                               ) : (
@@ -1060,7 +1065,7 @@ export default function AssetsPage() {
                       {/* Expanded Details Row */}
                       {isExpanded && (
                         <TableRow className="bg-muted/10 border-b-2 border-border/50">
-                          <TableCell colSpan={4} className="p-0">
+                          <TableCell colSpan={5} className="p-0">
                             <div className="p-8 space-y-6">
                               {/* Complete Details Header */}
                               <div className="flex items-center gap-3 pb-4 border-b border-border/50">
