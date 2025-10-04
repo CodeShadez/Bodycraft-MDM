@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, User, AlertCircle, Eye, EyeOff, Zap } from "lucide-react";
 import bodycraftLogo from "@assets/620d58b4-6963-4ba5-a394-d3defdf84884_1759583383267.png";
 
 export default function LoginPage() {
@@ -17,6 +17,9 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [usernameFocused, setUsernameFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +39,6 @@ export default function LoginPage() {
         const data = await response.json();
         console.log("Login successful:", data);
         
-        // Redirect to dashboard (session is stored server-side in cookies)
         window.location.href = "/";
       } else {
         const errorData = await response.json();
@@ -55,126 +57,299 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 px-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen flex items-center justify-center overflow-hidden relative px-4">
+      {/* Animated Gradient Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#6366f1] animate-gradient-shift"></div>
+      
+      {/* Animated Background Shapes */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-float-slower"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+      </div>
+
+      <div className="w-full max-w-md space-y-8 relative z-10">
         {/* BODYCRAFT Branding */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center mb-4">
+        <div className="text-center space-y-6 animate-fade-in">
+          <div className="flex items-center justify-center mb-6 transform hover:scale-105 transition-transform duration-300">
             <img 
               src={bodycraftLogo} 
               alt="BODYCRAFT Logo" 
-              className="h-20 w-auto"
+              className="h-24 w-auto drop-shadow-2xl"
             />
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Master Data Management</p>
+          <div className="space-y-2">
+            <h2 className="text-white/90 text-lg font-light tracking-wide">Master Data Management</h2>
+            <p className="text-white/60 text-sm font-light">
+              Sign in to access your Master Data Management
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            Sign in to access your Master Data Management
-          </p>
         </div>
 
-        {/* Login Form */}
-        <Card className="shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
-              <Lock className="h-5 w-5" />
-              Sign In
-            </CardTitle>
-            <CardDescription className="text-center">
-              Enter your credentials to access the BODYCRAFT MDM system
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="Enter your username"
-                    value={credentials.username}
-                    onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                    className="pl-10"
-                    required
-                  />
-                </div>
+        {/* Glassmorphism Login Card */}
+        <div 
+          className="glass-card rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/10 animate-slide-up"
+          style={{
+            background: 'rgba(255, 255, 255, 0.13)',
+            boxShadow: '0 0 40px rgba(8, 7, 16, 0.6)',
+          }}
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl">
+                <Lock className="h-6 w-6 text-white" />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={credentials.password}
-                    onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                    className="pl-10 pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90"
-                disabled={loading}
-              >
-                {loading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
-
-            {/* Quick Login Section */}
-            <div className="mt-6 space-y-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Quick Login</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSuperAdminLogin}
-                className="w-full"
-                data-testid="button-superadmin-login"
-              >
-                Use Super Admin Credentials
-              </Button>
-              
-              <p className="text-xs text-center text-muted-foreground">
-                Username: admin | Password: admin123
-              </p>
+              <h1 className="text-3xl font-light text-white">Sign In</h1>
             </div>
-          </CardContent>
-        </Card>
+            <p className="text-white/60 text-sm font-light mt-2">
+              Enter your credentials to access the BODYCRAFT MDM system
+            </p>
+          </div>
 
-        {/* System Info */}
-        <div className="text-center text-xs text-muted-foreground space-y-1">
+          <form onSubmit={handleLogin} className="space-y-6">
+            {error && (
+              <Alert variant="destructive" className="bg-red-500/20 border-red-500/50 backdrop-blur-sm animate-shake">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-white">{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Username Field with Floating Label */}
+            <div className="relative">
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40 z-10 transition-colors duration-300" />
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder=" "
+                  value={credentials.username}
+                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  onFocus={() => setUsernameFocused(true)}
+                  onBlur={() => setUsernameFocused(false)}
+                  required
+                  data-testid="input-username"
+                  className="glass-input pl-12 pr-4 py-6 w-full rounded-xl border border-white/30 bg-white/7 text-white placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300"
+                  style={{
+                    backdropFilter: 'blur(10px)',
+                  }}
+                />
+                <label
+                  htmlFor="username"
+                  className={`absolute left-12 transition-all duration-300 pointer-events-none ${
+                    usernameFocused || credentials.username
+                      ? 'top-2 text-xs text-purple-300'
+                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60'
+                  }`}
+                >
+                  Username
+                </label>
+              </div>
+            </div>
+
+            {/* Password Field with Floating Label */}
+            <div className="relative">
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40 z-10 transition-colors duration-300" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder=" "
+                  value={credentials.password}
+                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
+                  required
+                  data-testid="input-password"
+                  className="glass-input pl-12 pr-12 py-6 w-full rounded-xl border border-white/30 bg-white/7 text-white placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300"
+                  style={{
+                    backdropFilter: 'blur(10px)',
+                  }}
+                />
+                <label
+                  htmlFor="password"
+                  className={`absolute left-12 transition-all duration-300 pointer-events-none ${
+                    passwordFocused || credentials.password
+                      ? 'top-2 text-xs text-purple-300'
+                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60'
+                  }`}
+                >
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors duration-300 z-10"
+                  data-testid="button-toggle-password"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me Toggle */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div 
+                  className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                    rememberMe ? 'bg-gradient-to-r from-purple-500 to-blue-500' : 'bg-white/20'
+                  }`}
+                  onClick={() => setRememberMe(!rememberMe)}
+                >
+                  <div 
+                    className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
+                      rememberMe ? 'transform translate-x-6' : ''
+                    }`}
+                  ></div>
+                </div>
+                <span className="text-white/70 text-sm font-light group-hover:text-white/90 transition-colors duration-300">
+                  Remember me
+                </span>
+              </label>
+              <a 
+                href="#" 
+                className="text-purple-300 text-sm font-light hover:text-purple-200 transition-colors duration-300"
+              >
+                Forgot password?
+              </a>
+            </div>
+
+            {/* Sign In Button */}
+            <Button
+              type="submit"
+              disabled={loading}
+              data-testid="button-signin"
+              className="w-full py-6 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-medium text-lg shadow-lg hover:shadow-purple-500/50 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Signing in...</span>
+                </div>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="px-4 text-white/50 bg-transparent font-light tracking-wider">
+                  Quick Login
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Admin Login Button */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSuperAdminLogin}
+              data-testid="button-superadmin-login"
+              className="w-full py-6 rounded-xl border-2 border-white/20 bg-white/5 hover:bg-white/10 text-white font-light backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300"
+            >
+              <Zap className="h-5 w-5 mr-2" />
+              Use Super Admin Credentials
+            </Button>
+
+            <p className="text-center text-white/40 text-xs font-light mt-4">
+              Username: <span className="text-purple-300">admin</span> | Password: <span className="text-purple-300">admin123</span>
+            </p>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center text-white/40 text-xs font-light animate-fade-in-delay">
           <p>BODYCRAFT Master Data Management</p>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-green-400/80">System Secure</span>
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-20px) translateX(20px); }
+        }
+        
+        @keyframes float-slower {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(20px) translateX(-20px); }
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.1); }
+        }
+        
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fade-in-delay {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        
+        .animate-gradient-shift {
+          background-size: 200% 200%;
+          animation: gradient-shift 15s ease infinite;
+        }
+        
+        .animate-float-slow {
+          animation: float-slow 8s ease-in-out infinite;
+        }
+        
+        .animate-float-slower {
+          animation: float-slower 10s ease-in-out infinite;
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 6s ease-in-out infinite;
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out;
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.8s ease-out;
+        }
+        
+        .animate-fade-in-delay {
+          animation: fade-in-delay 1s ease-out 0.5s both;
+        }
+        
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
+        }
+        
+        .glass-input:focus {
+          background: rgba(255, 255, 255, 0.1) !important;
+        }
+      `}</style>
     </div>
   );
 }
