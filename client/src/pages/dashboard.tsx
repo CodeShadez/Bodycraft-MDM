@@ -378,27 +378,32 @@ export default function Dashboard() {
         <Card className="glass-card border-0">
           <CardHeader>
             <CardTitle className="text-lg text-white/90">Asset Distribution by Type</CardTitle>
+            <p className="text-xs text-white/50 mt-1">Equipment categorization across inventory</p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {Object.entries(assetTypeDistribution)
               .sort(([,a], [,b]) => (b as number) - (a as number))
-              .map(([type, count]) => (
-                <div key={type} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-purple-400 rounded"></div>
-                    <span className="text-sm capitalize text-white/80">{type}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 bg-white/10 rounded-full h-2">
-                      <div 
-                        className="bg-purple-400 h-2 rounded-full" 
-                        style={{width: `${totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0}%`}}
-                      ></div>
+              .map(([type, count], index) => {
+                const typeColors = ['bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-teal-500', 'bg-green-500', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500']
+                const colorClass = typeColors[index % typeColors.length]
+                const percentage = totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0
+                
+                return (
+                  <div key={type} className="group hover:bg-white/5 p-2 rounded-lg transition-all">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 ${colorClass} rounded-lg flex items-center justify-center`}>
+                          <span className="text-white font-bold text-xs">{(count as number)}</span>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium capitalize text-white">{type}</span>
+                          <div className="text-xs text-white/50">{percentage.toFixed(1)}% of total</div>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-sm font-medium w-8 text-right text-white">{count as number}</span>
                   </div>
-                </div>
-              ))}
+                )
+              })}
           </CardContent>
         </Card>
 
@@ -406,62 +411,79 @@ export default function Dashboard() {
         <Card className="glass-card border-0">
           <CardHeader>
             <CardTitle className="text-lg text-white/90">Asset Status Overview</CardTitle>
+            <p className="text-xs text-white/50 mt-1">Operational state and availability metrics</p>
           </CardHeader>
           <CardContent className="space-y-4">
             {Object.entries(assetStatusDistribution).map(([status, count]) => {
               const percentage = totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0
-              const statusColors = {
-                assigned: "bg-blue-400",
-                available: "bg-green-400", 
-                maintenance: "bg-yellow-400",
-                retired: "bg-red-400"
+              const statusConfig = {
+                assigned: { color: "bg-blue-400", icon: "🔵", label: "In Use" },
+                available: { color: "bg-green-400", icon: "✅", label: "Ready to Deploy" }, 
+                maintenance: { color: "bg-yellow-400", icon: "⚠️", label: "Under Service" },
+                retired: { color: "bg-red-400", icon: "⛔", label: "End of Life" }
               }
-              const statusColor = statusColors[status as keyof typeof statusColors] || "bg-gray-400"
+              const config = statusConfig[status as keyof typeof statusConfig] || { color: "bg-gray-400", icon: "⚪", label: status }
               
               return (
-                <div key={status} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`${statusColor} text-white border-0 text-xs`}>
-                      {count as number}
-                    </Badge>
-                    <span className="text-sm capitalize text-white/80">{status}</span>
+                <div key={status} className="relative">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{config.icon}</span>
+                      <div>
+                        <div className="text-sm font-medium text-white capitalize">{config.label}</div>
+                        <div className="text-xs text-white/50">{count as number} assets</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-white">{percentage.toFixed(0)}%</div>
+                    </div>
                   </div>
-                  <span className="text-sm text-white/60">
-                    {percentage.toFixed(1)}%
-                  </span>
+                  <div className="w-full bg-white/10 rounded-full h-1.5">
+                    <div 
+                      className={`${config.color} h-1.5 rounded-full transition-all duration-500`}
+                      style={{width: `${percentage}%`}}
+                    ></div>
+                  </div>
                 </div>
               )
             })}
           </CardContent>
         </Card>
 
-        {/* Employee Distribution */}
+        {/* Resource Allocation */}
         <Card className="glass-card border-0">
           <CardHeader>
             <CardTitle className="text-lg text-white/90">Resource Allocation</CardTitle>
+            <p className="text-xs text-white/50 mt-1">Workforce and equipment deployment analysis</p>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/10">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-blue-400" />
-                  <span className="text-sm text-white/80">Total Personnel</span>
-                </div>
-                <span className="text-sm font-medium text-white">{totalEmployees}</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-xl border border-blue-400/20">
+                <Users className="h-6 w-6 text-blue-400 mb-2" />
+                <div className="text-2xl font-bold text-white">{totalEmployees}</div>
+                <div className="text-xs text-white/70">Total Workforce</div>
+                <div className="text-xs text-blue-300 mt-1">Active personnel</div>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/10">
-                <div className="flex items-center gap-2">
-                  <Laptop className="h-4 w-4 text-purple-400" />
-                  <span className="text-sm text-white/80">Assets Deployed</span>
-                </div>
-                <span className="text-sm font-medium text-white">{activeAssignments}</span>
+              <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-xl border border-purple-400/20">
+                <Laptop className="h-6 w-6 text-purple-400 mb-2" />
+                <div className="text-2xl font-bold text-white">{activeAssignments}</div>
+                <div className="text-xs text-white/70">Deployed Assets</div>
+                <div className="text-xs text-purple-300 mt-1">{((activeAssignments / totalAssets) * 100).toFixed(0)}% utilization</div>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/10">
-                <div className="flex items-center gap-2">
-                  <Database className="h-4 w-4 text-green-400" />
-                  <span className="text-sm text-white/80">Available Inventory</span>
+            </div>
+            <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-xl border border-green-400/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Database className="h-6 w-6 text-green-400" />
+                  <div>
+                    <div className="text-xl font-bold text-white">{availableAssets}</div>
+                    <div className="text-xs text-white/70">Available for Assignment</div>
+                  </div>
                 </div>
-                <span className="text-sm font-medium text-white">{availableAssets}</span>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-green-300">{((availableAssets / totalAssets) * 100).toFixed(0)}%</div>
+                  <div className="text-xs text-white/50">Ready</div>
+                </div>
               </div>
             </div>
           </CardContent>
