@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Lock, User, AlertCircle, Eye, EyeOff, Zap, Flame } from "lucide-react";
+import { Lock, User, AlertCircle, Eye, EyeOff, Zap } from "lucide-react";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -70,70 +70,32 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* BODYCRAFT Branding */}
         <div className="text-center mb-10 animate-fade-in">
-          {/* Modern Logo Design */}
-          <div className="flex flex-col items-center justify-center transform hover:scale-105 transition-transform duration-500">
-            {/* Glass Logo Container */}
-            <div 
-              className="relative p-6 rounded-3xl backdrop-blur-xl border border-white/20 mb-5"
-              style={{
-                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
-                boxShadow: '0 8px 32px rgba(99, 102, 241, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              {/* Animated Flame Icon */}
-              <div className="relative">
-                <Flame className="h-14 w-14 text-transparent bg-clip-text" 
-                  style={{
-                    filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.8))',
-                  }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Flame className="h-14 w-14 animate-pulse-slow" 
-                    style={{
-                      fill: 'url(#flame-gradient)',
-                      stroke: 'url(#flame-gradient)',
-                      strokeWidth: '1',
-                    }}
-                  />
-                </div>
-                {/* SVG Gradient Definition */}
-                <svg width="0" height="0" className="absolute">
-                  <defs>
-                    <linearGradient id="flame-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#a855f7', stopOpacity: 1 }} />
-                      <stop offset="50%" style={{ stopColor: '#ec4899', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
-            
+          <div className="flex flex-col items-center justify-center space-y-4">
             {/* Brand Name with Gradient */}
             <h1 
-              className="text-4xl font-bold mb-3 tracking-tight"
+              className="text-5xl font-bold tracking-tight transform hover:scale-105 transition-transform duration-500"
               style={{
                 background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #3b82f6 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                textShadow: '0 0 40px rgba(168, 85, 247, 0.3)',
+                filter: 'drop-shadow(0 0 30px rgba(168, 85, 247, 0.4))',
               }}
             >
               BODYCRAFT
             </h1>
             
-            {/* Tagline */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-px w-6 bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
-              <p className="text-purple-300/80 text-[10px] font-light tracking-[0.25em] uppercase">
+            {/* Tagline with Dividers */}
+            <div className="flex items-center gap-3">
+              <div className="h-px w-8 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent"></div>
+              <p className="text-purple-300/90 text-xs font-light tracking-[0.3em] uppercase">
                 Salon · Skin · Clinic · Spa
               </p>
-              <div className="h-px w-6 bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
+              <div className="h-px w-8 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent"></div>
             </div>
 
             {/* Subtitle */}
-            <p className="text-white/70 text-base font-light">
+            <p className="text-white/70 text-base font-light mt-2">
               Master Data Management System
             </p>
           </div>
