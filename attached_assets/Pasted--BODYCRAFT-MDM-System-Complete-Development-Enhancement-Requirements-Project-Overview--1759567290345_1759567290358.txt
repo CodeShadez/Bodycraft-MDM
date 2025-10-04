@@ -1,0 +1,344 @@
+# BODYCRAFT MDM System - Complete Development & Enhancement Requirements
+
+## Project Overview
+
+**Project Name**: BODYCRAFT Master Data Management (MDM) System  
+**Environment**: Replit  
+**Technology Stack**: React 18 + TypeScript + Vite (Frontend), Express.js + TypeScript (Backend), PostgreSQL with Drizzle ORM (Database)  
+**Scope**: IT Asset Management System for 32 retail locations across India  
+**Priority**: Critical - Production Ready System Required Immediately
+
+---
+
+## Current System Status
+
+### ✅ What's Working
+- Basic application infrastructure running on port 5000
+- PostgreSQL database connected and operational
+- User authentication system active
+- Frontend UI loading correctly with modern design
+- Session management implemented
+- Basic CRUD operations functional
+
+### ⚠️ Critical Issues Requiring Immediate Fix
+- Dashboard cards display data but are non-interactive
+- Asset creation form showing validation errors
+- Excel import/export functionality completely broken
+- 31 TypeScript warnings causing system instability
+- Sample/test data needs complete removal
+- Role-based access control not implemented
+- No approval workflows in place
+- External system integrations missing
+
+---
+
+## Priority 1: Critical Bug Fixes
+
+### Dashboard Functionality Restoration
+**Issue**: Dashboard cards show static information but lack interactivity  
+**Requirements**:
+- Make all dashboard sections clickable with proper navigation
+- Implement detailed view pages for each dashboard component
+- Ensure data flows correctly from database to UI components
+- Add loading states and error handling for all dashboard sections
+
+**Dashboard Sections Requiring Fix**:
+- Total Assets → Navigate to asset management with filtering
+- Asset Utilization → Display utilization metrics and charts
+- Maintenance → Show maintenance schedule and pending tasks
+- System Health → Real-time status monitoring dashboard
+- CCTV System → Integration status and camera monitoring
+- Biometric System → Device status and attendance summary
+- Financial Overview → Cost analysis and budget tracking
+- Assets by Location → Location-specific asset breakdown
+- Recent Activities → Detailed activity logs with timestamps
+- Asset Condition → Condition analysis with visual charts
+
+### Asset Management System Repair
+**Issue**: Asset creation form produces errors and fails to save data  
+**Requirements**:
+- Debug and fix form validation logic
+- Ensure proper database insertion for new assets
+- Fix data type mismatches causing save failures
+- Implement proper error handling and user feedback
+- Add form field validation with real-time feedback
+
+### Excel Import/Export System Implementation
+**Issue**: Bulk data operations completely non-functional  
+**Requirements**:
+- Implement working Excel file import with data validation
+- Create Excel export functionality for all data entities
+- Support both .xlsx and .csv file formats
+- Add data templates for download
+- Implement proper error handling for malformed files
+- Add progress indicators for large file operations
+
+### TypeScript Error Resolution
+**Issue**: 31 TypeScript diagnostics causing system instability  
+**Files Requiring Fixes**:
+- `shared/schema.ts` (11 warnings - Drizzle-Zod schema refinements)
+- `server/database-storage.ts` (6 warnings - Drizzle ORM type inference)
+- `server/routes.ts` (3 warnings - session type definitions)
+- `server/storage.ts` (1 warning - interface implementation)
+- `server/seed.ts` (10 warnings - data insertion types)
+
+**Requirements**:
+- Resolve all type compatibility warnings
+- Ensure strict TypeScript compliance
+- Maintain code quality and type safety
+- Update all interface definitions and type declarations
+
+---
+
+## Priority 2: Role-Based Access Control Implementation
+
+### User Hierarchy Definition
+**Super Administrator**:
+- Complete system access and configuration
+- Backup management and system settings
+- User creation and deletion (all levels)
+- Database management and maintenance
+- System security configuration
+
+**Administrator**:
+- Asset management (create, edit, delete)
+- Location user management
+- Approval workflow management
+- Report generation and data export
+- Location and maintenance management
+- Inventory oversight
+
+**Location Users** (32 unique locations):
+- View location-specific assets only
+- Report asset issues and problems
+- Request new asset assignments
+- Update limited asset status information
+- Access location-specific reports
+
+### Authentication & Authorization System
+**Requirements**:
+- Implement secure login system with session management
+- Create location-specific user credentials (32 unique sets)
+- Enforce role-based permissions throughout application
+- Add session timeout and security measures
+- Implement proper logout and session cleanup
+
+---
+
+## Priority 3: Approval Workflow System
+
+### Asset Request Workflow
+**Process Flow**:
+1. Location user submits new asset request
+2. System sends notification to administrator
+3. Administrator reviews request details
+4. Administrator approves or rejects with comments
+5. Database updates with decision and timestamp
+6. User receives notification of decision
+7. If approved, asset gets assigned to location
+
+### Issue Reporting Workflow
+**Process Flow**:
+1. Location user reports asset problem/malfunction
+2. System logs issue with timestamp and details
+3. Administrator receives immediate notification
+4. Administrator investigates and updates status
+5. Administrator approves repair/replacement action
+6. Asset status automatically updates in database
+7. User receives status update notification
+
+### Workflow Requirements
+**Technical Implementation**:
+- Create approval queue dashboard for administrators
+- Implement notification system (email and in-app)
+- Add status tracking for all requests
+- Maintain complete audit trail and history logs
+- Add escalation procedures for urgent requests
+
+---
+
+## Priority 4: External System Integrations
+
+### Hikvision CCTV Integration
+**Purpose**: Real-time camera monitoring and status display  
+**Requirements**:
+- Connect to Hikvision portal API (credentials to be provided)
+- Display camera online/offline status in dashboard
+- Show recording status and storage capacity
+- Implement failure alerts and monitoring
+- Add camera health metrics to system dashboard
+- Ensure secure API communication with proper authentication
+
+### NAS Server Backup System
+**Purpose**: Automated daily data backup and disaster recovery  
+**Requirements**:
+- Schedule automated daily backups at 2:00 AM IST
+- Connect to company NAS server (credentials to be provided)
+- Create dedicated MDM folder structure on NAS
+- Backup all database content, files, and system logs
+- Implement 30-day backup retention policy
+- Add backup status monitoring and failure alerts
+- Include backup verification and integrity checks
+
+---
+
+## Priority 5: Advanced Features & Enhancements
+
+### Notification System Implementation
+**Requirements**:
+- Real-time in-app notifications for all users
+- Email notifications for critical events
+- Notification history and read status tracking
+- Customizable notification preferences
+- Mobile-friendly notification display
+
+### Data Management & Reporting
+**Requirements**:
+- Advanced reporting with custom filters
+- Scheduled report generation
+- Data visualization with charts and graphs
+- Audit trail reporting for compliance
+- Performance metrics and analytics
+
+### Mobile Optimization
+**Requirements**:
+- Fully responsive design for all screen sizes
+- Touch-friendly interface elements
+- Mobile-optimized forms and navigation
+- Offline capability for critical functions
+- Fast loading on mobile networks
+
+---
+
+## Technical Implementation Guidelines
+
+### Database Requirements
+- Remove all sample/seed data completely
+- Prepare schema for production data import
+- Implement proper indexing for performance
+- Add data validation constraints
+- Set up automated database maintenance
+
+### Security Requirements
+- Implement proper authentication mechanisms
+- Add data encryption for sensitive information
+- Secure all API endpoints with proper authorization
+- Implement input validation and sanitization
+- Add rate limiting and brute force protection
+
+### Performance Requirements
+- Optimize database queries for large datasets
+- Implement caching strategies for frequently accessed data
+- Add loading states for all asynchronous operations
+- Ensure sub-3-second page load times
+- Support concurrent users across 32 locations
+
+### Code Quality Requirements
+- Resolve all TypeScript warnings and errors
+- Implement comprehensive error handling
+- Add proper logging throughout the application
+- Follow consistent coding standards
+- Include inline documentation for complex logic
+
+---
+
+## Environment Configuration
+
+### Required Environment Variables
+```
+# Hikvision Integration
+HIKVISION_API_URL=
+HIKVISION_USERNAME=
+HIKVISION_PASSWORD=
+
+# NAS Backup Server
+NAS_SERVER_HOST=
+NAS_USERNAME=
+NAS_PASSWORD=
+NAS_BACKUP_PATH=
+
+# Email Notifications
+SMTP_SERVER=
+SMTP_PORT=
+SMTP_USERNAME=
+SMTP_PASSWORD=
+
+# Database
+DATABASE_URL=
+```
+
+### Replit Configuration
+- Ensure proper port 5000 configuration
+- Set up webview output correctly
+- Configure automatic deployment
+- Set up proper environment variable management
+
+---
+
+## Testing & Quality Assurance
+
+### Functional Testing Requirements
+- Test all dashboard interactions and navigation
+- Verify role-based access restrictions work correctly
+- Test approval workflows end-to-end
+- Validate Excel import/export with real data
+- Test external system integrations thoroughly
+- Verify notification system functionality
+- Test mobile responsiveness across devices
+
+### Data Integrity Testing
+- Test with actual BODYCRAFT production data
+- Validate data consistency after imports
+- Test backup and recovery procedures
+- Verify data security and access controls
+
+### Performance Testing
+- Load testing with multiple concurrent users
+- Database performance with large datasets
+- Network latency testing across locations
+- Mobile performance optimization verification
+
+---
+
+## Success Criteria & Deliverables
+
+### System Must Achieve
+- ✅ All dashboard cards fully interactive and functional
+- ✅ Asset creation working without any errors
+- ✅ Excel import/export fully operational
+- ✅ All TypeScript errors completely resolved
+- ✅ Role-based access control properly implemented
+- ✅ Approval workflows fully operational
+- ✅ Hikvision integration showing real camera status
+- ✅ NAS backup system running automatically daily
+- ✅ Notification system working across all user types
+- ✅ Location users restricted to their own data only
+- ✅ Mobile responsiveness working on all devices
+- ✅ System ready for immediate production deployment
+
+### Final Deliverable
+A completely functional, production-ready BODYCRAFT MDM System capable of managing IT assets across 32 retail locations with:
+- Zero system errors or warnings
+- All features tested and operational
+- Complete documentation and user guides
+- Automated backup and monitoring systems
+- Secure, role-based access control
+- Real-time external system integration
+- Mobile-optimized user interface
+
+---
+
+## Timeline & Priority
+
+**Phase 1** (Immediate): Fix critical bugs and errors  
+**Phase 2** (High Priority): Implement role-based access and workflows  
+**Phase 3** (Medium Priority): Add external integrations  
+**Phase 4** (Enhancement): Advanced features and optimization
+
+**Overall Timeline**: Complete system must be production-ready immediately upon completion of all phases.
+
+**Contact Information**: Development team must maintain regular communication and provide daily progress updates until project completion.
+
+---
+
+*This document serves as the complete requirements specification for the BODYCRAFT MDM System enhancement project. All requirements must be implemented exactly as specified to ensure successful project delivery.*
