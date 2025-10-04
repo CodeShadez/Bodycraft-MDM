@@ -223,7 +223,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white" data-testid="title-dashboard">Dashboard</h1>
           <p className="text-white/70 mt-1">
-            Centralized Master Data Management platform for IT asset lifecycle monitoring, resource allocation, and operational analytics.
+            Centralized Master Data Management platform for enterprise resource lifecycle, workforce allocation, and operational intelligence.
           </p>
         </div>
       </div>

@@ -129,7 +129,7 @@ export default function LocationsPage() {
   })
 
   // Get unique states for filter
-  const states = [...new Set(locations?.map(loc => loc.state) || [])]
+  const states = Array.from(new Set(locations?.map(loc => loc.state) || []))
 
   // Filter locations
   const filteredLocations = locations?.filter(location => {
@@ -285,7 +285,7 @@ export default function LocationsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">Locations</h1>
           <p className="text-white/70">
-            Manage BODYCRAFT outlets across India with location-specific analytics
+            Organizational site management with regional analytics and performance metrics
           </p>
         </div>
         <div className="flex gap-2">
@@ -308,7 +308,7 @@ export default function LocationsPage() {
               <DialogHeader>
                 <DialogTitle>Create New Location</DialogTitle>
                 <DialogDescription>
-                  Add a new BODYCRAFT outlet location
+                  Register a new organizational site in the master data system
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateLocation} className="space-y-4">

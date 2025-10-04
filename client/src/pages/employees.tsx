@@ -136,7 +136,7 @@ export default function EmployeesPage() {
   })
 
   // Get unique departments for filter
-  const departments = [...new Set(employees?.map(emp => emp.department) || [])]
+  const departments = Array.from(new Set(employees?.map(emp => emp.department) || []))
 
   // Filter employees
   const filteredEmployees = employees?.filter(employee => {
@@ -293,7 +293,7 @@ export default function EmployeesPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">Employees</h1>
           <p className="text-white/70">
-            Manage BODYCRAFT staff across {locations?.length || 0} locations
+            Human resource management and organizational structure oversight
           </p>
         </div>
         <div className="flex gap-2">
@@ -316,7 +316,7 @@ export default function EmployeesPage() {
               <DialogHeader>
                 <DialogTitle>Create New Employee</DialogTitle>
                 <DialogDescription>
-                  Add a new employee to the BODYCRAFT workforce
+                  Register a new personnel record in the master data system
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateEmployee} className="space-y-4">
@@ -651,7 +651,7 @@ export default function EmployeesPage() {
                         {employeeAssets?.length > 0 ? (
                           employeeAssets.map((asset, index) => (
                             <Badge key={index} variant="secondary" className="text-xs">
-                              {asset.assetId}
+                              {asset?.assetId}
                             </Badge>
                           ))
                         ) : (
@@ -784,7 +784,7 @@ export default function EmployeesPage() {
                     <div className="flex flex-wrap gap-2">
                       {getEmployeeAssets(selectedEmployee.id).map((asset, index) => (
                         <Badge key={index} variant="secondary">
-                          {asset.assetId} ({asset.brand} {asset.modelName})
+                          {asset?.assetId} ({asset?.brand} {asset?.modelName})
                         </Badge>
                       ))}
                     </div>

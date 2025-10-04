@@ -172,7 +172,7 @@ export default function AssetsPage() {
   })
 
   // Get unique asset types for filter
-  const assetTypes = [...new Set(assets?.map(asset => asset.assetType) || [])]
+  const assetTypes = Array.from(new Set(assets?.map(asset => asset.assetType) || []))
 
   // Filter assets
   const filteredAssets = assets?.filter(asset => {
@@ -448,7 +448,7 @@ export default function AssetsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">Assets</h1>
           <p className="text-white/70">
-            Manage all BODYCRAFT IT assets across {locations?.length || 0} locations
+            Comprehensive inventory management and lifecycle tracking for enterprise resources
           </p>
         </div>
         <div className="flex gap-2">
@@ -544,7 +544,7 @@ export default function AssetsPage() {
               <DialogHeader>
                 <DialogTitle>Create New Asset</DialogTitle>
                 <DialogDescription>
-                  Add a new IT asset to the BODYCRAFT inventory
+                  Register a new inventory item in the master data repository
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateAsset} className="space-y-4">

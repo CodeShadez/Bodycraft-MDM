@@ -433,7 +433,7 @@ export default function ReportsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">Reports</h1>
           <p className="text-white/70">
-            Generate comprehensive reports and analytics for BODYCRAFT asset management
+            Generate comprehensive reports and analytics for enterprise master data management
           </p>
         </div>
         <div className="flex gap-2">
