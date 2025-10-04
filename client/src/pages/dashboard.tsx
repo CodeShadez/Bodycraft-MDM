@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useLocation } from "wouter"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -84,6 +85,8 @@ interface Location {
 }
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation()
+  
   // Fetch all data for dashboard statistics
   const { data: assets = [], isLoading: assetsLoading } = useQuery<Asset[]>({
     queryKey: ["/api/assets"],
@@ -239,7 +242,11 @@ export default function Dashboard() {
 
       {/* Enhanced Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card data-testid="card-total-assets">
+        <Card 
+          data-testid="card-total-assets" 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setLocation("/assets")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
             <Laptop className="h-4 w-4 text-muted-foreground" />
@@ -252,7 +259,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card data-testid="card-assigned-assets">
+        <Card 
+          data-testid="card-assigned-assets" 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setLocation("/assignments")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Asset Utilization</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -266,7 +277,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card data-testid="card-maintenance-status">
+        <Card 
+          data-testid="card-maintenance-status" 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setLocation("/maintenance")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
             <Wrench className="h-4 w-4 text-muted-foreground" />
@@ -279,7 +294,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card data-testid="card-system-health">
+        <Card 
+          data-testid="card-system-health" 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setLocation("/compliance")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">System Health</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
@@ -296,7 +315,11 @@ export default function Dashboard() {
 
       {/* Integration Systems Overview */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setLocation("/cctv")}
+          data-testid="card-cctv-systems"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">CCTV Systems</CardTitle>
             <Camera className="h-4 w-4 text-blue-500" />
@@ -314,7 +337,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setLocation("/biometric")}
+          data-testid="card-biometric-systems"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Biometric Systems</CardTitle>
             <Fingerprint className="h-4 w-4 text-purple-500" />
@@ -332,7 +359,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setLocation("/reports")}
+          data-testid="card-financial-overview"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Financial Overview</CardTitle>
             <DollarSign className="h-4 w-4 text-green-500" />
@@ -540,7 +571,12 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => setLocation("/assets")}
+              data-testid="button-add-asset"
+            >
               <Laptop className="h-5 w-5" />
               <div className="text-center">
                 <div className="font-medium">Add Asset</div>
@@ -548,7 +584,12 @@ export default function Dashboard() {
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => setLocation("/assignments")}
+              data-testid="button-assign-asset"
+            >
               <Users className="h-5 w-5" />
               <div className="text-center">
                 <div className="font-medium">Assign Asset</div>
@@ -556,7 +597,12 @@ export default function Dashboard() {
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => setLocation("/maintenance")}
+              data-testid="button-schedule-maintenance"
+            >
               <Wrench className="h-5 w-5" />
               <div className="text-center">
                 <div className="font-medium">Schedule Maintenance</div>
@@ -564,7 +610,12 @@ export default function Dashboard() {
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center gap-2"
+              onClick={() => setLocation("/reports")}
+              data-testid="button-view-reports"
+            >
               <Eye className="h-5 w-5" />
               <div className="text-center">
                 <div className="font-medium">View Reports</div>
