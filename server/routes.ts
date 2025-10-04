@@ -85,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/session", async (req, res) => {
     try {
-      if (!req.session.userId) {
+      if (!req.session.userId || !req.session.username) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -138,6 +138,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return data;
   };
 
+  // Helper to check if location_user can access a specific location
+  const canAccessLocation = (req: any, locationId: number | null) => {
+    // super_admin and admin can access all locations
+    if (req.session.role === 'super_admin' || req.session.role === 'admin') {
+      return true;
+    }
+    
+    // location_user can only access their own location
+    if (req.session.role === 'location_user') {
+      return locationId === req.session.locationId;
+    }
+    
+    return true; // Default allow for other roles
+  };
+
   // Assets routes - Protected with authentication
   app.get("/api/assets", requireAuth, async (req, res) => {
     try {
@@ -149,12 +164,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/assets/:id", async (req, res) => {
+  app.get("/api/assets/:id", requireAuth, async (req, res) => {
     try {
       const asset = await storage.getAsset(req.params.id);
       if (!asset) {
         return res.status(404).json({ error: "Asset not found" });
       }
+      
+      // Check location access
+      if (!canAccessLocation(req, asset.locationId)) {
+        return res.status(403).json({ error: "Access denied to this asset" });
+      }
+      
       res.json(asset);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch asset" });
@@ -174,13 +195,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/assets/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+  app.patch("/api/assets/:id", requireAuth, requireRole(['super_admin', 'admin', 'location_user']), async (req, res) => {
     try {
-      const validatedAsset = insertAssetSchema.partial().parse(req.body);
-      const asset = await storage.updateAsset(req.params.id, validatedAsset);
-      if (!asset) {
+      // First check if asset exists and user has access
+      const existingAsset = await storage.getAsset(req.params.id);
+      if (!existingAsset) {
         return res.status(404).json({ error: "Asset not found" });
       }
+      
+      if (!canAccessLocation(req, existingAsset.locationId)) {
+        return res.status(403).json({ error: "Access denied to this asset" });
+      }
+      
+      const validatedAsset = insertAssetSchema.partial().parse(req.body);
+      
+      // Prevent location_user from changing locationId
+      if (req.session.role === 'location_user' && validatedAsset.locationId && validatedAsset.locationId !== existingAsset.locationId) {
+        return res.status(403).json({ error: "Cannot transfer asset to another location" });
+      }
+      
+      const asset = await storage.updateAsset(req.params.id, validatedAsset);
       res.json(asset);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -206,25 +240,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/employees", requireAuth, async (req, res) => {
     try {
       const employees = await storage.getAllEmployees();
-      res.json(employees);
+      const filteredEmployees = filterByUserLocation(employees, req);
+      res.json(filteredEmployees);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch employees" });
     }
   });
 
-  app.get("/api/employees/:id", async (req, res) => {
+  app.get("/api/employees/:id", requireAuth, async (req, res) => {
     try {
       const employee = await storage.getEmployee(parseInt(req.params.id));
       if (!employee) {
         return res.status(404).json({ error: "Employee not found" });
       }
+      
+      if (!canAccessLocation(req, employee.locationId)) {
+        return res.status(403).json({ error: "Access denied to this employee" });
+      }
+      
       res.json(employee);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch employee" });
     }
   });
 
-  app.post("/api/employees", async (req, res) => {
+  app.post("/api/employees", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedEmployee = insertEmployeeSchema.parse(req.body);
       const employee = await storage.createEmployee(validatedEmployee);
@@ -237,13 +277,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/employees/:id", async (req, res) => {
+  app.patch("/api/employees/:id", requireAuth, requireRole(['super_admin', 'admin', 'location_user']), async (req, res) => {
     try {
-      const validatedEmployee = insertEmployeeSchema.partial().parse(req.body);
-      const employee = await storage.updateEmployee(parseInt(req.params.id), validatedEmployee);
-      if (!employee) {
+      const existingEmployee = await storage.getEmployee(parseInt(req.params.id));
+      if (!existingEmployee) {
         return res.status(404).json({ error: "Employee not found" });
       }
+      
+      if (!canAccessLocation(req, existingEmployee.locationId)) {
+        return res.status(403).json({ error: "Access denied to this employee" });
+      }
+      
+      const validatedEmployee = insertEmployeeSchema.partial().parse(req.body);
+      
+      // Prevent location_user from changing locationId
+      if (req.session.role === 'location_user' && validatedEmployee.locationId && validatedEmployee.locationId !== existingEmployee.locationId) {
+        return res.status(403).json({ error: "Cannot transfer employee to another location" });
+      }
+      
+      const employee = await storage.updateEmployee(parseInt(req.params.id), validatedEmployee);
       res.json(employee);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -253,7 +305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/employees/:id", async (req, res) => {
+  app.delete("/api/employees/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const success = await storage.deleteEmployee(parseInt(req.params.id));
       if (!success) {
@@ -275,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/locations", async (req, res) => {
+  app.post("/api/locations", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedLocation = insertLocationSchema.parse(req.body);
       const location = await storage.createLocation(validatedLocation);
@@ -288,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/locations/:id", async (req, res) => {
+  app.patch("/api/locations/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedLocation = insertLocationSchema.partial().parse(req.body);
       const location = await storage.updateLocation(parseInt(req.params.id), validatedLocation);
@@ -304,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/locations/:id", async (req, res) => {
+  app.delete("/api/locations/:id", requireAuth, requireRole(['super_admin']), async (req, res) => {
     try {
       const success = await storage.deleteLocation(parseInt(req.params.id));
       if (!success) {
@@ -322,15 +374,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const assetId = req.query.assetId as string;
       const employeeId = req.query.employeeId ? parseInt(req.query.employeeId as string) : undefined;
       const assignments = await storage.getAssignmentHistory(assetId, employeeId);
-      res.json(assignments);
+      
+      // Filter by location for location_user
+      const filteredAssignments = await Promise.all(
+        assignments.map(async (assignment) => {
+          const asset = await storage.getAsset(assignment.assetId);
+          return { assignment, asset };
+        })
+      );
+      
+      const accessibleAssignments = filteredAssignments
+        .filter(({ asset }) => canAccessLocation(req, asset?.locationId || null))
+        .map(({ assignment }) => assignment);
+      
+      res.json(accessibleAssignments);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch assignments" });
     }
   });
 
-  app.post("/api/assignments", async (req, res) => {
+  app.post("/api/assignments", requireAuth, requireRole(['super_admin', 'admin', 'location_user']), async (req, res) => {
     try {
       const validatedAssignment = insertAssetAssignmentHistorySchema.parse(req.body);
+      
+      // Check location access for location_user
+      const asset = await storage.getAsset(validatedAssignment.assetId);
+      if (!canAccessLocation(req, asset?.locationId || null)) {
+        return res.status(403).json({ error: "Access denied to assign this asset" });
+      }
+      
       const assignment = await storage.createAssignment(validatedAssignment);
       res.status(201).json(assignment);
     } catch (error) {
@@ -342,19 +414,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Maintenance routes
-  app.get("/api/maintenance", async (req, res) => {
+  app.get("/api/maintenance", requireAuth, async (req, res) => {
     try {
       const assetId = req.query.assetId as string;
       const maintenance = await storage.getMaintenanceRecords(assetId);
-      res.json(maintenance);
+      
+      // Filter by location for location_user
+      const filteredMaintenance = await Promise.all(
+        maintenance.map(async (record) => {
+          const asset = await storage.getAsset(record.assetId);
+          return { record, asset };
+        })
+      );
+      
+      const accessibleMaintenance = filteredMaintenance
+        .filter(({ asset }) => canAccessLocation(req, asset?.locationId || null))
+        .map(({ record }) => record);
+      
+      res.json(accessibleMaintenance);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch maintenance records" });
     }
   });
 
-  app.post("/api/maintenance", async (req, res) => {
+  app.post("/api/maintenance", requireAuth, requireRole(['super_admin', 'admin', 'location_user']), async (req, res) => {
     try {
       const validatedMaintenance = insertAssetMaintenanceSchema.parse(req.body);
+      
+      // Check location access for location_user
+      const asset = await storage.getAsset(validatedMaintenance.assetId);
+      if (!canAccessLocation(req, asset?.locationId || null)) {
+        return res.status(403).json({ error: "Access denied to this asset" });
+      }
+      
       const maintenance = await storage.createMaintenanceRecord(validatedMaintenance);
       res.status(201).json(maintenance);
     } catch (error) {
@@ -365,13 +457,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/maintenance/:id", async (req, res) => {
+  app.patch("/api/maintenance/:id", requireAuth, requireRole(['super_admin', 'admin', 'location_user']), async (req, res) => {
     try {
-      const validatedMaintenance = insertAssetMaintenanceSchema.partial().parse(req.body);
-      const maintenance = await storage.updateMaintenanceRecord(parseInt(req.params.id), validatedMaintenance);
-      if (!maintenance) {
+      // First get all maintenance records to find the one we want to update
+      const allMaintenance = await storage.getMaintenanceRecords();
+      const existing = allMaintenance.find(m => m.id === parseInt(req.params.id));
+      
+      if (!existing) {
         return res.status(404).json({ error: "Maintenance record not found" });
       }
+      
+      // Check location access BEFORE updating
+      const asset = await storage.getAsset(existing.assetId);
+      if (!canAccessLocation(req, asset?.locationId || null)) {
+        return res.status(403).json({ error: "Access denied to this maintenance record" });
+      }
+      
+      const validatedMaintenance = insertAssetMaintenanceSchema.partial().parse(req.body);
+      
+      // Prevent location_user from changing assetId (reassigning to different asset/location)
+      if (req.session.role === 'location_user' && validatedMaintenance.assetId && validatedMaintenance.assetId !== existing.assetId) {
+        return res.status(403).json({ error: "Cannot reassign maintenance record to a different asset" });
+      }
+      
+      const maintenance = await storage.updateMaintenanceRecord(parseInt(req.params.id), validatedMaintenance);
+      
       res.json(maintenance);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -381,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/maintenance/:id", async (req, res) => {
+  app.delete("/api/maintenance/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const success = await storage.deleteMaintenanceRecord(parseInt(req.params.id));
       if (!success) {
@@ -394,11 +504,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // CCTV Systems routes
-  app.get("/api/cctv", async (req, res) => {
+  app.get("/api/cctv", requireAuth, async (req, res) => {
     try {
       const systems = await storage.getAllCctvSystems();
-      // Mask sensitive data
-      const maskedSystems = systems.map(system => ({
+      
+      // Filter by location for location_user and mask sensitive data
+      const filteredSystems = filterByUserLocation(systems, req);
+      const maskedSystems = filteredSystems.map(system => ({
         ...system,
         passwordHash: system.passwordHash ? "********" : null
       }));
@@ -408,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cctv", async (req, res) => {
+  app.post("/api/cctv", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedSystem = insertCctvSystemSchema.parse(req.body);
       const system = await storage.createCctvSystem(validatedSystem);
@@ -426,13 +538,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/cctv/:id", async (req, res) => {
+  app.patch("/api/cctv/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
-      const validatedSystem = insertCctvSystemSchema.partial().parse(req.body);
-      const system = await storage.updateCctvSystem(parseInt(req.params.id), validatedSystem);
-      if (!system) {
+      // First get existing CCTV system
+      const allSystems = await storage.getAllCctvSystems();
+      const existing = allSystems.find(s => s.id === parseInt(req.params.id));
+      
+      if (!existing) {
         return res.status(404).json({ error: "CCTV system not found" });
       }
+      
+      // Check location access BEFORE updating
+      if (!canAccessLocation(req, existing.locationId)) {
+        return res.status(403).json({ error: "Access denied to this CCTV system" });
+      }
+      
+      const validatedSystem = insertCctvSystemSchema.partial().parse(req.body);
+      
+      // Prevent changing locationId if location_user (even though only admin can access this route, defense in depth)
+      if (req.session.role === 'location_user' && validatedSystem.locationId && validatedSystem.locationId !== existing.locationId) {
+        return res.status(403).json({ error: "Cannot transfer CCTV system to another location" });
+      }
+      
+      const system = await storage.updateCctvSystem(parseInt(req.params.id), validatedSystem);
+      
       // Mask sensitive data in response
       const maskedSystem = {
         ...system,
@@ -447,7 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cctv/:id", async (req, res) => {
+  app.delete("/api/cctv/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const success = await storage.deleteCctvSystem(parseInt(req.params.id));
       if (!success) {
@@ -460,16 +589,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Biometric Systems routes
-  app.get("/api/biometric", async (req, res) => {
+  app.get("/api/biometric", requireAuth, async (req, res) => {
     try {
       const systems = await storage.getAllBiometricSystems();
-      res.json(systems);
+      const filteredSystems = filterByUserLocation(systems, req);
+      res.json(filteredSystems);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch biometric systems" });
     }
   });
 
-  app.post("/api/biometric", async (req, res) => {
+  app.post("/api/biometric", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedSystem = insertBiometricSystemSchema.parse(req.body);
       const system = await storage.createBiometricSystem(validatedSystem);
@@ -482,7 +612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/biometric/:id", async (req, res) => {
+  app.patch("/api/biometric/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedSystem = insertBiometricSystemSchema.partial().parse(req.body);
       const system = await storage.updateBiometricSystem(parseInt(req.params.id), validatedSystem);
@@ -498,7 +628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/biometric/:id", async (req, res) => {
+  app.delete("/api/biometric/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const success = await storage.deleteBiometricSystem(parseInt(req.params.id));
       if (!success) {
@@ -511,19 +641,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Backup routes
-  app.get("/api/backups", async (req, res) => {
+  app.get("/api/backups", requireAuth, async (req, res) => {
     try {
       const assetId = req.query.assetId as string;
       const backups = await storage.getBackups(assetId);
-      res.json(backups);
+      
+      // Filter by location for location_user
+      const filteredBackups = await Promise.all(
+        backups.map(async (backup) => {
+          const asset = await storage.getAsset(backup.assetId);
+          return { backup, asset };
+        })
+      );
+      
+      const accessibleBackups = filteredBackups
+        .filter(({ asset }) => canAccessLocation(req, asset?.locationId || null))
+        .map(({ backup }) => backup);
+      
+      res.json(accessibleBackups);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch backups" });
     }
   });
 
-  app.post("/api/backups", async (req, res) => {
+  app.post("/api/backups", requireAuth, requireRole(['super_admin', 'admin', 'location_user']), async (req, res) => {
     try {
       const validatedBackup = insertBackupSchema.parse(req.body);
+      
+      // Check location access for location_user
+      const asset = await storage.getAsset(validatedBackup.assetId);
+      if (!canAccessLocation(req, asset?.locationId || null)) {
+        return res.status(403).json({ error: "Access denied to this asset" });
+      }
+      
       const backup = await storage.createBackup(validatedBackup);
       res.status(201).json(backup);
     } catch (error) {
@@ -534,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/backups/:id", async (req, res) => {
+  app.patch("/api/backups/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedBackup = insertBackupSchema.partial().parse(req.body);
       const backup = await storage.updateBackup(parseInt(req.params.id), validatedBackup);
@@ -550,7 +700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/backups/:id", async (req, res) => {
+  app.delete("/api/backups/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const success = await storage.deleteBackup(parseInt(req.params.id));
       if (!success) {

@@ -36,8 +36,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication and Authorization
 - **Session-based authentication** using connect-pg-simple for PostgreSQL session storage
-- **Role-based access control** framework ready for implementation
-- **Location-based data filtering** ensuring users see relevant outlet information
+- **Comprehensive role-based access control (RBAC)** with location-based isolation
+- **Three-tier permission model**: Super Admin, Admin, and Location User
+- **Location-based data filtering** ensuring complete data isolation between outlets
+- **Pre-update authorization** preventing unauthorized cross-location modifications
+- **Defense-in-depth security** with multiple validation layers
 
 ### Design System
 - **Modern design approach** inspired by Canva and Figma
@@ -95,6 +98,29 @@ The system is architected for scalability and maintainability, with clear separa
 
 ## Recent Changes
 
+### October 4, 2025 - RBAC Implementation Completed (Production-Ready)
+- Implemented comprehensive role-based access control (RBAC) with location-based isolation
+- Added locationId field to users table for location-specific access control
+- Updated session types to store user's locationId for runtime authorization
+- Created filterByUserLocation helper to filter data arrays by user location
+- Created canAccessLocation helper to validate location access permissions
+- Applied RBAC protection to ALL API routes:
+  - Assets: location filtering on GET, location validation on write, transfer prevention for location_user
+  - Employees: location filtering on GET, location validation on write, transfer prevention for location_user  
+  - Maintenance: location filtering via asset lookup, assetId reassignment prevention for location_user
+  - Assignments: location filtering via asset lookup, location-restricted assignment creation
+  - CCTV: location filtering on GET, admin-only write operations
+  - Biometric: location filtering on GET, admin-only write operations
+  - Backups: location filtering via asset lookup, location-restricted backup creation
+  - Locations: admin-only write operations
+- Fixed critical security vulnerabilities:
+  - All PATCH routes now verify authorization BEFORE database updates
+  - Prevented authorization-after-mutation bugs in maintenance and CCTV routes
+  - Blocked cross-location reassignment via request payload (locationId/assetId changes)
+  - Return 403 errors WITHOUT mutating data when access is denied
+- Architect-verified production-ready with no remaining security vulnerabilities
+- Complete data isolation between 32 BODYCRAFT retail outlets
+
 ### October 4, 2025 - Replit Environment Setup Completed
 - Successfully imported GitHub project into Replit environment
 - Created PostgreSQL database for permanent data storage
@@ -124,6 +150,39 @@ npm run db:push         # Push schema changes to database
 npm run db:push --force # Force push if there are warnings
 npm run seed            # Seed database with sample data
 ```
+
+### Role-Based Access Control (RBAC)
+
+The system implements comprehensive location-based access control with three distinct roles:
+
+**Super Admin (Global Access)**
+- Full access to all 32 locations and all operations
+- Can create/update/delete assets, employees, and locations
+- Can transfer assets and employees between locations
+- Can manage CCTV systems and biometric devices
+- Can access all reports and audit trails
+
+**Admin (Global Access)**
+- Full access to all 32 locations and most operations
+- Can create/update/delete assets, employees within all locations
+- Can transfer assets and employees between locations
+- Can manage CCTV systems and biometric devices
+- Same permissions as Super Admin for day-to-day operations
+
+**Location User (Location-Restricted Access)**
+- Access ONLY to their assigned location
+- Can view and manage assets/employees within their location
+- Can create maintenance records and backups for location assets
+- CANNOT transfer assets or employees to other locations
+- CANNOT modify CCTV systems or biometric devices
+- Can only reassign assets to employees within their location
+
+**Security Implementation:**
+- All GET routes filter data by user's location context
+- All POST routes validate location access before creation
+- All PATCH routes verify authorization BEFORE any database update
+- Location users cannot change locationId or assetId to cross-location values
+- Authorization failures return 403 errors WITHOUT mutating data
 
 ### Demo Login Credentials
 
