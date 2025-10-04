@@ -97,10 +97,10 @@ interface Location {
 
 // Status color mapping
 const statusColors: Record<string, string> = {
-  active: "bg-green-500",
+  active: "bg-green-400",
   inactive: "bg-gray-500",
-  maintenance: "bg-yellow-500",
-  fault: "bg-red-500"
+  maintenance: "bg-yellow-400",
+  fault: "bg-red-400"
 }
 
 // System type icons
@@ -294,12 +294,12 @@ export default function CCTVPage() {
   const systemHealth = totalSystems > 0 ? Math.round((activeSystems / totalSystems) * 100) : 0
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">CCTV Systems</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white">CCTV Systems</h1>
+          <p className="text-white/70">
             Monitor and manage surveillance systems across all BODYCRAFT locations
           </p>
         </div>
@@ -490,52 +490,52 @@ export default function CCTVPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Systems</CardTitle>
             <Camera className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalSystems}</div>
+            <div className="text-2xl font-bold text-white/90">{totalSystems}</div>
             <p className="text-xs text-muted-foreground">
               All surveillance systems
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Systems</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeSystems}</div>
+            <div className="text-2xl font-bold text-white/90">{activeSystems}</div>
             <p className="text-xs text-muted-foreground">
               Operational systems
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Cameras</CardTitle>
             <Video className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCameras}</div>
+            <div className="text-2xl font-bold text-white/90">{totalCameras}</div>
             <p className="text-xs text-muted-foreground">
               Across all systems
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">System Health</CardTitle>
             <Shield className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{systemHealth}%</div>
+            <div className="text-2xl font-bold text-white/90">{systemHealth}%</div>
             <div className="mt-2">
               <Progress value={systemHealth} className="h-2" />
             </div>
@@ -544,7 +544,7 @@ export default function CCTVPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardHeader>
           <CardTitle className="text-lg">Search & Filter Systems</CardTitle>
         </CardHeader>
@@ -612,7 +612,7 @@ export default function CCTVPage() {
       </Card>
 
       {/* CCTV Systems Table */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

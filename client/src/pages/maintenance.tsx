@@ -96,15 +96,15 @@ interface Location {
 
 // Status color mapping
 const statusColors: Record<string, string> = {
-  scheduled: "bg-blue-500",
-  in_progress: "bg-yellow-500", 
-  completed: "bg-green-500",
-  overdue: "bg-red-500"
+  scheduled: "bg-blue-400",
+  in_progress: "bg-yellow-400", 
+  completed: "bg-green-400",
+  overdue: "bg-red-400"
 }
 
 // Maintenance type color mapping
 const typeColors: Record<string, string> = {
-  preventive: "bg-blue-500",
+  preventive: "bg-blue-400",
   corrective: "bg-orange-500"
 }
 
@@ -308,7 +308,7 @@ export default function MaintenancePage() {
 
   if (maintenanceLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 animate-fade-in">
         <div className="animate-pulse">
           <div className="h-8 bg-muted rounded w-1/4 mb-6"></div>
           <div className="space-y-4">
@@ -327,12 +327,12 @@ export default function MaintenancePage() {
   const completedMaintenance = maintenance?.filter(record => record.completedDate).length || 0
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Maintenance</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white">Maintenance</h1>
+          <p className="text-white/70">
             Schedule and track asset maintenance across all locations
           </p>
         </div>
@@ -462,52 +462,52 @@ export default function MaintenancePage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Maintenance</CardTitle>
             <Wrench className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{maintenance?.length || 0}</div>
+            <div className="text-2xl font-bold text-white/90">{maintenance?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
               All maintenance records
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingMaintenance}</div>
+            <div className="text-2xl font-bold text-white/90">{pendingMaintenance}</div>
             <p className="text-xs text-muted-foreground">
               Not yet completed
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overdue</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{overdueMaintenance}</div>
+            <div className="text-2xl font-bold text-white/90">{overdueMaintenance}</div>
             <p className="text-xs text-muted-foreground">
               Past due date
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Cost</CardTitle>
             <DollarSign className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalCost)}</div>
+            <div className="text-2xl font-bold text-white/90">{formatCurrency(totalCost)}</div>
             <p className="text-xs text-muted-foreground">
               All maintenance costs
             </p>
@@ -516,7 +516,7 @@ export default function MaintenancePage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardHeader>
           <CardTitle className="text-lg">Search & Filter Maintenance</CardTitle>
         </CardHeader>
@@ -581,7 +581,7 @@ export default function MaintenancePage() {
       </Card>
 
       {/* Maintenance Table */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

@@ -104,17 +104,17 @@ interface Location {
 
 // Status color mapping
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500",
-  completed: "bg-green-500",
-  overdue: "bg-red-500",
+  pending: "bg-yellow-400",
+  completed: "bg-green-400",
+  overdue: "bg-red-400",
   exempted: "bg-gray-500"
 }
 
 // Type color mapping
 const typeColors: Record<string, string> = {
-  backup: "bg-blue-500",
-  security_audit: "bg-red-500",
-  policy_review: "bg-purple-500",
+  backup: "bg-blue-400",
+  security_audit: "bg-red-400",
+  policy_review: "bg-purple-400",
   system_update: "bg-orange-500",
   data_retention: "bg-cyan-500",
   access_review: "bg-pink-500"
@@ -328,12 +328,12 @@ export default function CompliancePage() {
   const complianceRate = totalRecords > 0 ? Math.round((completedRecords / totalRecords) * 100) : 0
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Backup & Compliance</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white">Backup & Compliance</h1>
+          <p className="text-white/70">
             Monitor compliance activities and backup verification across all locations
           </p>
         </div>
@@ -491,52 +491,52 @@ export default function CompliancePage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalRecords}</div>
+            <div className="text-2xl font-bold text-white/90">{totalRecords}</div>
             <p className="text-xs text-muted-foreground">
               All compliance tasks
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Completed</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedRecords}</div>
+            <div className="text-2xl font-bold text-white/90">{completedRecords}</div>
             <p className="text-xs text-muted-foreground">
               Tasks completed
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overdue</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{overdueRecords}</div>
+            <div className="text-2xl font-bold text-white/90">{overdueRecords}</div>
             <p className="text-xs text-muted-foreground">
               Past due date
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
             <Shield className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{complianceRate}%</div>
+            <div className="text-2xl font-bold text-white/90">{complianceRate}%</div>
             <div className="mt-2">
               <Progress value={complianceRate} className="h-2" />
             </div>
@@ -545,7 +545,7 @@ export default function CompliancePage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardHeader>
           <CardTitle className="text-lg">Search & Filter Compliance</CardTitle>
         </CardHeader>
@@ -628,7 +628,7 @@ export default function CompliancePage() {
       </Card>
 
       {/* Compliance Table */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

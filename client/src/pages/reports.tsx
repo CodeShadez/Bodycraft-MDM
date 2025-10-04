@@ -143,11 +143,11 @@ export default function ReportsPage() {
 
   const getCategoryColorClass = (category: string) => {
     switch (category) {
-      case "assets": return "bg-blue-500"
+      case "assets": return "bg-blue-400"
       case "maintenance": return "bg-orange-500"
-      case "assignments": return "bg-green-500"
-      case "locations": return "bg-purple-500"
-      case "compliance": return "bg-red-500"
+      case "assignments": return "bg-green-400"
+      case "locations": return "bg-purple-400"
+      case "compliance": return "bg-red-400"
       default: return "bg-gray-500"
     }
   }
@@ -426,12 +426,12 @@ export default function ReportsPage() {
   )
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white">Reports</h1>
+          <p className="text-white/70">
             Generate comprehensive reports and analytics for BODYCRAFT asset management
           </p>
         </div>
@@ -596,35 +596,35 @@ export default function ReportsPage() {
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Report Templates</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{enrichedTemplates.length}</div>
+            <div className="text-2xl font-bold text-white/90">{enrichedTemplates.length}</div>
             <p className="text-xs text-muted-foreground">Pre-built reports available</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Custom Reports</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{customReports.length}</div>
+            <div className="text-2xl font-bold text-white/90">{customReports.length}</div>
             <p className="text-xs text-muted-foreground">User-created reports</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Reports Run</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white/90">
               {enrichedTemplates.reduce((sum, r) => sum + (r.totalRuns || 0), 0) + 
                customReports.reduce((sum, r) => sum + (r.totalRuns || 0), 0)}
             </div>
@@ -632,20 +632,20 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Export Formats</CardTitle>
             <Download className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold text-white/90">3</div>
             <p className="text-xs text-muted-foreground">Excel, CSV, PDF</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Search */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-4">
             <div className="relative flex-1">
@@ -674,7 +674,7 @@ export default function ReportsPage() {
             {filteredTemplates.map((template) => {
               const IconComponent = template.icon
               return (
-                <Card key={template.id} className="hover:shadow-md transition-shadow">
+                <Card className="glass-card border-0" key={template.id} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -770,7 +770,7 @@ export default function ReportsPage() {
                         {new Date(report.lastRun).toLocaleDateString()}
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">Never</span>
+                      <span className="text-white/70">Never</span>
                     )}
                   </TableCell>
                   <TableCell>

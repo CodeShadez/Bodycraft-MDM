@@ -81,18 +81,18 @@ const assetTypeIcons: Record<string, any> = {
 
 // Status color mapping
 const statusColors: Record<string, string> = {
-  available: "bg-green-500",
-  assigned: "bg-blue-500", 
-  maintenance: "bg-yellow-500",
-  retired: "bg-red-500"
+  available: "bg-green-400",
+  assigned: "bg-blue-400", 
+  maintenance: "bg-yellow-400",
+  retired: "bg-red-400"
 }
 
 // Condition color mapping
 const conditionColors: Record<string, string> = {
-  excellent: "bg-green-500",
-  good: "bg-blue-500",
-  fair: "bg-yellow-500", 
-  poor: "bg-red-500"
+  excellent: "bg-green-400",
+  good: "bg-blue-400",
+  fair: "bg-yellow-400", 
+  poor: "bg-red-400"
 }
 
 interface Asset {
@@ -427,7 +427,7 @@ export default function AssetsPage() {
 
   if (assetsLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 animate-fade-in">
         <div className="animate-pulse">
           <div className="h-8 bg-muted rounded w-1/4 mb-6"></div>
           <div className="space-y-4">
@@ -441,12 +441,12 @@ export default function AssetsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Assets</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white">Assets</h1>
+          <p className="text-white/70">
             Manage all BODYCRAFT IT assets across {locations?.length || 0} locations
           </p>
         </div>
@@ -734,26 +734,26 @@ export default function AssetsPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{assets?.length || 0}</div>
+            <div className="text-2xl font-bold text-white/90">{assets?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
               Across {locations?.length || 0} locations
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white/90">
               {assets?.filter(a => a.status === 'available').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -762,13 +762,13 @@ export default function AssetsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Assigned</CardTitle>
             <User className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white/90">
               {assets?.filter(a => a.status === 'assigned').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -777,13 +777,13 @@ export default function AssetsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white/90">
               {assets?.filter(a => a.status === 'maintenance').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -794,7 +794,7 @@ export default function AssetsPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardHeader>
           <CardTitle className="text-lg">Search & Filter Assets</CardTitle>
         </CardHeader>
@@ -860,7 +860,7 @@ export default function AssetsPage() {
       </Card>
 
       {/* Assets Table */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

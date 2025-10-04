@@ -201,9 +201,9 @@ export default function SettingsPage() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "super_admin": return "bg-red-500";
-      case "admin": return "bg-blue-500";
-      case "manager": return "bg-green-500";
+      case "super_admin": return "bg-red-400";
+      case "admin": return "bg-blue-400";
+      case "manager": return "bg-green-400";
       default: return "bg-gray-500";
     }
   };
@@ -214,7 +214,7 @@ export default function SettingsPage() {
         <Settings className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">System Settings</h1>
-          <p className="text-muted-foreground">Configure your BODYCRAFT MDM system</p>
+          <p className="text-white/70">Configure your BODYCRAFT MDM system</p>
         </div>
       </div>
 
@@ -252,7 +252,7 @@ export default function SettingsPage() {
 
         {/* Company Settings */}
         <TabsContent value="company">
-          <Card>
+          <Card className="glass-card border-0 glass-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
@@ -353,7 +353,7 @@ export default function SettingsPage() {
         {/* User Management */}
         <TabsContent value="users">
           <div className="space-y-6">
-            <Card>
+            <Card className="glass-card border-0 glass-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
@@ -400,7 +400,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass-card border-0 glass-card border-0">
               <CardHeader>
                 <CardTitle>Create New User</CardTitle>
               </CardHeader>
@@ -482,7 +482,7 @@ export default function SettingsPage() {
         {/* Asset Configuration */}
         <TabsContent value="assets">
           <div className="space-y-6">
-            <Card>
+            <Card className="glass-card border-0 glass-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
@@ -518,7 +518,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass-card border-0 glass-card border-0">
               <CardHeader>
                 <CardTitle>Add New Asset Type</CardTitle>
               </CardHeader>
@@ -558,7 +558,7 @@ export default function SettingsPage() {
         {/* Location Setup */}
         <TabsContent value="locations">
           <div className="space-y-6">
-            <Card>
+            <Card className="glass-card border-0 glass-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
@@ -591,7 +591,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass-card border-0 glass-card border-0">
               <CardHeader>
                 <CardTitle>Add New Location</CardTitle>
               </CardHeader>
@@ -680,7 +680,7 @@ export default function SettingsPage() {
 
         {/* Notifications */}
         <TabsContent value="notifications">
-          <Card>
+          <Card className="glass-card border-0 glass-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
@@ -762,7 +762,7 @@ export default function SettingsPage() {
 
         {/* Security */}
         <TabsContent value="security">
-          <Card>
+          <Card className="glass-card border-0 glass-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
@@ -842,7 +842,7 @@ export default function SettingsPage() {
         {/* Backup & Maintenance */}
         <TabsContent value="backup">
           <div className="space-y-6">
-            <Card>
+            <Card className="glass-card border-0 glass-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Database className="h-5 w-5" />

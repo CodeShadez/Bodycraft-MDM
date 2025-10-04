@@ -62,9 +62,9 @@ import { useToast } from "@/hooks/use-toast"
 
 // Status color mapping
 const statusColors: Record<string, string> = {
-  active: "bg-green-500",
-  inactive: "bg-red-500",
-  on_leave: "bg-yellow-500",
+  active: "bg-green-400",
+  inactive: "bg-red-400",
+  on_leave: "bg-yellow-400",
 }
 
 interface Employee {
@@ -272,7 +272,7 @@ export default function EmployeesPage() {
 
   if (employeesLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 animate-fade-in">
         <div className="animate-pulse">
           <div className="h-8 bg-muted rounded w-1/4 mb-6"></div>
           <div className="space-y-4">
@@ -286,12 +286,12 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Employees</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white">Employees</h1>
+          <p className="text-white/70">
             Manage BODYCRAFT staff across {locations?.length || 0} locations
           </p>
         </div>
@@ -452,26 +452,26 @@ export default function EmployeesPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{employees?.length || 0}</div>
+            <div className="text-2xl font-bold text-white/90">{employees?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
               Across {departments.length} departments
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active</CardTitle>
             <BadgeIcon className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white/90">
               {employees?.filter(emp => emp.status === 'active').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -480,13 +480,13 @@ export default function EmployeesPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">With Assets</CardTitle>
             <Laptop className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white/90">
               {employees?.filter(emp => 
                 assignments?.some(assignment => 
                   assignment.employeeId === emp.id && !assignment.returnedDate
@@ -499,13 +499,13 @@ export default function EmployeesPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Departments</CardTitle>
             <Building2 className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{departments.length}</div>
+            <div className="text-2xl font-bold text-white/90">{departments.length}</div>
             <p className="text-xs text-muted-foreground">
               Active departments
             </p>
@@ -514,7 +514,7 @@ export default function EmployeesPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardHeader>
           <CardTitle className="text-lg">Search & Filter Employees</CardTitle>
         </CardHeader>
@@ -579,7 +579,7 @@ export default function EmployeesPage() {
       </Card>
 
       {/* Employees Table */}
-      <Card>
+      <Card className="glass-card border-0 glass-card border-0">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
