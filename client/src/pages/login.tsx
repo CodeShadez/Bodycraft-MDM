@@ -35,11 +35,8 @@ export default function LoginPage() {
         const data = await response.json();
         console.log("Login successful:", data);
         
-        // Store user info in localStorage
-        localStorage.setItem("user", JSON.stringify(data.user));
-        
-        // Redirect to dashboard
-        setLocation("/");
+        // Redirect to dashboard (session is stored server-side in cookies)
+        window.location.href = "/";
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Login failed. Please check your credentials.");

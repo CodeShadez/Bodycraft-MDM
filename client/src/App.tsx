@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -21,54 +22,108 @@ import Settings from "@/pages/settings";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
+function ProtectedRoute({ component: Component, ...rest }: any) {
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (!response.ok) {
+          setLocation('/login');
+        }
+      } catch (error) {
+        setLocation('/login');
+      }
+    };
+
+    checkAuth();
+  }, [setLocation]);
+
+  return <Component {...rest} />;
+}
+
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/assets" component={Assets} />
-      <Route path="/employees" component={Employees} />
-      <Route path="/assignments" component={Assignments} />
-      <Route path="/locations" component={Locations} />
-      <Route path="/maintenance" component={Maintenance} />
-      <Route path="/compliance" component={Compliance} />
-      <Route path="/cctv" component={CCTV} />
-      <Route path="/biometric" component={Biometric} />
-      <Route path="/reports" component={Reports} />
-      <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
-      {/* Fallback to 404 */}
+      <Route path="/">
+        {(params) => <ProtectedRoute component={Dashboard} {...params} />}
+      </Route>
+      <Route path="/assets">
+        {(params) => <ProtectedRoute component={Assets} {...params} />}
+      </Route>
+      <Route path="/employees">
+        {(params) => <ProtectedRoute component={Employees} {...params} />}
+      </Route>
+      <Route path="/assignments">
+        {(params) => <ProtectedRoute component={Assignments} {...params} />}
+      </Route>
+      <Route path="/locations">
+        {(params) => <ProtectedRoute component={Locations} {...params} />}
+      </Route>
+      <Route path="/maintenance">
+        {(params) => <ProtectedRoute component={Maintenance} {...params} />}
+      </Route>
+      <Route path="/compliance">
+        {(params) => <ProtectedRoute component={Compliance} {...params} />}
+      </Route>
+      <Route path="/cctv">
+        {(params) => <ProtectedRoute component={CCTV} {...params} />}
+      </Route>
+      <Route path="/biometric">
+        {(params) => <ProtectedRoute component={Biometric} {...params} />}
+      </Route>
+      <Route path="/reports">
+        {(params) => <ProtectedRoute component={Reports} {...params} />}
+      </Route>
+      <Route path="/settings">
+        {(params) => <ProtectedRoute component={Settings} {...params} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-export default function App() {
-  // Custom sidebar width for MDM application
+function AppContent() {
+  const [location] = useLocation();
+  const isLoginPage = location === '/login';
+
   const style = {
-    "--sidebar-width": "20rem",       // 320px for better content
-    "--sidebar-width-icon": "4rem",   // default icon width
+    "--sidebar-width": "20rem",
+    "--sidebar-width-icon": "4rem",
   };
 
+  if (isLoginPage) {
+    return <Router />;
+  }
+
+  return (
+    <SidebarProvider style={style as React.CSSProperties}>
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1">
+          <header className="flex items-center justify-between p-2 border-b bg-background">
+            <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto bg-background">
+            <Router />
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="bodycraft-theme">
         <TooltipProvider>
-          <SidebarProvider style={style as React.CSSProperties}>
-            <div className="flex h-screen w-full">
-              <AppSidebar />
-              <div className="flex flex-col flex-1">
-                <header className="flex items-center justify-between p-2 border-b bg-background">
-                  <SidebarTrigger data-testid="button-sidebar-toggle" />
-                  <div className="flex items-center gap-2">
-                    <ThemeToggle />
-                  </div>
-                </header>
-                <main className="flex-1 overflow-auto bg-background">
-                  <Router />
-                </main>
-              </div>
-            </div>
-          </SidebarProvider>
+          <AppContent />
           <Toaster />
         </TooltipProvider>
       </ThemeProvider>

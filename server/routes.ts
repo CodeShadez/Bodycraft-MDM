@@ -104,6 +104,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alias for session check (used by frontend auth guard)
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      if (!req.session.userId || !req.session.username) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Get current user info
+      const user = await storage.getUserByUsername(req.session.username);
+      if (!user || user.status !== "active") {
+        return res.status(401).json({ message: "Invalid session" });
+      }
+
+      // Return user info (without password hash)
+      const { passwordHash, ...userResponse } = user;
+      res.json({ user: userResponse });
+    } catch (error) {
+      console.error("Session check error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Middleware to check authentication
   const requireAuth = (req: any, res: any, next: any) => {
     if (!req.session.userId) {
