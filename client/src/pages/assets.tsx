@@ -140,6 +140,20 @@ export default function AssetsPage() {
   const [importErrors, setImportErrors] = useState<string[]>([])
   const [isImporting, setIsImporting] = useState(false)
   
+  // Form state for create dialog
+  const [newAsset, setNewAsset] = useState({
+    assetId: '',
+    assetType: '',
+    brand: '',
+    modelName: '',
+    serviceTag: '',
+    locationId: '',
+    purchaseDate: '',
+    warrantyExpiry: '',
+    status: 'available',
+    condition: 'good'
+  })
+  
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -181,17 +195,22 @@ export default function AssetsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(assetData),
+        credentials: 'include'
       })
-      if (!response.ok) throw new Error('Failed to create asset')
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to create asset')
+      }
       return response.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
       toast({ title: "Success", description: "Asset created successfully" })
+      resetNewAssetForm()
       setIsCreateDialogOpen(false)
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to create asset", variant: "destructive" })
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message || "Failed to create asset", variant: "destructive" })
     }
   })
 
@@ -253,22 +272,46 @@ export default function AssetsPage() {
 
   const handleCreateAsset = (event: React.FormEvent) => {
     event.preventDefault()
-    const formData = new FormData(event.target as HTMLFormElement)
+    
+    // Validate required fields
+    if (!newAsset.assetId?.trim() || !newAsset.assetType?.trim() || !newAsset.brand?.trim() || !newAsset.modelName?.trim()) {
+      toast({ 
+        title: "Validation Error", 
+        description: "Please fill in all required fields (Asset ID, Asset Type, Brand, Model Name)", 
+        variant: "destructive" 
+      })
+      return
+    }
     
     const assetData = {
-      assetId: formData.get('assetId'),
-      modelName: formData.get('modelName'),
-      brand: formData.get('brand'),
-      serviceTag: formData.get('serviceTag') || null,
-      assetType: formData.get('assetType'),
-      purchaseDate: formData.get('purchaseDate') || null,
-      warrantyExpiry: formData.get('warrantyExpiry') || null,
-      status: formData.get('status'),
-      condition: formData.get('condition'),
-      locationId: formData.get('locationId') ? parseInt(formData.get('locationId') as string) : null,
+      assetId: newAsset.assetId.trim(),
+      modelName: newAsset.modelName.trim(),
+      brand: newAsset.brand.trim(),
+      serviceTag: newAsset.serviceTag?.trim() || null,
+      assetType: newAsset.assetType,
+      purchaseDate: newAsset.purchaseDate || null,
+      warrantyExpiry: newAsset.warrantyExpiry || null,
+      status: newAsset.status,
+      condition: newAsset.condition,
+      locationId: newAsset.locationId ? parseInt(newAsset.locationId) : null,
     }
 
     createAssetMutation.mutate(assetData)
+  }
+  
+  const resetNewAssetForm = () => {
+    setNewAsset({
+      assetId: '',
+      assetType: '',
+      brand: '',
+      modelName: '',
+      serviceTag: '',
+      locationId: '',
+      purchaseDate: '',
+      warrantyExpiry: '',
+      status: 'available',
+      condition: 'good'
+    })
   }
 
   const handleUpdateAsset = (event: React.FormEvent) => {
@@ -509,15 +552,21 @@ export default function AssetsPage() {
                     <Label htmlFor="assetId">Asset ID *</Label>
                     <Input
                       id="assetId"
-                      name="assetId"
                       placeholder="BFC001"
                       required
+                      value={newAsset.assetId}
+                      onChange={(e) => setNewAsset({...newAsset, assetId: e.target.value})}
+                      data-testid="input-asset-id"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="assetType">Asset Type *</Label>
-                    <Select name="assetType" required>
-                      <SelectTrigger>
+                    <Select 
+                      value={newAsset.assetType} 
+                      onValueChange={(value) => setNewAsset({...newAsset, assetType: value})}
+                      required
+                    >
+                      <SelectTrigger data-testid="select-asset-type">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -540,18 +589,22 @@ export default function AssetsPage() {
                     <Label htmlFor="brand">Brand *</Label>
                     <Input
                       id="brand"
-                      name="brand"
                       placeholder="Dell, HP, Lenovo..."
                       required
+                      value={newAsset.brand}
+                      onChange={(e) => setNewAsset({...newAsset, brand: e.target.value})}
+                      data-testid="input-brand"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="modelName">Model Name *</Label>
                     <Input
                       id="modelName"
-                      name="modelName"
                       placeholder="ThinkPad E15, OptiPlex 3080..."
                       required
+                      value={newAsset.modelName}
+                      onChange={(e) => setNewAsset({...newAsset, modelName: e.target.value})}
+                      data-testid="input-model-name"
                     />
                   </div>
                 </div>
@@ -561,14 +614,19 @@ export default function AssetsPage() {
                     <Label htmlFor="serviceTag">Service Tag</Label>
                     <Input
                       id="serviceTag"
-                      name="serviceTag"
                       placeholder="Manufacturer service tag"
+                      value={newAsset.serviceTag}
+                      onChange={(e) => setNewAsset({...newAsset, serviceTag: e.target.value})}
+                      data-testid="input-service-tag"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="locationId">Location</Label>
-                    <Select name="locationId">
-                      <SelectTrigger>
+                    <Select 
+                      value={newAsset.locationId} 
+                      onValueChange={(value) => setNewAsset({...newAsset, locationId: value})}
+                    >
+                      <SelectTrigger data-testid="select-location">
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                       <SelectContent>
@@ -587,16 +645,20 @@ export default function AssetsPage() {
                     <Label htmlFor="purchaseDate">Purchase Date</Label>
                     <Input
                       id="purchaseDate"
-                      name="purchaseDate"
                       type="date"
+                      value={newAsset.purchaseDate}
+                      onChange={(e) => setNewAsset({...newAsset, purchaseDate: e.target.value})}
+                      data-testid="input-purchase-date"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="warrantyExpiry">Warranty Expiry</Label>
                     <Input
                       id="warrantyExpiry"
-                      name="warrantyExpiry"
                       type="date"
+                      value={newAsset.warrantyExpiry}
+                      onChange={(e) => setNewAsset({...newAsset, warrantyExpiry: e.target.value})}
+                      data-testid="input-warranty-expiry"
                     />
                   </div>
                 </div>
@@ -604,8 +666,11 @@ export default function AssetsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select name="status" defaultValue="available">
-                      <SelectTrigger>
+                    <Select 
+                      value={newAsset.status} 
+                      onValueChange={(value) => setNewAsset({...newAsset, status: value})}
+                    >
+                      <SelectTrigger data-testid="select-status">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -618,8 +683,11 @@ export default function AssetsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="condition">Condition</Label>
-                    <Select name="condition" defaultValue="good">
-                      <SelectTrigger>
+                    <Select 
+                      value={newAsset.condition} 
+                      onValueChange={(value) => setNewAsset({...newAsset, condition: value})}
+                    >
+                      <SelectTrigger data-testid="select-condition">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -636,11 +704,25 @@ export default function AssetsPage() {
                   <Button 
                     type="button" 
                     variant="outline" 
-                    onClick={() => setIsCreateDialogOpen(false)}
+                    onClick={() => {
+                      resetNewAssetForm()
+                      setIsCreateDialogOpen(false)
+                    }}
+                    data-testid="button-cancel-create"
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createAssetMutation.isPending}>
+                  <Button 
+                    type="submit" 
+                    disabled={
+                      createAssetMutation.isPending || 
+                      !newAsset.assetId?.trim() || 
+                      !newAsset.assetType?.trim() || 
+                      !newAsset.brand?.trim() || 
+                      !newAsset.modelName?.trim()
+                    }
+                    data-testid="button-submit-create"
+                  >
                     {createAssetMutation.isPending ? "Creating..." : "Create Asset"}
                   </Button>
                 </DialogFooter>
