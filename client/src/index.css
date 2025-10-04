@@ -470,7 +470,6 @@
   table tbody tr:hover {
     background: rgba(168, 85, 247, 0.05);
     box-shadow: 0 4px 16px rgba(168, 85, 247, 0.1);
-    transform: translateX(4px);
   }
   
   table tbody tr.bg-muted\/10 {
@@ -529,32 +528,8 @@
   }
 }
 
-/* Table Container - Clean Minimal Scrollbar */
+/* Table Container - Fixed and Stable, No Movement */
 .table-container-stable {
-  overflow-x: auto;
+  overflow-x: hidden;
   position: relative;
-}
-
-/* Minimal scrollbar styling for WebKit browsers */
-.table-container-stable::-webkit-scrollbar {
-  height: 8px;
-}
-
-.table-container-stable::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.table-container-stable::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.2);
-  border-radius: 4px;
-}
-
-.table-container-stable::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.4);
-}
-
-/* Minimal scrollbar for Firefox */
-.table-container-stable {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(168, 85, 247, 0.2) transparent;
 }
