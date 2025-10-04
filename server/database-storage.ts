@@ -13,8 +13,11 @@ import {
   type User, type InsertUser,
   type CompanySettings, type InsertCompanySettings,
   type AssetType, type InsertAssetType,
+  type ApprovalRequest, type InsertApprovalRequest,
+  type ApprovalAction, type InsertApprovalAction,
   assets, employees, locations, assetAssignmentHistory, assetMaintenance,
-  cctvSystems, biometricSystems, backups, users, companySettings, assetTypes
+  cctvSystems, biometricSystems, backups, users, companySettings, assetTypes,
+  approvalRequests, approvalActions
 } from "@shared/schema";
 import { IStorage } from "./storage";
 
@@ -413,5 +416,69 @@ export class DatabaseStorage implements IStorage {
     .where(isNull(assetAssignmentHistory.returnedDate))
     .orderBy(desc(assetAssignmentHistory.createdAt))
     .limit(limit);
+  }
+
+  // Approval Requests
+  async getApprovalRequest(id: number): Promise<ApprovalRequest | undefined> {
+    const result = await db.select().from(approvalRequests).where(eq(approvalRequests.id, id));
+    return result[0];
+  }
+
+  async getAllApprovalRequests(filters?: { status?: string; requestedBy?: number }): Promise<ApprovalRequest[]> {
+    let query = db.select().from(approvalRequests);
+    
+    const conditions = [];
+    if (filters?.status) {
+      conditions.push(eq(approvalRequests.status, filters.status));
+    }
+    if (filters?.requestedBy) {
+      conditions.push(eq(approvalRequests.requestedBy, filters.requestedBy));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    return await query.orderBy(desc(approvalRequests.requestedAt));
+  }
+
+  async createApprovalRequest(request: InsertApprovalRequest): Promise<ApprovalRequest> {
+    const result = await db.insert(approvalRequests).values({
+      ...request,
+      status: request.status || "pending",
+      currentApprovalLevel: request.currentApprovalLevel || 1,
+      requiredApprovalLevels: request.requiredApprovalLevels || 1,
+      requestedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    return result[0];
+  }
+
+  async updateApprovalRequest(id: number, request: Partial<InsertApprovalRequest>): Promise<ApprovalRequest | undefined> {
+    const result = await db.update(approvalRequests)
+      .set({
+        ...request,
+        updatedAt: new Date(),
+      })
+      .where(eq(approvalRequests.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Approval Actions
+  async getApprovalActions(requestId: number): Promise<ApprovalAction[]> {
+    return await db.select().from(approvalActions)
+      .where(eq(approvalActions.requestId, requestId))
+      .orderBy(approvalActions.approvalLevel);
+  }
+
+  async createApprovalAction(action: InsertApprovalAction): Promise<ApprovalAction> {
+    const result = await db.insert(approvalActions).values({
+      ...action,
+      actionAt: new Date(),
+      createdAt: new Date(),
+    }).returning();
+    return result[0];
   }
 }

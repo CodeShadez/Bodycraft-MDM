@@ -9,7 +9,9 @@ import {
   type Backup, type InsertBackup,
   type User, type InsertUser,
   type CompanySettings, type InsertCompanySettings,
-  type AssetType, type InsertAssetType
+  type AssetType, type InsertAssetType,
+  type ApprovalRequest, type InsertApprovalRequest,
+  type ApprovalAction, type InsertApprovalAction
 } from "@shared/schema";
 
 // BODYCRAFT MDM Storage Interface
@@ -77,6 +79,16 @@ export interface IStorage {
   // Asset Types
   getAllAssetTypes(): Promise<AssetType[]>;
   createAssetType(assetType: InsertAssetType): Promise<AssetType>;
+  
+  // Approval Requests
+  getApprovalRequest(id: number): Promise<ApprovalRequest | undefined>;
+  getAllApprovalRequests(filters?: { status?: string; requestedBy?: number }): Promise<ApprovalRequest[]>;
+  createApprovalRequest(request: InsertApprovalRequest): Promise<ApprovalRequest>;
+  updateApprovalRequest(id: number, request: Partial<InsertApprovalRequest>): Promise<ApprovalRequest | undefined>;
+  
+  // Approval Actions
+  getApprovalActions(requestId: number): Promise<ApprovalAction[]>;
+  createApprovalAction(action: InsertApprovalAction): Promise<ApprovalAction>;
   
   // Dashboard Statistics
   getDashboardStats(): Promise<any>;
