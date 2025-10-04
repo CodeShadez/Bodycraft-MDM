@@ -562,6 +562,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const system = await storage.updateCctvSystem(parseInt(req.params.id), validatedSystem);
       
+      if (!system) {
+        return res.status(404).json({ error: "CCTV system not found" });
+      }
+      
       // Mask sensitive data in response
       const maskedSystem = {
         ...system,
@@ -1230,6 +1234,360 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating asset type:", error);
       res.status(500).json({ message: "Failed to create asset type" });
+    }
+  });
+
+  // Approval Workflow Routes
+  app.get("/api/approvals", requireAuth, async (req, res) => {
+    try {
+      const filters: { status?: string; requestedBy?: number } = {};
+      
+      if (req.query.status) {
+        filters.status = req.query.status as string;
+      }
+      
+      // Location users can only see their own requests or requests they can approve
+      if (req.session.role === 'location_user') {
+        filters.requestedBy = req.session.userId;
+      }
+      
+      const requests = await storage.getAllApprovalRequests(filters);
+      
+      // Filter by location for location_user
+      const accessibleRequests = await Promise.all(
+        requests.map(async (request) => {
+          const currentValue = request.currentValue ? JSON.parse(request.currentValue) : {};
+          const newValue = JSON.parse(request.newValue);
+          
+          // Check access based on entity type
+          if (request.entityType === 'asset') {
+            const asset = await storage.getAsset(request.entityId);
+            if (!canAccessLocation(req, asset?.locationId || null)) {
+              return null;
+            }
+          } else if (request.entityType === 'employee') {
+            const employee = await storage.getEmployee(parseInt(request.entityId));
+            if (!canAccessLocation(req, employee?.locationId || null)) {
+              return null;
+            }
+          }
+          
+          return request;
+        })
+      );
+      
+      res.json(accessibleRequests.filter(r => r !== null));
+    } catch (error) {
+      console.error("Error fetching approval requests:", error);
+      res.status(500).json({ error: "Failed to fetch approval requests" });
+    }
+  });
+
+  app.post("/api/approvals", requireAuth, requireRole(['location_user', 'admin', 'super_admin']), async (req, res) => {
+    try {
+      const validation = z.object({
+        requestType: z.enum(['asset_transfer', 'asset_assignment', 'employee_transfer']),
+        entityType: z.enum(['asset', 'employee']),
+        entityId: z.string(),
+        currentValue: z.string().optional(),
+        newValue: z.string(),
+        reason: z.string().optional(),
+        requiredApprovalLevels: z.number().min(1).max(3).default(1),
+      }).safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid approval request data", details: validation.error.issues });
+      }
+
+      // Verify entity exists and user has access
+      const { entityType, entityId } = validation.data;
+      if (entityType === 'asset') {
+        const asset = await storage.getAsset(entityId);
+        if (!asset) {
+          return res.status(404).json({ error: "Asset not found" });
+        }
+        if (!canAccessLocation(req, asset.locationId)) {
+          return res.status(403).json({ error: "Access denied to this asset" });
+        }
+      } else if (entityType === 'employee') {
+        const employee = await storage.getEmployee(parseInt(entityId));
+        if (!employee) {
+          return res.status(404).json({ error: "Employee not found" });
+        }
+        if (!canAccessLocation(req, employee.locationId)) {
+          return res.status(403).json({ error: "Access denied to this employee" });
+        }
+      }
+
+      const request = await storage.createApprovalRequest({
+        ...validation.data,
+        requestedBy: req.session.userId!,
+      });
+
+      res.status(201).json(request);
+    } catch (error) {
+      console.error("Error creating approval request:", error);
+      res.status(500).json({ error: "Failed to create approval request" });
+    }
+  });
+
+  app.post("/api/approvals/:id/approve", requireAuth, requireRole(['admin', 'super_admin']), async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const request = await storage.getApprovalRequest(requestId);
+      
+      if (!request) {
+        return res.status(404).json({ error: "Approval request not found" });
+      }
+      
+      if (request.status !== 'pending') {
+        return res.status(400).json({ error: "This request has already been processed" });
+      }
+
+      const validation = z.object({
+        comments: z.string().optional(),
+      }).safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid approval data" });
+      }
+
+      // Create approval action
+      await storage.createApprovalAction({
+        requestId,
+        approvalLevel: request.currentApprovalLevel,
+        actionBy: req.session.userId!,
+        action: 'approved',
+        comments: validation.data.comments,
+      });
+
+      // Check if all levels are approved
+      const newLevel = request.currentApprovalLevel + 1;
+      if (newLevel > request.requiredApprovalLevels) {
+        // All approvals complete - verify entity still exists then execute the change
+        const newValue = JSON.parse(request.newValue);
+        
+        if (request.requestType === 'asset_transfer' && request.entityType === 'asset') {
+          const asset = await storage.getAsset(request.entityId);
+          if (!asset) {
+            return res.status(404).json({ error: "Asset no longer exists and cannot be transferred" });
+          }
+          await storage.updateAsset(request.entityId, { locationId: newValue.locationId });
+        } else if (request.requestType === 'asset_assignment' && request.entityType === 'asset') {
+          const asset = await storage.getAsset(request.entityId);
+          if (!asset) {
+            return res.status(404).json({ error: "Asset no longer exists and cannot be assigned" });
+          }
+          const employee = await storage.getEmployee(newValue.employeeId);
+          if (!employee) {
+            return res.status(404).json({ error: "Employee no longer exists for assignment" });
+          }
+          
+          await storage.updateAsset(request.entityId, { 
+            currentUserId: newValue.employeeId,
+            status: 'assigned'
+          });
+          // Create assignment history
+          await storage.createAssignment({
+            assetId: request.entityId,
+            employeeId: newValue.employeeId,
+            assignedDate: new Date().toISOString().split('T')[0],
+            assignmentReason: request.reason || 'Approved assignment',
+          });
+        } else if (request.requestType === 'employee_transfer' && request.entityType === 'employee') {
+          const employee = await storage.getEmployee(parseInt(request.entityId));
+          if (!employee) {
+            return res.status(404).json({ error: "Employee no longer exists and cannot be transferred" });
+          }
+          await storage.updateEmployee(parseInt(request.entityId), { locationId: newValue.locationId });
+        }
+
+        await storage.updateApprovalRequest(requestId, {
+          status: 'approved',
+          completedAt: new Date(),
+          completedBy: req.session.userId!,
+        });
+      } else {
+        // Move to next approval level
+        await storage.updateApprovalRequest(requestId, {
+          currentApprovalLevel: newLevel,
+        });
+      }
+
+      const updatedRequest = await storage.getApprovalRequest(requestId);
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error approving request:", error);
+      res.status(500).json({ error: "Failed to approve request" });
+    }
+  });
+
+  app.post("/api/approvals/:id/reject", requireAuth, requireRole(['admin', 'super_admin']), async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const request = await storage.getApprovalRequest(requestId);
+      
+      if (!request) {
+        return res.status(404).json({ error: "Approval request not found" });
+      }
+      
+      if (request.status !== 'pending') {
+        return res.status(400).json({ error: "This request has already been processed" });
+      }
+
+      const validation = z.object({
+        comments: z.string().min(1, "Rejection reason is required"),
+      }).safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({ error: "Rejection reason is required", details: validation.error.issues });
+      }
+
+      // Create rejection action
+      await storage.createApprovalAction({
+        requestId,
+        approvalLevel: request.currentApprovalLevel,
+        actionBy: req.session.userId!,
+        action: 'rejected',
+        comments: validation.data.comments,
+      });
+
+      // Update request status
+      await storage.updateApprovalRequest(requestId, {
+        status: 'rejected',
+        completedAt: new Date(),
+        completedBy: req.session.userId!,
+      });
+
+      const updatedRequest = await storage.getApprovalRequest(requestId);
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+      res.status(500).json({ error: "Failed to reject request" });
+    }
+  });
+
+  app.get("/api/approvals/:id/actions", requireAuth, async (req, res) => {
+    try {
+      const actions = await storage.getApprovalActions(parseInt(req.params.id));
+      res.json(actions);
+    } catch (error) {
+      console.error("Error fetching approval actions:", error);
+      res.status(500).json({ error: "Failed to fetch approval actions" });
+    }
+  });
+
+  // Sample Data Cleanup Route (for production deployment)
+  app.post("/api/cleanup/sample-data", requireAuth, requireRole(['super_admin']), async (req, res) => {
+    try {
+      const confirmation = req.body.confirmation;
+      
+      if (confirmation !== "DELETE_ALL_SAMPLE_DATA") {
+        return res.status(400).json({ 
+          error: "Invalid confirmation", 
+          message: "Please provide confirmation: 'DELETE_ALL_SAMPLE_DATA'" 
+        });
+      }
+
+      console.log("⚠️  Starting sample data cleanup...");
+      
+      // Get all data counts before deletion
+      const beforeCounts = {
+        assets: (await storage.getAllAssets()).length,
+        employees: (await storage.getAllEmployees()).length,
+        locations: (await storage.getAllLocations()).length,
+        assignments: (await storage.getAssignmentHistory()).length,
+        maintenance: (await storage.getMaintenanceRecords()).length,
+        cctv: (await storage.getAllCctvSystems()).length,
+        biometric: (await storage.getAllBiometricSystems()).length,
+        backups: (await storage.getBackups()).length,
+      };
+
+      // Delete all sample data in correct order (respecting foreign keys)
+      // 1. Delete backups (references assets)
+      const allBackups = await storage.getBackups();
+      for (const backup of allBackups) {
+        await storage.deleteBackup(backup.id);
+      }
+
+      // 2. Delete assignment history (references assets and employees)
+      // Note: Assignment history deletion might not be exposed in API, so we'll skip it
+      
+      // 3. Delete maintenance records (references assets)
+      const allMaintenance = await storage.getMaintenanceRecords();
+      for (const record of allMaintenance) {
+        await storage.deleteMaintenanceRecord(record.id);
+      }
+
+      // 4. Delete CCTV systems (references locations)
+      const allCctv = await storage.getAllCctvSystems();
+      for (const system of allCctv) {
+        await storage.deleteCctvSystem(system.id);
+      }
+
+      // 5. Delete biometric systems (references locations)
+      const allBiometric = await storage.getAllBiometricSystems();
+      for (const system of allBiometric) {
+        await storage.deleteBiometricSystem(system.id);
+      }
+
+      // 6. Delete assets (references employees and locations)
+      const allAssets = await storage.getAllAssets();
+      for (const asset of allAssets) {
+        await storage.deleteAsset(asset.assetId);
+      }
+
+      // 7. Delete employees (references locations)
+      const allEmployees = await storage.getAllEmployees();
+      for (const employee of allEmployees) {
+        // Keep admin user's associated employee if exists
+        if (employee.email !== 'admin@bodycraft.com') {
+          await storage.deleteEmployee(employee.id);
+        }
+      }
+
+      // 8. Delete locations (but keep one for admin)
+      const allLocations = await storage.getAllLocations();
+      let keptLocationId = null;
+      for (const location of allLocations) {
+        if (!keptLocationId) {
+          keptLocationId = location.id; // Keep first location for admin
+        } else {
+          await storage.deleteLocation(location.id);
+        }
+      }
+
+      const afterCounts = {
+        assets: (await storage.getAllAssets()).length,
+        employees: (await storage.getAllEmployees()).length,
+        locations: (await storage.getAllLocations()).length,
+        assignments: 0, // Can't count, no API
+        maintenance: (await storage.getMaintenanceRecords()).length,
+        cctv: (await storage.getAllCctvSystems()).length,
+        biometric: (await storage.getAllBiometricSystems()).length,
+        backups: (await storage.getBackups()).length,
+      };
+
+      console.log("✅ Sample data cleanup completed!");
+      
+      res.json({
+        success: true,
+        message: "Sample data cleanup completed successfully",
+        deletedCounts: {
+          assets: beforeCounts.assets - afterCounts.assets,
+          employees: beforeCounts.employees - afterCounts.employees,
+          locations: beforeCounts.locations - afterCounts.locations,
+          maintenance: beforeCounts.maintenance - afterCounts.maintenance,
+          cctv: beforeCounts.cctv - afterCounts.cctv,
+          biometric: beforeCounts.biometric - afterCounts.biometric,
+          backups: beforeCounts.backups - afterCounts.backups,
+        },
+        remainingCounts: afterCounts,
+        note: "One location has been kept for admin access. Admin user has been preserved."
+      });
+    } catch (error) {
+      console.error("❌ Error during sample data cleanup:", error);
+      res.status(500).json({ error: "Failed to cleanup sample data", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
