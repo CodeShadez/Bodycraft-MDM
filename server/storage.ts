@@ -2,6 +2,7 @@ import {
   type Asset, type InsertAsset,
   type Employee, type InsertEmployee,
   type Location, type InsertLocation,
+  type Department, type InsertDepartment,
   type AssetAssignmentHistory, type InsertAssetAssignmentHistory,
   type AssetMaintenance, type InsertAssetMaintenance,
   type CctvSystem, type InsertCctvSystem,
@@ -36,6 +37,13 @@ export interface IStorage {
   createLocation(location: InsertLocation): Promise<Location>;
   updateLocation(id: number, location: Partial<InsertLocation>): Promise<Location | undefined>;
   deleteLocation(id: number): Promise<boolean>;
+  
+  // Departments
+  getDepartment(id: number): Promise<Department | undefined>;
+  getAllDepartments(): Promise<Department[]>;
+  createDepartment(department: InsertDepartment): Promise<Department>;
+  updateDepartment(id: number, department: Partial<InsertDepartment>): Promise<Department | undefined>;
+  deleteDepartment(id: number): Promise<boolean>;
   
   // Assignment History
   getAssignmentHistory(assetId?: string, employeeId?: number): Promise<AssetAssignmentHistory[]>;

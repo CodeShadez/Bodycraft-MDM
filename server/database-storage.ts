@@ -5,6 +5,7 @@ import {
   type Asset, type InsertAsset,
   type Employee, type InsertEmployee, 
   type Location, type InsertLocation,
+  type Department, type InsertDepartment,
   type AssetAssignmentHistory, type InsertAssetAssignmentHistory,
   type AssetMaintenance, type InsertAssetMaintenance,
   type CctvSystem, type InsertCctvSystem,
@@ -15,7 +16,7 @@ import {
   type AssetType, type InsertAssetType,
   type ApprovalRequest, type InsertApprovalRequest,
   type ApprovalAction, type InsertApprovalAction,
-  assets, employees, locations, assetAssignmentHistory, assetMaintenance,
+  assets, employees, locations, departments, assetAssignmentHistory, assetMaintenance,
   cctvSystems, biometricSystems, backups, users, companySettings, assetTypes,
   approvalRequests, approvalActions
 } from "@shared/schema";
@@ -122,6 +123,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteLocation(id: number): Promise<boolean> {
     const result = await db.delete(locations).where(eq(locations.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Departments
+  async getDepartment(id: number): Promise<Department | undefined> {
+    const result = await db.select().from(departments).where(eq(departments.id, id));
+    return result[0];
+  }
+
+  async getAllDepartments(): Promise<Department[]> {
+    return await db.select().from(departments).orderBy(departments.name);
+  }
+
+  async createDepartment(department: InsertDepartment): Promise<Department> {
+    const result = await db.insert(departments).values({
+      ...department,
+      isActive: department.isActive !== undefined ? department.isActive : true,
+      isCustom: department.isCustom !== undefined ? department.isCustom : false,
+      createdAt: new Date(),
+    }).returning();
+    return result[0];
+  }
+
+  async updateDepartment(id: number, department: Partial<InsertDepartment>): Promise<Department | undefined> {
+    const result = await db.update(departments)
+      .set(department)
+      .where(eq(departments.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteDepartment(id: number): Promise<boolean> {
+    const result = await db.delete(departments).where(eq(departments.id, id));
     return result.rowCount > 0;
   }
 

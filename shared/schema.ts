@@ -3,6 +3,17 @@ import { pgTable, text, varchar, timestamp, boolean, integer, decimal, date } fr
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// 0. DEPARTMENTS - Business units including outlets and corporate departments
+export const departments = pgTable("departments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  type: varchar("type", { length: 50 }).notNull(), // outlet, corporate
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  isCustom: boolean("is_custom").notNull().default(false), // true for super admin created departments
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // 1. LOCATIONS - 32 BODYCRAFT outlets across India
 export const locations = pgTable("locations", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -41,8 +52,18 @@ export const assets = pgTable("assets", {
   warrantyExpiry: date("warranty_expiry"),
   status: varchar("status", { length: 20 }).notNull().default("available"), // available, assigned, maintenance, retired
   condition: varchar("condition", { length: 20 }).notNull().default("good"), // excellent, good, fair, poor
+  
+  // Enhanced asset categorization and location tracking
+  departmentId: integer("department_id").references(() => departments.id), // Salon, Clinic, Skin & Spa, IT, Marketing, etc.
+  physicalLocation: varchar("physical_location", { length: 255 }), // Reception, Front Desk, Room 1, etc.
+  floor: varchar("floor", { length: 50 }), // Ground Floor, 1st Floor, 2nd Floor, etc.
+  
+  // Ownership and assignment type
+  ownershipType: varchar("ownership_type", { length: 20 }).notNull().default("company"), // company, rented, personal
+  assignmentType: varchar("assignment_type", { length: 20 }).notNull().default("person"), // person, outlet
+  
   locationId: integer("location_id").references(() => locations.id),
-  currentUserId: integer("current_user_id").references(() => employees.id),
+  currentUserId: integer("current_user_id").references(() => employees.id), // NULL if assigned to outlet
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -136,6 +157,7 @@ export const reportExecutions = pgTable("report_executions", {
 });
 
 // Insert Schemas - Zod schemas for validation (fields excluded via Drizzle, not Zod)
+export const insertDepartmentSchema = createInsertSchema(departments);
 export const insertLocationSchema = createInsertSchema(locations);
 export const insertEmployeeSchema = createInsertSchema(employees);
 export const insertAssetSchema = createInsertSchema(assets);
@@ -147,6 +169,9 @@ export const insertBackupSchema = createInsertSchema(backups);
 export const insertReportExecutionSchema = createInsertSchema(reportExecutions);
 
 // TypeScript Types
+export type Department = typeof departments.$inferSelect;
+export type InsertDepartment = z.infer<typeof insertDepartmentSchema>;
+
 export type Location = typeof locations.$inferSelect;
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
 
