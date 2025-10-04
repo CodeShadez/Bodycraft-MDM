@@ -675,7 +675,7 @@ export default function ReportsPage() {
             {filteredTemplates.map((template) => {
               const IconComponent = template.icon
               return (
-                <Card className="glass-card border-0" key={template.id} className="hover:shadow-md transition-shadow">
+                <Card key={template.id} className="glass-card border-0 hover:shadow-md transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
