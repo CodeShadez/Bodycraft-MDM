@@ -972,108 +972,108 @@ export default function AssetsPage() {
       {/* Assets Table */}
       <Card className="glass-card border-0">
         <CardContent className="p-6">
-          <div className="rounded-lg border border-border/50 overflow-hidden">
+          <div className="rounded-lg border border-border/40 overflow-hidden bg-card">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border/50">
-                  <TableHead className="font-semibold text-foreground h-12 w-[240px]">Asset Details</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 w-[140px]">Department</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 w-[160px]">Status & Condition</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 w-[200px]">Location Details</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 w-[180px]">Assignment</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 w-[120px]">Ownership</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 w-[140px]">Service Tag</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 w-[80px] text-right">Actions</TableHead>
+                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-2 border-border/60">
+                  <TableHead className="font-semibold text-foreground h-14 w-[280px] px-6">Asset Information</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Department</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[200px] px-4">Location</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[180px] px-4">Assignment</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[130px] px-4">Ownership</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[130px] px-4">Service Tag</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[70px] text-center px-2">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredAssets.map((asset) => (
                   <TableRow 
                     key={asset.assetId}
-                    className="hover:bg-muted/30 transition-colors border-b border-border/30"
+                    className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group"
                     data-testid={`row-asset-${asset.assetId}`}
                   >
-                    {/* Asset Details - ID, Type, Brand, Model */}
-                    <TableCell className="py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                    {/* Asset Information - ID, Type, Brand, Model */}
+                    <TableCell className="py-5 px-6">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2.5 rounded-xl bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
                           {getAssetIcon(asset.assetType)}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-foreground" data-testid={`text-asset-id-${asset.assetId}`}>
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                          <div className="flex items-center gap-2.5">
+                            <span className="font-semibold text-base text-foreground leading-none" data-testid={`text-asset-id-${asset.assetId}`}>
                               {asset.assetId}
                             </span>
-                            <Badge variant="outline" className="text-xs" data-testid={`badge-type-${asset.assetId}`}>
+                            <Badge variant="outline" className="text-xs font-medium px-2 py-0.5" data-testid={`badge-type-${asset.assetId}`}>
                               {asset.assetType}
                             </Badge>
                           </div>
-                          <div className="text-xs text-muted-foreground truncate">
+                          <p className="text-sm text-muted-foreground leading-tight truncate">
                             {asset.brand} {asset.modelName}
-                          </div>
+                          </p>
                         </div>
                       </div>
                     </TableCell>
 
                     {/* Department */}
-                    <TableCell className="py-3">
-                      <span className="text-sm font-medium" data-testid={`text-department-${asset.assetId}`}>
+                    <TableCell className="py-5 px-4">
+                      <span className="text-sm font-medium text-foreground leading-relaxed" data-testid={`text-department-${asset.assetId}`}>
                         {asset.departmentId 
                           ? departments?.find(d => d.id === asset.departmentId)?.name || "—"
                           : "—"}
                       </span>
                     </TableCell>
 
-                    {/* Status & Condition Combined */}
-                    <TableCell className="py-3">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`} />
-                          <span className="text-xs font-medium capitalize" data-testid={`text-status-${asset.assetId}`}>
+                    {/* Status & Condition */}
+                    <TableCell className="py-5 px-4">
+                      <div className="space-y-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColors[asset.status]}`} />
+                          <span className="text-sm font-medium capitalize leading-none" data-testid={`text-status-${asset.assetId}`}>
                             {asset.status}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${conditionColors[asset.condition]}`} />
-                          <span className="text-xs font-medium capitalize" data-testid={`text-condition-${asset.assetId}`}>
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${conditionColors[asset.condition]}`} />
+                          <span className="text-sm text-muted-foreground capitalize leading-none" data-testid={`text-condition-${asset.assetId}`}>
                             {asset.condition}
                           </span>
                         </div>
                       </div>
                     </TableCell>
 
-                    {/* Location Details - Outlet, Physical Location, Floor */}
-                    <TableCell className="py-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm font-medium truncate" data-testid={`text-location-${asset.assetId}`}>
+                    {/* Location */}
+                    <TableCell className="py-5 px-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm font-medium text-foreground leading-tight truncate" data-testid={`text-location-${asset.assetId}`}>
                             {getLocationName(asset.locationId)}
                           </span>
                         </div>
                         {(asset.physicalLocation || asset.floor) && (
-                          <div className="text-xs text-muted-foreground ml-5 truncate">
+                          <p className="text-xs text-muted-foreground leading-relaxed pl-6 truncate">
                             {asset.physicalLocation && <span>{asset.physicalLocation}</span>}
-                            {asset.physicalLocation && asset.floor && <span> • </span>}
+                            {asset.physicalLocation && asset.floor && <span className="mx-1.5">•</span>}
                             {asset.floor && <span>{asset.floor}</span>}
-                          </div>
+                          </p>
                         )}
                       </div>
                     </TableCell>
 
-                    {/* Assignment - Type + Assigned To */}
-                    <TableCell className="py-3">
-                      <div className="space-y-1">
+                    {/* Assignment */}
+                    <TableCell className="py-5 px-4">
+                      <div className="space-y-2">
                         <Badge 
                           variant="outline" 
-                          className="text-xs font-medium"
+                          className="text-xs font-medium px-2.5 py-0.5"
                           data-testid={`badge-assignment-${asset.assetId}`}
                         >
                           {asset.assignmentType === 'person' ? 'Person' : 'Outlet'}
                         </Badge>
-                        <div className="flex items-center gap-1.5">
-                          <User className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-xs font-medium truncate" data-testid={`text-assigned-${asset.assetId}`}>
+                        <div className="flex items-center gap-2">
+                          <User className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-xs text-muted-foreground leading-tight truncate" data-testid={`text-assigned-${asset.assetId}`}>
                             {asset.assignmentType === 'outlet' 
                               ? getLocationName(asset.locationId) 
                               : getEmployeeName(asset.currentUserId)}
@@ -1083,10 +1083,10 @@ export default function AssetsPage() {
                     </TableCell>
 
                     {/* Ownership */}
-                    <TableCell className="py-3">
+                    <TableCell className="py-5 px-4">
                       <Badge 
                         variant={asset.ownershipType === 'company' ? 'default' : 'secondary'} 
-                        className="text-xs font-medium"
+                        className="text-xs font-medium px-2.5 py-1"
                         data-testid={`badge-ownership-${asset.assetId}`}
                       >
                         {asset.ownershipType === 'company' ? 'Company' : 
@@ -1096,14 +1096,14 @@ export default function AssetsPage() {
                     </TableCell>
 
                     {/* Service Tag */}
-                    <TableCell className="py-3">
-                      <span className="text-xs font-mono text-muted-foreground" data-testid={`text-service-tag-${asset.assetId}`}>
+                    <TableCell className="py-5 px-4">
+                      <span className="text-sm font-mono text-muted-foreground leading-relaxed" data-testid={`text-service-tag-${asset.assetId}`}>
                         {asset.serviceTag || "—"}
                       </span>
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell className="py-3 text-right">
+                    <TableCell className="py-5 px-2 text-center">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button 
