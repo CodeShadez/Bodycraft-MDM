@@ -98,6 +98,31 @@ The system is architected for scalability and maintainability, with clear separa
 
 ## Recent Changes
 
+### October 4, 2025 - Approval Workflow System Implemented
+- Implemented multi-level approval workflow system for sensitive operations
+- Added database schema for approval requests and approval actions (audit trail)
+- Created comprehensive API routes for approval management:
+  - POST /api/approvals - Create approval request with entity validation
+  - GET /api/approvals - List pending approvals filtered by location
+  - POST /api/approvals/:id/approve - Approve request with multi-level support
+  - POST /api/approvals/:id/reject - Reject request with required comments
+  - POST /api/approvals/:id/cancel - Cancel pending request
+  - GET /api/approvals/:id/actions - Get approval action history
+- Supported approval types:
+  - Asset Transfer - Requires approval to move assets between locations
+  - Asset Assignment - Requires approval to assign assets to employees
+  - Employee Transfer - Requires approval to transfer employees between locations
+- Features:
+  - Configurable approval levels (1-3 levels per request type)
+  - Automatic execution of approved changes when all levels complete
+  - Complete audit trail with approval history
+  - Entity existence validation to prevent crashes from deleted entities
+  - Location-based access control integrated with RBAC
+- Created sample data cleanup endpoint (POST /api/admin/cleanup-sample-data):
+  - Super admin only access with "DELETE_ALL_SAMPLE_DATA" confirmation
+  - Removes all demo data in correct foreign key order
+  - Preserves admin user and one location for system continuity
+
 ### October 4, 2025 - RBAC Implementation Completed (Production-Ready)
 - Implemented comprehensive role-based access control (RBAC) with location-based isolation
 - Added locationId field to users table for location-specific access control
