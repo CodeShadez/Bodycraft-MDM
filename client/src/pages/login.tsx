@@ -68,7 +68,7 @@ export default function LoginPage() {
             </div>
           </div>
           <p className="text-muted-foreground">
-            Sign in to access your IT asset management system
+            Sign in to access your Master Data Management
           </p>
         </div>
 
