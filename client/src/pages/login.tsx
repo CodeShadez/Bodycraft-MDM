@@ -49,15 +49,8 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = (role: 'super_admin' | 'admin' | 'manager' | 'user') => {
-    const demoCredentials = {
-      super_admin: { username: "admin", password: "admin123" },
-      admin: { username: "rajesh.kumar", password: "rajesh123" },
-      manager: { username: "priya.sharma", password: "priya123" },
-      user: { username: "demo.user", password: "demo123" },
-    };
-
-    setCredentials(demoCredentials[role]);
+  const handleSuperAdminLogin = () => {
+    setCredentials({ username: "admin", password: "admin123" });
   };
 
   return (
@@ -147,58 +140,29 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Demo Login Section */}
+            {/* Quick Login Section */}
             <div className="mt-6 space-y-3">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Demo Accounts</span>
+                  <span className="bg-background px-2 text-muted-foreground">Quick Login</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('super_admin')}
-                  className="text-xs"
-                >
-                  Super Admin
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('admin')}
-                  className="text-xs"
-                >
-                  Admin
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('manager')}
-                  className="text-xs"
-                >
-                  Manager
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoLogin('user')}
-                  className="text-xs"
-                >
-                  User
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSuperAdminLogin}
+                className="w-full"
+                data-testid="button-superadmin-login"
+              >
+                Use Super Admin Credentials
+              </Button>
               
               <p className="text-xs text-center text-muted-foreground">
-                Click any demo account to auto-fill credentials
+                Username: admin | Password: admin123
               </p>
             </div>
           </CardContent>
