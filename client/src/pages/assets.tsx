@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, Fragment } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { 
   Laptop, 
@@ -1162,9 +1162,8 @@ export default function AssetsPage() {
                 {filteredAssets.map((asset) => {
                   const isExpanded = expandedAssetId === asset.assetId
                   return (
-                    <>
+                    <Fragment key={asset.assetId}>
                       <TableRow 
-                        key={asset.assetId}
                         onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
                         className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
                         data-testid={`row-asset-${asset.assetId}`}
@@ -1385,7 +1384,7 @@ export default function AssetsPage() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </Fragment>
                   )
                 })}
               </TableBody>
