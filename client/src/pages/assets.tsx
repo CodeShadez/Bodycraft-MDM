@@ -970,113 +970,140 @@ export default function AssetsPage() {
       </Card>
 
       {/* Assets Table */}
-      <Card className="glass-card border-0 glass-card border-0">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Asset</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Condition</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Assigned To</TableHead>
-                <TableHead>Service Tag</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAssets.map((asset) => (
-                <TableRow key={asset.assetId}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      {getAssetIcon(asset.assetType)}
-                      <div>
-                        <div className="font-medium">{asset.assetId}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {asset.brand} {asset.modelName}
+      <Card className="glass-card border-0">
+        <CardContent className="p-6">
+          <div className="rounded-lg border border-border/50 overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border/50">
+                  <TableHead className="font-semibold text-foreground h-12">Asset</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Type</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Condition</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Location</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Assigned To</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Service Tag</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAssets.map((asset) => (
+                  <TableRow 
+                    key={asset.assetId}
+                    className="hover:bg-muted/30 transition-colors border-b border-border/30"
+                    data-testid={`row-asset-${asset.assetId}`}
+                  >
+                    <TableCell className="py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                          {getAssetIcon(asset.assetType)}
+                        </div>
+                        <div>
+                          <div className="font-medium text-foreground" data-testid={`text-asset-id-${asset.assetId}`}>
+                            {asset.assetId}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {asset.brand} {asset.modelName}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{asset.assetType}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`}
-                      />
-                      <span className="capitalize">{asset.status}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className={`w-2 h-2 rounded-full ${conditionColors[asset.condition]}`}
-                      />
-                      <span className="capitalize">{asset.condition}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3 text-muted-foreground" />
-                      {getLocationName(asset.locationId)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      {getEmployeeName(asset.currentUserId)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm font-mono">
-                      {asset.serviceTag || "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedAsset(asset)
-                            setIsViewDialogOpen(true)
-                          }}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedAsset(asset)
-                            setIsEditDialogOpen(true)
-                          }}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Asset
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => deleteAssetMutation.mutate(asset.assetId)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Asset
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <Badge variant="outline" className="font-medium" data-testid={`badge-type-${asset.assetId}`}>
+                        {asset.assetType}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className={`w-2.5 h-2.5 rounded-full ${statusColors[asset.status]}`}
+                        />
+                        <span className="capitalize font-medium" data-testid={`text-status-${asset.assetId}`}>
+                          {asset.status}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className={`w-2.5 h-2.5 rounded-full ${conditionColors[asset.condition]}`}
+                        />
+                        <span className="capitalize font-medium" data-testid={`text-condition-${asset.assetId}`}>
+                          {asset.condition}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium" data-testid={`text-location-${asset.assetId}`}>
+                          {getLocationName(asset.locationId)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium" data-testid={`text-assigned-${asset.assetId}`}>
+                          {getEmployeeName(asset.currentUserId)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <span className="text-sm font-mono text-muted-foreground" data-testid={`text-service-tag-${asset.assetId}`}>
+                        {asset.serviceTag || "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            className="h-8 w-8 p-0 hover:bg-primary/10"
+                            data-testid={`button-actions-${asset.assetId}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedAsset(asset)
+                              setIsViewDialogOpen(true)
+                            }}
+                            data-testid={`menu-view-${asset.assetId}`}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedAsset(asset)
+                              setIsEditDialogOpen(true)
+                            }}
+                            data-testid={`menu-edit-${asset.assetId}`}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Asset
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => deleteAssetMutation.mutate(asset.assetId)}
+                            className="text-red-600 focus:text-red-600"
+                            data-testid={`menu-delete-${asset.assetId}`}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Asset
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
