@@ -18,7 +18,9 @@ import {
   Calendar,
   Badge as BadgeIcon,
   Building2,
-  Laptop
+  Laptop,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -114,6 +116,7 @@ export default function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [expandedEmployeeId, setExpandedEmployeeId] = useState<number | null>(null)
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -595,12 +598,25 @@ export default function EmployeesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEmployees.map((employee) => {
+              {filteredEmployees.flatMap((employee) => {
                 const employeeAssets = getEmployeeAssets(employee.id)
-                return (
-                  <TableRow key={employee.id}>
+                const isExpanded = expandedEmployeeId === employee.id
+                const rows = [
+                  <TableRow 
+                    key={`main-${employee.id}`}
+                    onClick={() => setExpandedEmployeeId(isExpanded ? null : employee.id)}
+                    className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                    data-testid={`row-employee-${employee.id}`}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </div>
                         <User className="h-8 w-8 p-1.5 bg-muted rounded-full" />
                         <div>
                           <div className="font-medium">
@@ -659,10 +675,10 @@ export default function EmployeesPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${employee.id}`}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -673,6 +689,7 @@ export default function EmployeesPage() {
                               setSelectedEmployee(employee)
                               setIsViewDialogOpen(true)
                             }}
+                            data-testid={`menu-view-${employee.id}`}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
@@ -682,6 +699,7 @@ export default function EmployeesPage() {
                               setSelectedEmployee(employee)
                               setIsEditDialogOpen(true)
                             }}
+                            data-testid={`menu-edit-${employee.id}`}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Employee
@@ -690,6 +708,7 @@ export default function EmployeesPage() {
                           <DropdownMenuItem
                             onClick={() => deleteEmployeeMutation.mutate(employee.id)}
                             className="text-red-600"
+                            data-testid={`menu-delete-${employee.id}`}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Employee
@@ -698,7 +717,130 @@ export default function EmployeesPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                ]
+
+                if (isExpanded) {
+                  rows.push(
+                    <TableRow key={`expanded-${employee.id}`} className="bg-muted/10 hover:bg-muted/10">
+                      <TableCell colSpan={7} className="p-6">
+                        <div className="grid grid-cols-3 gap-6">
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Employee Information</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Employee Code</div>
+                                <div className="font-mono text-sm mt-1">{employee.employeeCode}</div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Full Name</div>
+                                <div className="text-sm mt-1">{employee.firstName} {employee.lastName}</div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Department</div>
+                                <div className="text-sm mt-1">{employee.department}</div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Designation</div>
+                                <div className="text-sm mt-1">{employee.designation}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Contact Information</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground">Email Address</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <Mail className="h-3 w-3" />
+                                  {employee.email}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Phone Number</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <Phone className="h-3 w-3" />
+                                  {employee.phone}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Location</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  {getLocationName(employee.locationId)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground">Status</div>
+                                <div className="text-sm mt-1 flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${statusColors[employee.status]}`} />
+                                  <span className="capitalize">{employee.status.replace('_', ' ')}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Assigned Assets</h4>
+                            <div className="space-y-2">
+                              {employeeAssets && employeeAssets.length > 0 ? (
+                                employeeAssets.map((asset, index) => (
+                                  <div key={index} className="p-3 bg-muted/30 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Laptop className="h-4 w-4 text-muted-foreground" />
+                                      <span className="font-mono text-sm font-medium">{asset?.assetId}</span>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {asset?.brand} {asset?.modelName}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      Type: {asset?.assetType}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-sm text-muted-foreground italic p-3 bg-muted/20 rounded-lg">
+                                  No assets currently assigned to this employee
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedEmployee(employee)
+                              setIsViewDialogOpen(true)
+                            }}
+                            data-testid={`button-view-details-${employee.id}`}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Full Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedEmployee(employee)
+                              setIsEditDialogOpen(true)
+                            }}
+                            data-testid={`button-edit-employee-${employee.id}`}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Employee
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                return rows
               })}
             </TableBody>
           </Table>
