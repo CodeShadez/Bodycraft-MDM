@@ -218,28 +218,13 @@ export default function Dashboard() {
     <div className="p-6 space-y-6 animate-fade-in" data-testid="dashboard-page">
       <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
       
-      {/* Header with System Health */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white" data-testid="title-dashboard">Dashboard</h1>
-          <p className="text-white/70">
-            Comprehensive overview of BODYCRAFT IT asset management system across {totalLocations} locations
+          <p className="text-white/70 mt-1">
+            Centralized Master Data Management platform for IT asset lifecycle monitoring, resource allocation, and operational analytics.
           </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right glass-card px-4 py-2 rounded-lg">
-            <div className="text-sm text-white/70">System Health</div>
-            <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-white">{overallSystemHealth}%</div>
-              {overallSystemHealth >= 90 ? (
-                <CheckCircle className="h-6 w-6 text-green-400" />
-              ) : overallSystemHealth >= 70 ? (
-                <AlertTriangle className="h-6 w-6 text-yellow-400" />
-              ) : (
-                <AlertCircle className="h-6 w-6 text-red-400" />
-              )}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -288,33 +273,32 @@ export default function Dashboard() {
           onClick={() => setLocation("/maintenance")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white/90">Maintenance</CardTitle>
+            <CardTitle className="text-sm font-medium text-white/90">Maintenance Activities</CardTitle>
             <Wrench className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-300">{maintenanceDue}</div>
             <p className="text-xs text-white/60">
-              Due • {maintenanceInProgress} in progress • {maintenanceCompleted} completed
+              Scheduled • {maintenanceInProgress} active • {maintenanceCompleted} completed
             </p>
           </CardContent>
         </Card>
 
         <Card 
-          data-testid="card-system-health" 
+          data-testid="card-warranty-status" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.3s" }}
-          onClick={() => setLocation("/compliance")}
+          onClick={() => setLocation("/assets")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white/90">System Health</CardTitle>
-            <Activity className="h-4 w-4 text-green-400" />
+            <CardTitle className="text-sm font-medium text-white/90">Warranty Management</CardTitle>
+            <Shield className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{assetHealthScore}%</div>
+            <div className="text-2xl font-bold text-white">{expiringSoon}</div>
             <p className="text-xs text-white/60">
-              Asset reliability • {expiringSoon} warranties expiring
+              Expiring within 90 days • Active monitoring
             </p>
-            <Progress value={assetHealthScore} className="mt-2 bg-white/10" />
           </CardContent>
         </Card>
       </div>
@@ -451,32 +435,35 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Location Distribution */}
+        {/* Employee Distribution */}
         <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="text-lg text-white/90">Assets by Location</CardTitle>
+            <CardTitle className="text-lg text-white/90">Resource Allocation</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.entries(locationDistribution)
-              .sort(([,a], [,b]) => (b as number) - (a as number))
-              .slice(0, 5)
-              .map(([location, count]) => (
-                <div key={location} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-3 w-3 text-blue-400" />
-                    <span className="text-sm text-white/80">{location}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 bg-white/10 rounded-full h-2">
-                      <div 
-                        className="bg-blue-400 h-2 rounded-full" 
-                        style={{width: `${totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0}%`}}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-medium w-6 text-right text-white">{count as number}</span>
-                  </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white/10">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm text-white/80">Total Personnel</span>
                 </div>
-              ))}
+                <span className="text-sm font-medium text-white">{totalEmployees}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white/10">
+                <div className="flex items-center gap-2">
+                  <Laptop className="h-4 w-4 text-purple-400" />
+                  <span className="text-sm text-white/80">Assets Deployed</span>
+                </div>
+                <span className="text-sm font-medium text-white">{activeAssignments}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white/10">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-green-400" />
+                  <span className="text-sm text-white/80">Available Inventory</span>
+                </div>
+                <span className="text-sm font-medium text-white">{availableAssets}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -555,16 +542,6 @@ export default function Dashboard() {
                 )
               })}
             
-            {expiringSoon > 0 && (
-              <div className="mt-4 p-3 rounded-lg bg-yellow-500/20 border border-yellow-400/30">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-300" />
-                  <span className="text-sm font-medium text-yellow-100">
-                    {expiringSoon} asset{expiringSoon > 1 ? 's' : ''} warranty expiring within 90 days
-                  </span>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
@@ -572,8 +549,8 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <Card className="glass-card border-0">
         <CardHeader>
-          <CardTitle className="text-lg text-white/90">Quick Actions</CardTitle>
-          <p className="text-sm text-white/70">Common tasks and management actions</p>
+          <CardTitle className="text-lg text-white/90">Operational Actions</CardTitle>
+          <p className="text-sm text-white/70">Streamlined access to core MDM functions</p>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
@@ -585,8 +562,8 @@ export default function Dashboard() {
             >
               <Laptop className="h-5 w-5 text-purple-400" />
               <div className="text-center">
-                <div className="font-medium">Add Asset</div>
-                <div className="text-xs text-white/60">Register new equipment</div>
+                <div className="font-medium">Register Asset</div>
+                <div className="text-xs text-white/60">Add new inventory item</div>
               </div>
             </Button>
             
@@ -598,8 +575,8 @@ export default function Dashboard() {
             >
               <Users className="h-5 w-5 text-blue-400" />
               <div className="text-center">
-                <div className="font-medium">Assign Asset</div>
-                <div className="text-xs text-white/60">Assign to employee</div>
+                <div className="font-medium">Deploy Asset</div>
+                <div className="text-xs text-white/60">Resource allocation</div>
               </div>
             </Button>
             
@@ -611,8 +588,8 @@ export default function Dashboard() {
             >
               <Wrench className="h-5 w-5 text-orange-400" />
               <div className="text-center">
-                <div className="font-medium">Schedule Maintenance</div>
-                <div className="text-xs text-white/60">Preventive service</div>
+                <div className="font-medium">Maintenance Schedule</div>
+                <div className="text-xs text-white/60">Service management</div>
               </div>
             </Button>
             
@@ -624,8 +601,8 @@ export default function Dashboard() {
             >
               <Eye className="h-5 w-5 text-green-400" />
               <div className="text-center">
-                <div className="font-medium">View Reports</div>
-                <div className="text-xs text-white/60">Analytics & insights</div>
+                <div className="font-medium">Analytics Portal</div>
+                <div className="text-xs text-white/60">Data insights</div>
               </div>
             </Button>
           </div>
