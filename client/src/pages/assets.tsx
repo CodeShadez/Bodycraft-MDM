@@ -144,7 +144,7 @@ export default function AssetsPage() {
   const [locationFilter, setLocationFilter] = useState<string>("all")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [importFile, setImportFile] = useState<File | null>(null)
@@ -976,337 +976,217 @@ export default function AssetsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-2 border-border/60">
-                  <TableHead className="font-semibold text-foreground h-14 w-[280px] px-6">Asset Information</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Department</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[300px] px-6">Asset Information</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[160px] px-4">Department</TableHead>
                   <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Status</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[200px] px-4">Location</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[180px] px-4">Assignment</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[130px] px-4">Ownership</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[130px] px-4">Service Tag</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[70px] text-center px-2">Actions</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[220px] px-4">Location</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Assignment Type</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[180px] px-4">Assigned To</TableHead>
+                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Service Tag</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAssets.map((asset) => (
-                  <TableRow 
-                    key={asset.assetId}
-                    className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group"
-                    data-testid={`row-asset-${asset.assetId}`}
-                  >
-                    {/* Asset Information - ID, Type, Brand, Model */}
-                    <TableCell className="py-5 px-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-2.5 rounded-xl bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
-                          {getAssetIcon(asset.assetType)}
-                        </div>
-                        <div className="min-w-0 flex-1 space-y-1.5">
-                          <div className="flex items-center gap-2.5">
-                            <span className="font-semibold text-base text-foreground leading-none" data-testid={`text-asset-id-${asset.assetId}`}>
-                              {asset.assetId}
-                            </span>
-                            <Badge variant="outline" className="text-xs font-medium px-2 py-0.5" data-testid={`badge-type-${asset.assetId}`}>
-                              {asset.assetType}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground leading-tight truncate">
-                            {asset.brand} {asset.modelName}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    {/* Department */}
-                    <TableCell className="py-5 px-4">
-                      <span className="text-sm font-medium text-foreground leading-relaxed" data-testid={`text-department-${asset.assetId}`}>
-                        {asset.departmentId 
-                          ? departments?.find(d => d.id === asset.departmentId)?.name || "—"
-                          : "—"}
-                      </span>
-                    </TableCell>
-
-                    {/* Status & Condition */}
-                    <TableCell className="py-5 px-4">
-                      <div className="space-y-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColors[asset.status]}`} />
-                          <span className="text-sm font-medium capitalize leading-none" data-testid={`text-status-${asset.assetId}`}>
-                            {asset.status}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${conditionColors[asset.condition]}`} />
-                          <span className="text-sm text-muted-foreground capitalize leading-none" data-testid={`text-condition-${asset.assetId}`}>
-                            {asset.condition}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    {/* Location */}
-                    <TableCell className="py-5 px-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm font-medium text-foreground leading-tight truncate" data-testid={`text-location-${asset.assetId}`}>
-                            {getLocationName(asset.locationId)}
-                          </span>
-                        </div>
-                        {(asset.physicalLocation || asset.floor) && (
-                          <p className="text-xs text-muted-foreground leading-relaxed pl-6 truncate">
-                            {asset.physicalLocation && <span>{asset.physicalLocation}</span>}
-                            {asset.physicalLocation && asset.floor && <span className="mx-1.5">•</span>}
-                            {asset.floor && <span>{asset.floor}</span>}
-                          </p>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    {/* Assignment */}
-                    <TableCell className="py-5 px-4">
-                      <div className="space-y-2">
-                        <Badge 
-                          variant="outline" 
-                          className="text-xs font-medium px-2.5 py-0.5"
-                          data-testid={`badge-assignment-${asset.assetId}`}
-                        >
-                          {asset.assignmentType === 'person' ? 'Person' : 'Outlet'}
-                        </Badge>
-                        <div className="flex items-center gap-2">
-                          <User className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="text-xs text-muted-foreground leading-tight truncate" data-testid={`text-assigned-${asset.assetId}`}>
-                            {asset.assignmentType === 'outlet' 
-                              ? getLocationName(asset.locationId) 
-                              : getEmployeeName(asset.currentUserId)}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    {/* Ownership */}
-                    <TableCell className="py-5 px-4">
-                      <Badge 
-                        variant={asset.ownershipType === 'company' ? 'default' : 'secondary'} 
-                        className="text-xs font-medium px-2.5 py-1"
-                        data-testid={`badge-ownership-${asset.assetId}`}
+                {filteredAssets.map((asset) => {
+                  const isExpanded = expandedAssetId === asset.assetId
+                  return (
+                    <>
+                      <TableRow 
+                        key={asset.assetId}
+                        onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
+                        className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                        data-testid={`row-asset-${asset.assetId}`}
                       >
-                        {asset.ownershipType === 'company' ? 'Company' : 
-                         asset.ownershipType === 'rented' ? 'Rented' : 
-                         asset.ownershipType === 'personal' ? 'Personal' : '—'}
-                      </Badge>
-                    </TableCell>
+                        {/* Asset Information - ID, Type, Brand, Model, Ownership */}
+                        <TableCell className="py-5 px-6">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
+                              {getAssetIcon(asset.assetType)}
+                            </div>
+                            <div className="min-w-0 flex-1 space-y-1.5">
+                              <div className="flex items-center gap-2.5 flex-wrap">
+                                <span className="font-semibold text-base text-foreground leading-none" data-testid={`text-asset-id-${asset.assetId}`}>
+                                  {asset.assetId}
+                                </span>
+                                <Badge variant="outline" className="text-xs font-medium px-2 py-0.5" data-testid={`badge-type-${asset.assetId}`}>
+                                  {asset.assetType}
+                                </Badge>
+                                <Badge 
+                                  variant={asset.ownershipType === 'company' ? 'default' : 'secondary'} 
+                                  className="text-xs font-medium px-2 py-0.5"
+                                  data-testid={`badge-ownership-${asset.assetId}`}
+                                >
+                                  {asset.ownershipType === 'company' ? 'Company' : 
+                                   asset.ownershipType === 'rented' ? 'Rented' : 
+                                   asset.ownershipType === 'personal' ? 'Personal' : '—'}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground leading-tight truncate">
+                                {asset.brand} {asset.modelName}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
 
-                    {/* Service Tag */}
-                    <TableCell className="py-5 px-4">
-                      <span className="text-sm font-mono text-muted-foreground leading-relaxed" data-testid={`text-service-tag-${asset.assetId}`}>
-                        {asset.serviceTag || "—"}
-                      </span>
-                    </TableCell>
+                        {/* Department */}
+                        <TableCell className="py-5 px-4">
+                          <span className="text-sm font-medium text-foreground leading-relaxed" data-testid={`text-department-${asset.assetId}`}>
+                            {asset.departmentId 
+                              ? departments?.find(d => d.id === asset.departmentId)?.name || "—"
+                              : "—"}
+                          </span>
+                        </TableCell>
 
-                    {/* Actions */}
-                    <TableCell className="py-5 px-2 text-center">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            className="h-8 w-8 p-0 hover:bg-primary/10"
-                            data-testid={`button-actions-${asset.assetId}`}
+                        {/* Status & Condition */}
+                        <TableCell className="py-5 px-4">
+                          <div className="space-y-2.5">
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColors[asset.status]}`} />
+                              <span className="text-sm font-medium capitalize leading-none" data-testid={`text-status-${asset.assetId}`}>
+                                {asset.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${conditionColors[asset.condition]}`} />
+                              <span className="text-sm text-muted-foreground capitalize leading-none" data-testid={`text-condition-${asset.assetId}`}>
+                                {asset.condition}
+                              </span>
+                            </div>
+                          </div>
+                        </TableCell>
+
+                        {/* Location */}
+                        <TableCell className="py-5 px-4">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm font-medium text-foreground leading-tight truncate" data-testid={`text-location-${asset.assetId}`}>
+                                {getLocationName(asset.locationId)}
+                              </span>
+                            </div>
+                            {(asset.physicalLocation || asset.floor) && (
+                              <p className="text-xs text-muted-foreground leading-relaxed pl-6 truncate">
+                                {asset.physicalLocation && <span>{asset.physicalLocation}</span>}
+                                {asset.physicalLocation && asset.floor && <span className="mx-1.5">•</span>}
+                                {asset.floor && <span>{asset.floor}</span>}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+
+                        {/* Assignment Type */}
+                        <TableCell className="py-5 px-4">
+                          <Badge 
+                            variant="outline" 
+                            className="text-xs font-medium px-2.5 py-1"
+                            data-testid={`badge-assignment-${asset.assetId}`}
                           >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedAsset(asset)
-                              setIsViewDialogOpen(true)
-                            }}
-                            data-testid={`menu-view-${asset.assetId}`}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedAsset(asset)
-                              setIsEditDialogOpen(true)
-                            }}
-                            data-testid={`menu-edit-${asset.assetId}`}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Asset
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => deleteAssetMutation.mutate(asset.assetId)}
-                            className="text-red-600 focus:text-red-600"
-                            data-testid={`menu-delete-${asset.assetId}`}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Asset
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                            {asset.assignmentType === 'person' ? 'Person' : 'Outlet'}
+                          </Badge>
+                        </TableCell>
+
+                        {/* Assigned To */}
+                        <TableCell className="py-5 px-4">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm font-medium text-foreground leading-tight truncate" data-testid={`text-assigned-${asset.assetId}`}>
+                              {asset.assignmentType === 'outlet' 
+                                ? getLocationName(asset.locationId) 
+                                : getEmployeeName(asset.currentUserId)}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        {/* Service Tag */}
+                        <TableCell className="py-5 px-4">
+                          <span className="text-sm font-mono text-muted-foreground leading-relaxed" data-testid={`text-service-tag-${asset.assetId}`}>
+                            {asset.serviceTag || "—"}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+
+                      {/* Expanded Details Row */}
+                      {isExpanded && (
+                        <TableRow className="bg-muted/10 border-b-2 border-border/50">
+                          <TableCell colSpan={7} className="p-0">
+                            <div className="p-6 space-y-6">
+                              {/* Complete Asset Details */}
+                              <div className="grid grid-cols-3 gap-6">
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground mb-1">Purchase Date</Label>
+                                    <p className="text-sm font-medium">{asset.purchaseDate || "Not specified"}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground mb-1">Warranty Expiry</Label>
+                                    <p className="text-sm font-medium">{asset.warrantyExpiry || "Not specified"}</p>
+                                  </div>
+                                </div>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground mb-1">Created At</Label>
+                                    <p className="text-sm font-medium">{new Date(asset.createdAt).toLocaleDateString()}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground mb-1">Last Updated</Label>
+                                    <p className="text-sm font-medium">{new Date(asset.updatedAt).toLocaleDateString()}</p>
+                                  </div>
+                                </div>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground mb-1">Full Location Path</Label>
+                                    <p className="text-sm font-medium">
+                                      {getLocationName(asset.locationId)}
+                                      {asset.physicalLocation && ` → ${asset.physicalLocation}`}
+                                      {asset.floor && ` (${asset.floor})`}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex items-center gap-3 pt-4 border-t border-border/50">
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedAsset(asset)
+                                    setIsEditDialogOpen(true)
+                                  }}
+                                  variant="default"
+                                  size="sm"
+                                  className="gap-2"
+                                  data-testid={`button-edit-${asset.assetId}`}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                  Edit Asset
+                                </Button>
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    if (confirm(`Are you sure you want to delete asset ${asset.assetId}?`)) {
+                                      deleteAssetMutation.mutate(asset.assetId)
+                                    }
+                                  }}
+                                  variant="destructive"
+                                  size="sm"
+                                  className="gap-2"
+                                  data-testid={`button-delete-${asset.assetId}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Delete Asset
+                                </Button>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
-
-      {/* View Asset Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Asset Details</DialogTitle>
-            <DialogDescription>
-              View comprehensive specifications, status history, and assignment records for {selectedAsset?.assetId}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedAsset && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Asset ID</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.assetId}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Type</Label>
-                  <div className="text-sm p-2 bg-muted rounded flex items-center gap-2">
-                    {getAssetIcon(selectedAsset.assetType)}
-                    {selectedAsset.assetType}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Brand</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.brand}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Model</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.modelName}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Status</Label>
-                  <div className="text-sm p-2 bg-muted rounded flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${statusColors[selectedAsset.status]}`} />
-                    <span className="capitalize">{selectedAsset.status}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Condition</Label>
-                  <div className="text-sm p-2 bg-muted rounded flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${conditionColors[selectedAsset.condition]}`} />
-                    <span className="capitalize">{selectedAsset.condition}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Location</Label>
-                <div className="text-sm p-2 bg-muted rounded">
-                  {getLocationName(selectedAsset.locationId)}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Department</Label>
-                <div className="text-sm p-2 bg-muted rounded">
-                  {selectedAsset.departmentId 
-                    ? departments?.find(d => d.id === selectedAsset.departmentId)?.name || "Unknown department"
-                    : "Not assigned"}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Physical Location</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.physicalLocation || "Not specified"}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Floor</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.floor || "Not specified"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Ownership Type</Label>
-                  <div className="text-sm p-2 bg-muted rounded capitalize">
-                    {selectedAsset.ownershipType === 'company' ? 'Company Owned' : 
-                     selectedAsset.ownershipType === 'rented' ? 'Rented' : 
-                     selectedAsset.ownershipType === 'personal' ? 'Personal' : 
-                     selectedAsset.ownershipType || 'Not specified'}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Assignment Type</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.assignmentType === 'person' ? 'Assigned to Person' : 
-                     selectedAsset.assignmentType === 'outlet' ? 'Assigned to Outlet' : 
-                     selectedAsset.assignmentType || 'Not specified'}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Assigned To</Label>
-                <div className="text-sm p-2 bg-muted rounded">
-                  {selectedAsset.assignmentType === 'outlet' 
-                    ? `${getLocationName(selectedAsset.locationId)} (Outlet)` 
-                    : getEmployeeName(selectedAsset.currentUserId)}
-                </div>
-              </div>
-
-              {selectedAsset.serviceTag && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Service Tag</Label>
-                  <div className="text-sm p-2 bg-muted rounded font-mono">
-                    {selectedAsset.serviceTag}
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Purchase Date</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.purchaseDate || "Not specified"}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Warranty Expiry</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAsset.warrantyExpiry || "Not specified"}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Asset Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
