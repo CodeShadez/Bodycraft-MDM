@@ -597,7 +597,6 @@ export default function MaintenancePage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Cost</TableHead>
                 <TableHead>Technician</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -674,66 +673,13 @@ export default function MaintenancePage() {
                         {record.technicianName || "Not assigned"}
                       </div>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${record.id}`}>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedMaintenance(record)
-                              setIsViewDialogOpen(true)
-                            }}
-                            data-testid={`menu-view-${record.id}`}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedMaintenance(record)
-                              setIsEditDialogOpen(true)
-                            }}
-                            data-testid={`menu-edit-${record.id}`}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Maintenance
-                          </DropdownMenuItem>
-                          {!record.completedDate && (
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedMaintenance(record)
-                                setIsCompleteDialogOpen(true)
-                              }}
-                              data-testid={`menu-complete-${record.id}`}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Mark Complete
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => deleteMaintenanceMutation.mutate(record.id)}
-                            className="text-red-600"
-                            data-testid={`menu-delete-${record.id}`}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Record
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
                   </TableRow>
                 ]
 
                 if (isExpanded) {
                   rows.push(
                     <TableRow key={`expanded-${record.id}`} className="bg-muted/10 hover:bg-muted/10">
-                      <TableCell colSpan={8} className="p-6">
+                      <TableCell colSpan={7} className="p-6">
                         <div className="grid grid-cols-3 gap-6">
                           <div className="space-y-4">
                             <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Service Details</h4>

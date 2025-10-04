@@ -594,7 +594,6 @@ export default function EmployeesPage() {
                 <TableHead>Location</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Assigned Assets</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -675,54 +674,13 @@ export default function EmployeesPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${employee.id}`}>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedEmployee(employee)
-                              setIsViewDialogOpen(true)
-                            }}
-                            data-testid={`menu-view-${employee.id}`}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedEmployee(employee)
-                              setIsEditDialogOpen(true)
-                            }}
-                            data-testid={`menu-edit-${employee.id}`}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Employee
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => deleteEmployeeMutation.mutate(employee.id)}
-                            className="text-red-600"
-                            data-testid={`menu-delete-${employee.id}`}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Employee
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
                   </TableRow>
                 ]
 
                 if (isExpanded) {
                   rows.push(
                     <TableRow key={`expanded-${employee.id}`} className="bg-muted/10 hover:bg-muted/10">
-                      <TableCell colSpan={7} className="p-6">
+                      <TableCell colSpan={6} className="p-6">
                         <div className="grid grid-cols-3 gap-6">
                           <div className="space-y-4">
                             <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Employee Information</h4>

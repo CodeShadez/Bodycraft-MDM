@@ -1181,7 +1181,6 @@ export default function AssetsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Assigned To</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
               <TableBody>

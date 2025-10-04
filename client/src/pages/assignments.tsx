@@ -595,7 +595,6 @@ export default function AssignmentsPage() {
                 <TableHead>Condition</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Reason</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -699,59 +698,13 @@ export default function AssignmentsPage() {
                         {assignment.assignmentReason}
                       </Badge>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${assignmentId}`}>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedAssignment(assignment)
-                              setIsViewDialogOpen(true)
-                            }}
-                            data-testid={`menu-view-${assignmentId}`}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          {isActive && (
-                            <>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedAssignment(assignment)
-                                  setIsReturnDialogOpen(true)
-                                }}
-                                data-testid={`menu-return-${assignmentId}`}
-                              >
-                                <Undo className="mr-2 h-4 w-4" />
-                                Return Asset
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedAssignment(assignment)
-                                  setIsTransferDialogOpen(true)
-                                }}
-                                data-testid={`menu-transfer-${assignmentId}`}
-                              >
-                                <ArrowRightLeft className="mr-2 h-4 w-4" />
-                                Transfer Asset
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
                   </TableRow>
                 ]
 
                 if (isExpanded) {
                   rows.push(
                     <TableRow key={`expanded-${assignmentId}`} className="bg-muted/10 hover:bg-muted/10">
-                      <TableCell colSpan={8} className="p-6">
+                      <TableCell colSpan={7} className="p-6">
                         <div className="grid grid-cols-3 gap-6">
                           <div className="space-y-4">
                             <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Assignment Timeline</h4>

@@ -516,7 +516,6 @@ export default function LocationsPage() {
                 <TableHead>Employees</TableHead>
                 <TableHead>Active Assignments</TableHead>
                 <TableHead>Contact</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -587,58 +586,13 @@ export default function LocationsPage() {
                         {location.contactDetails}
                       </div>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${location.id}`}>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedLocation(location)
-                              setIsViewDialogOpen(true)
-                            }}
-                            data-testid={`menu-view-${location.id}`}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedLocation(location)
-                              setIsEditDialogOpen(true)
-                            }}
-                            data-testid={`menu-edit-${location.id}`}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Location
-                          </DropdownMenuItem>
-                          <DropdownMenuItem data-testid={`menu-analytics-${location.id}`}>
-                            <BarChart3 className="mr-2 h-4 w-4" />
-                            View Analytics
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => deleteLocationMutation.mutate(location.id)}
-                            className="text-red-600"
-                            data-testid={`menu-delete-${location.id}`}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Location
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
                   </TableRow>
                 ]
 
                 if (isExpanded) {
                   rows.push(
                     <TableRow key={`expanded-${location.id}`} className="bg-muted/10 hover:bg-muted/10">
-                      <TableCell colSpan={7} className="p-6">
+                      <TableCell colSpan={6} className="p-6">
                         <div className="grid grid-cols-3 gap-6">
                           <div className="space-y-4">
                             <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Location Details</h4>
