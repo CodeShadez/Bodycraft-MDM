@@ -1,4 +1,4 @@
-import { useState, Fragment, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useLocation } from "wouter"
 import { 
@@ -1178,15 +1178,15 @@ export default function AssetsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAssets.map((asset) => {
+                {filteredAssets.flatMap((asset) => {
                   const isExpanded = expandedAssetId === asset.assetId
-                  return (
-                    <Fragment key={asset.assetId}>
-                      <TableRow 
-                        onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
-                        className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
-                        data-testid={`row-asset-${asset.assetId}`}
-                      >
+                  const rows = [
+                    <TableRow 
+                      key={`main-${asset.assetId}`}
+                      onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
+                      className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                      data-testid={`row-asset-${asset.assetId}`}
+                    >
                         {/* Asset Type */}
                         <TableCell className="py-4 px-6">
                           <div className="flex items-center gap-2">
@@ -1252,11 +1252,12 @@ export default function AssetsPage() {
                           </div>
                         </TableCell>
                       </TableRow>
+                  ];
 
-                      {/* Expanded Details Row */}
-                      {isExpanded && (
-                        <TableRow className="bg-muted/10 border-b-2 border-border/50">
-                          <TableCell colSpan={5} className="p-0">
+                  if (isExpanded) {
+                    rows.push(
+                      <TableRow key={`expanded-${asset.assetId}`} className="bg-muted/10 border-b-2 border-border/50">
+                        <TableCell colSpan={5} className="p-0">
                             <div className="p-8 space-y-6">
                               {/* Complete Details Header */}
                               <div className="flex items-center gap-3 pb-4 border-b border-border/50">
@@ -1402,9 +1403,10 @@ export default function AssetsPage() {
                             </div>
                           </TableCell>
                         </TableRow>
-                      )}
-                    </Fragment>
-                  )
+                    )
+                  }
+
+                  return rows
                 })}
               </TableBody>
             </Table>
