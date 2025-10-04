@@ -107,6 +107,11 @@ interface Asset {
   status: "available" | "assigned" | "maintenance" | "retired"
   condition: "excellent" | "good" | "fair" | "poor"
   locationId: number | null
+  departmentId: number | null
+  physicalLocation: string | null
+  floor: string | null
+  ownershipType: "company" | "rented" | "personal"
+  assignmentType: "person" | "outlet"
   currentUserId: number | null
   createdAt: string
   updatedAt: string
@@ -355,6 +360,11 @@ export default function AssetsPage() {
       status: formData.get('status'),
       condition: formData.get('condition'),
       locationId: formData.get('locationId') ? parseInt(formData.get('locationId') as string) : null,
+      departmentId: formData.get('departmentId') ? parseInt(formData.get('departmentId') as string) : null,
+      physicalLocation: formData.get('physicalLocation') || null,
+      floor: formData.get('floor') || null,
+      ownershipType: formData.get('ownershipType'),
+      assignmentType: formData.get('assignmentType'),
     }
 
     updateAssetMutation.mutate({ assetId: selectedAsset.assetId, data: assetData })
@@ -1137,9 +1147,55 @@ export default function AssetsPage() {
               </div>
 
               <div className="space-y-2">
+                <Label className="text-sm font-medium">Department</Label>
+                <div className="text-sm p-2 bg-muted rounded">
+                  {selectedAsset.departmentId 
+                    ? departments?.find(d => d.id === selectedAsset.departmentId)?.name || "Unknown department"
+                    : "Not assigned"}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Physical Location</Label>
+                  <div className="text-sm p-2 bg-muted rounded">
+                    {selectedAsset.physicalLocation || "Not specified"}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Floor</Label>
+                  <div className="text-sm p-2 bg-muted rounded">
+                    {selectedAsset.floor || "Not specified"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Ownership Type</Label>
+                  <div className="text-sm p-2 bg-muted rounded capitalize">
+                    {selectedAsset.ownershipType === 'company' ? 'Company Owned' : 
+                     selectedAsset.ownershipType === 'rented' ? 'Rented' : 
+                     selectedAsset.ownershipType === 'personal' ? 'Personal' : 
+                     selectedAsset.ownershipType || 'Not specified'}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Assignment Type</Label>
+                  <div className="text-sm p-2 bg-muted rounded">
+                    {selectedAsset.assignmentType === 'person' ? 'Assigned to Person' : 
+                     selectedAsset.assignmentType === 'outlet' ? 'Assigned to Outlet' : 
+                     selectedAsset.assignmentType || 'Not specified'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label className="text-sm font-medium">Assigned To</Label>
                 <div className="text-sm p-2 bg-muted rounded">
-                  {getEmployeeName(selectedAsset.currentUserId)}
+                  {selectedAsset.assignmentType === 'outlet' 
+                    ? `${getLocationName(selectedAsset.locationId)} (Outlet)` 
+                    : getEmployeeName(selectedAsset.currentUserId)}
                 </div>
               </div>
 
@@ -1304,6 +1360,71 @@ export default function AssetsPage() {
                     <SelectItem value="poor">Poor</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-departmentId">Department</Label>
+                <Select name="departmentId" defaultValue={selectedAsset.departmentId?.toString() || ""}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments?.filter(d => d.isActive).map(dept => (
+                      <SelectItem key={dept.id} value={dept.id.toString()}>
+                        {dept.name} ({dept.type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-physicalLocation">Physical Location</Label>
+                  <Input
+                    id="edit-physicalLocation"
+                    name="physicalLocation"
+                    placeholder="Reception, Front Desk, Room 1..."
+                    defaultValue={selectedAsset.physicalLocation || ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-floor">Floor</Label>
+                  <Input
+                    id="edit-floor"
+                    name="floor"
+                    placeholder="Ground Floor, 1st Floor..."
+                    defaultValue={selectedAsset.floor || ""}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-ownershipType">Ownership Type</Label>
+                  <Select name="ownershipType" defaultValue={selectedAsset.ownershipType || "company"}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="company">Company Owned</SelectItem>
+                      <SelectItem value="rented">Rented</SelectItem>
+                      <SelectItem value="personal">Personal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-assignmentType">Assignment Type</Label>
+                  <Select name="assignmentType" defaultValue={selectedAsset.assignmentType || "person"}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="person">Assigned to Person</SelectItem>
+                      <SelectItem value="outlet">Assigned to Outlet</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <DialogFooter>
