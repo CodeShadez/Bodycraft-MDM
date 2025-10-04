@@ -184,7 +184,8 @@ export const users = pgTable("users", {
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
   firstName: varchar("first_name", { length: 100 }).notNull(),
   lastName: varchar("last_name", { length: 100 }).notNull(),
-  role: varchar("role", { length: 50 }).notNull().default("user"), // super_admin, admin, manager, user
+  role: varchar("role", { length: 50 }).notNull().default("user"), // super_admin, admin, location_user, user
+  locationId: integer("location_id").references(() => locations.id), // For location-specific access (location_user role)
   status: varchar("status", { length: 20 }).notNull().default("active"), // active, inactive, locked
   lastLogin: timestamp("last_login"),
   employeeId: integer("employee_id").references(() => employees.id), // Link to employee record if applicable

@@ -54,6 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.session.userId = user.id;
         req.session.username = user.username;
         req.session.role = user.role;
+        req.session.locationId = user.locationId || null;
 
         // Return user info (without password hash)
         const { passwordHash, ...userResponse } = user;
@@ -121,11 +122,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   };
 
+  // Helper function to filter data by location for location_user role
+  const filterByUserLocation = (data: any[], req: any) => {
+    // super_admin and admin can see all data
+    if (req.session.role === 'super_admin' || req.session.role === 'admin') {
+      return data;
+    }
+    
+    // location_user can only see data from their location
+    if (req.session.role === 'location_user' && req.session.locationId) {
+      return data.filter((item: any) => item.locationId === req.session.locationId);
+    }
+    
+    // Default: return all data (for other roles)
+    return data;
+  };
+
   // Assets routes - Protected with authentication
   app.get("/api/assets", requireAuth, async (req, res) => {
     try {
       const assets = await storage.getAllAssets();
-      res.json(assets);
+      const filteredAssets = filterByUserLocation(assets, req);
+      res.json(filteredAssets);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch assets" });
     }
