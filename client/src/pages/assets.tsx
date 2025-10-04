@@ -982,7 +982,6 @@ export default function AssetsPage() {
                   <TableHead className="font-semibold text-foreground h-12 px-4">Status</TableHead>
                   <TableHead className="font-semibold text-foreground h-12 px-4">Location</TableHead>
                   <TableHead className="font-semibold text-foreground h-12 px-4">Assigned To</TableHead>
-                  <TableHead className="font-semibold text-foreground h-12 px-4 text-right w-[100px]">Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -992,7 +991,8 @@ export default function AssetsPage() {
                     <>
                       <TableRow 
                         key={asset.assetId}
-                        className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group"
+                        onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
+                        className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
                         data-testid={`row-asset-${asset.assetId}`}
                       >
                         {/* Asset Information */}
@@ -1013,6 +1013,13 @@ export default function AssetsPage() {
                               <p className="text-sm text-muted-foreground truncate">
                                 {asset.brand} {asset.modelName}
                               </p>
+                            </div>
+                            <div className="ml-2 text-muted-foreground">
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
                             </div>
                           </div>
                         </TableCell>
@@ -1048,35 +1055,12 @@ export default function AssetsPage() {
                             </span>
                           </div>
                         </TableCell>
-
-                        {/* Expand Button */}
-                        <TableCell className="py-4 px-4 text-right">
-                          <Button
-                            onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
-                            variant="ghost"
-                            size="sm"
-                            className="gap-2"
-                            data-testid={`button-details-${asset.assetId}`}
-                          >
-                            {isExpanded ? (
-                              <>
-                                <ChevronUp className="h-4 w-4" />
-                                Hide
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="h-4 w-4" />
-                                Show
-                              </>
-                            )}
-                          </Button>
-                        </TableCell>
                       </TableRow>
 
                       {/* Expanded Details Row */}
                       {isExpanded && (
                         <TableRow className="bg-muted/10 border-b-2 border-border/50">
-                          <TableCell colSpan={5} className="p-0">
+                          <TableCell colSpan={4} className="p-0">
                             <div className="p-8 space-y-6">
                               {/* Complete Details Header */}
                               <div className="flex items-center gap-3 pb-4 border-b border-border/50">
