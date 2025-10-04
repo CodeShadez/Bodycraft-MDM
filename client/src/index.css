@@ -525,3 +525,9 @@
                 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   }
 }
+
+/* Table Container with Stable Scrollbar - Global Scope */
+.table-container-stable {
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+}
