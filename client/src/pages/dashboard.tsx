@@ -214,26 +214,26 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6" data-testid="dashboard-page">
+    <div className="p-6 space-y-6 animate-fade-in" data-testid="dashboard-page">
       {/* Header with System Health */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight" data-testid="title-dashboard">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white" data-testid="title-dashboard">Dashboard</h1>
+          <p className="text-white/70">
             Comprehensive overview of BODYCRAFT IT asset management system across {totalLocations} locations
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground">System Health</div>
+          <div className="text-right glass-card px-4 py-2 rounded-lg">
+            <div className="text-sm text-white/70">System Health</div>
             <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold">{overallSystemHealth}%</div>
+              <div className="text-2xl font-bold text-white">{overallSystemHealth}%</div>
               {overallSystemHealth >= 90 ? (
-                <CheckCircle className="h-6 w-6 text-green-500" />
+                <CheckCircle className="h-6 w-6 text-green-400" />
               ) : overallSystemHealth >= 70 ? (
-                <AlertTriangle className="h-6 w-6 text-yellow-500" />
+                <AlertTriangle className="h-6 w-6 text-yellow-400" />
               ) : (
-                <AlertCircle className="h-6 w-6 text-red-500" />
+                <AlertCircle className="h-6 w-6 text-red-400" />
               )}
             </div>
           </div>
@@ -244,16 +244,16 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card 
           data-testid="card-total-assets" 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           onClick={() => setLocation("/assets")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
-            <Laptop className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white/90">Total Assets</CardTitle>
+            <Laptop className="h-4 w-4 text-purple-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-total-assets">{totalAssets}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white" data-testid="text-total-assets">{totalAssets}</div>
+            <p className="text-xs text-white/60">
               Worth ₹{(totalAssetValue / 100000).toFixed(1)}L • {totalLocations} locations
             </p>
           </CardContent>
@@ -261,34 +261,36 @@ export default function Dashboard() {
 
         <Card 
           data-testid="card-assigned-assets" 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
+          style={{ animationDelay: "0.1s" }}
           onClick={() => setLocation("/assignments")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Asset Utilization</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white/90">Asset Utilization</CardTitle>
+            <Users className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-assigned-assets">{assignmentRate}%</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white" data-testid="text-assigned-assets">{assignmentRate}%</div>
+            <p className="text-xs text-white/60">
               {activeAssignments} assigned • {availableAssets} available
             </p>
-            <Progress value={assignmentRate} className="mt-2" />
+            <Progress value={assignmentRate} className="mt-2 bg-white/10" />
           </CardContent>
         </Card>
 
         <Card 
           data-testid="card-maintenance-status" 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
+          style={{ animationDelay: "0.2s" }}
           onClick={() => setLocation("/maintenance")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white/90">Maintenance</CardTitle>
+            <Wrench className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{maintenanceDue}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-orange-300">{maintenanceDue}</div>
+            <p className="text-xs text-white/60">
               Due • {maintenanceInProgress} in progress • {maintenanceCompleted} completed
             </p>
           </CardContent>
@@ -296,19 +298,20 @@ export default function Dashboard() {
 
         <Card 
           data-testid="card-system-health" 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
+          style={{ animationDelay: "0.3s" }}
           onClick={() => setLocation("/compliance")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Health</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white/90">System Health</CardTitle>
+            <Activity className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{assetHealthScore}%</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{assetHealthScore}%</div>
+            <p className="text-xs text-white/60">
               Asset reliability • {expiringSoon} warranties expiring
             </p>
-            <Progress value={assetHealthScore} className="mt-2" />
+            <Progress value={assetHealthScore} className="mt-2 bg-white/10" />
           </CardContent>
         </Card>
       </div>
@@ -316,21 +319,21 @@ export default function Dashboard() {
       {/* Integration Systems Overview */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
         <Card 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0"
           onClick={() => setLocation("/cctv")}
           data-testid="card-cctv-systems"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">CCTV Systems</CardTitle>
-            <Camera className="h-4 w-4 text-blue-500" />
+            <CardTitle className="text-sm font-medium text-white/90">CCTV Systems</CardTitle>
+            <Camera className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{cctvActive}/{cctvSystems}</div>
-                <p className="text-xs text-muted-foreground">{totalCameras} cameras active</p>
+                <div className="text-2xl font-bold text-white">{cctvActive}/{cctvSystems}</div>
+                <p className="text-xs text-white/60">{totalCameras} cameras active</p>
               </div>
-              <Badge variant={cctvHealthScore >= 90 ? "default" : "destructive"}>
+              <Badge variant={cctvHealthScore >= 90 ? "default" : "destructive"} className="bg-red-500/80 text-white border-0">
                 {cctvHealthScore}% uptime
               </Badge>
             </div>
@@ -338,21 +341,21 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0"
           onClick={() => setLocation("/biometric")}
           data-testid="card-biometric-systems"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Biometric Systems</CardTitle>
-            <Fingerprint className="h-4 w-4 text-purple-500" />
+            <CardTitle className="text-sm font-medium text-white/90">Biometric Systems</CardTitle>
+            <Fingerprint className="h-4 w-4 text-purple-400" />
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{biometricActive}/{biometricSystems}</div>
-                <p className="text-xs text-muted-foreground">{enrolledUsers} users enrolled</p>
+                <div className="text-2xl font-bold text-white">{biometricActive}/{biometricSystems}</div>
+                <p className="text-xs text-white/60">{enrolledUsers} users enrolled</p>
               </div>
-              <Badge variant={biometricHealthScore >= 90 ? "default" : "destructive"}>
+              <Badge variant={biometricHealthScore >= 90 ? "default" : "destructive"} className="bg-red-500/80 text-white border-0">
                 {biometricHealthScore}% uptime
               </Badge>
             </div>
@@ -360,21 +363,21 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0"
           onClick={() => setLocation("/reports")}
           data-testid="card-financial-overview"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Financial Overview</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium text-white/90">Financial Overview</CardTitle>
+            <DollarSign className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div>
-                <div className="text-2xl font-bold">₹{(maintenanceCosts / 100000).toFixed(1)}L</div>
-                <p className="text-xs text-muted-foreground">Total maintenance spend</p>
+                <div className="text-2xl font-bold text-white">₹{(maintenanceCosts / 100000).toFixed(1)}L</div>
+                <p className="text-xs text-white/60">Total maintenance spend</p>
               </div>
-              <div className="text-xs">
+              <div className="text-xs text-white/50">
                 Avg asset cost: ₹{avgAssetCost.toLocaleString('en-IN')}
               </div>
             </div>
@@ -385,9 +388,9 @@ export default function Dashboard() {
       {/* Enhanced Analytics Charts */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* Asset Distribution by Type */}
-        <Card>
+        <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="text-lg">Asset Distribution by Type</CardTitle>
+            <CardTitle className="text-lg text-white/90">Asset Distribution by Type</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {Object.entries(assetTypeDistribution)
@@ -395,17 +398,17 @@ export default function Dashboard() {
               .map(([type, count]) => (
                 <div key={type} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                    <span className="text-sm capitalize">{type}</span>
+                    <div className="w-3 h-3 bg-purple-400 rounded"></div>
+                    <span className="text-sm capitalize text-white/80">{type}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-24 bg-muted rounded-full h-2">
+                    <div className="w-24 bg-white/10 rounded-full h-2">
                       <div 
-                        className="bg-purple-500 h-2 rounded-full" 
+                        className="bg-purple-400 h-2 rounded-full" 
                         style={{width: `${totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0}%`}}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium w-8 text-right">{count as number}</span>
+                    <span className="text-sm font-medium w-8 text-right text-white">{count as number}</span>
                   </div>
                 </div>
               ))}
@@ -413,30 +416,30 @@ export default function Dashboard() {
         </Card>
 
         {/* Asset Status Overview */}
-        <Card>
+        <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="text-lg">Asset Status Overview</CardTitle>
+            <CardTitle className="text-lg text-white/90">Asset Status Overview</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {Object.entries(assetStatusDistribution).map(([status, count]) => {
               const percentage = totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0
               const statusColors = {
-                assigned: "bg-blue-500",
-                available: "bg-green-500", 
-                maintenance: "bg-yellow-500",
-                retired: "bg-red-500"
+                assigned: "bg-blue-400",
+                available: "bg-green-400", 
+                maintenance: "bg-yellow-400",
+                retired: "bg-red-400"
               }
-              const statusColor = statusColors[status as keyof typeof statusColors] || "bg-gray-500"
+              const statusColor = statusColors[status as keyof typeof statusColors] || "bg-gray-400"
               
               return (
                 <div key={status} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`${statusColor.replace('bg-', 'border-')} text-xs`}>
+                    <Badge variant="outline" className={`${statusColor} text-white border-0 text-xs`}>
                       {count as number}
                     </Badge>
-                    <span className="text-sm capitalize">{status}</span>
+                    <span className="text-sm capitalize text-white/80">{status}</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-white/60">
                     {percentage.toFixed(1)}%
                   </span>
                 </div>
@@ -446,28 +449,28 @@ export default function Dashboard() {
         </Card>
 
         {/* Location Distribution */}
-        <Card>
+        <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="text-lg">Assets by Location</CardTitle>
+            <CardTitle className="text-lg text-white/90">Assets by Location</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {Object.entries(locationDistribution)
               .sort(([,a], [,b]) => (b as number) - (a as number))
-              .slice(0, 5) // Show top 5 locations
+              .slice(0, 5)
               .map(([location, count]) => (
                 <div key={location} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MapPin className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm">{location}</span>
+                    <MapPin className="h-3 w-3 text-blue-400" />
+                    <span className="text-sm text-white/80">{location}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-16 bg-muted rounded-full h-2">
+                    <div className="w-16 bg-white/10 rounded-full h-2">
                       <div 
-                        className="bg-blue-500 h-2 rounded-full" 
+                        className="bg-blue-400 h-2 rounded-full" 
                         style={{width: `${totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0}%`}}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium w-6 text-right">{count as number}</span>
+                    <span className="text-sm font-medium w-6 text-right text-white">{count as number}</span>
                   </div>
                 </div>
               ))}
@@ -478,25 +481,25 @@ export default function Dashboard() {
       {/* Recent Activities and Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Recent Activities */}
-        <Card>
+        <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+            <CardTitle className="text-lg flex items-center gap-2 text-white/90">
+              <Clock className="h-5 w-5 text-blue-400" />
               Recent Activities
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {recentAssignments.length > 0 ? (
               recentAssignments.slice(0, 6).map((item) => (
-                <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg bg-white/10">
                   <div className="mt-0.5">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-green-400" />
                   </div>
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-medium text-white/90">
                       {item.asset?.assetId} assigned to {item.employee?.firstName} {item.employee?.lastName}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs text-white/60">
                       <span>{item.asset?.brand} {item.asset?.modelName}</span>
                       <span>•</span>
                       <span>{new Date(item.assignedDate).toLocaleDateString('en-IN')}</span>
@@ -505,16 +508,16 @@ export default function Dashboard() {
                 </div>
               ))
             ) : (
-              <div className="text-sm text-muted-foreground">No recent activities</div>
+              <div className="text-sm text-white/60">No recent activities</div>
             )}
           </CardContent>
         </Card>
 
         {/* Asset Condition Analysis */}
-        <Card>
+        <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Shield className="h-5 w-5" />
+            <CardTitle className="text-lg flex items-center gap-2 text-white/90">
+              <Shield className="h-5 w-5 text-purple-400" />
               Asset Condition Analysis
             </CardTitle>
           </CardHeader>
@@ -524,22 +527,22 @@ export default function Dashboard() {
               .map(([condition, count]) => {
                 const percentage = totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0
                 const conditionColors = {
-                  excellent: "bg-green-500",
-                  good: "bg-blue-500",
-                  fair: "bg-yellow-500", 
-                  poor: "bg-red-500"
+                  excellent: "bg-green-400",
+                  good: "bg-blue-400",
+                  fair: "bg-yellow-400", 
+                  poor: "bg-red-400"
                 }
-                const conditionColor = conditionColors[condition as keyof typeof conditionColors] || "bg-gray-500"
+                const conditionColor = conditionColors[condition as keyof typeof conditionColors] || "bg-gray-400"
                 
                 return (
                   <div key={condition} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm capitalize font-medium">{condition}</span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm capitalize font-medium text-white/90">{condition}</span>
+                      <span className="text-sm text-white/60">
                         {count as number} assets ({percentage.toFixed(1)}%)
                       </span>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
+                    <div className="w-full bg-white/10 rounded-full h-2">
                       <div 
                         className={`${conditionColor} h-2 rounded-full`} 
                         style={{width: `${percentage}%`}}
@@ -550,10 +553,10 @@ export default function Dashboard() {
               })}
             
             {expiringSoon > 0 && (
-              <div className="mt-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+              <div className="mt-4 p-3 rounded-lg bg-yellow-500/20 border border-yellow-400/30">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm font-medium text-yellow-800">
+                  <AlertTriangle className="h-4 w-4 text-yellow-300" />
+                  <span className="text-sm font-medium text-yellow-100">
                     {expiringSoon} asset{expiringSoon > 1 ? 's' : ''} warranty expiring within 90 days
                   </span>
                 </div>
@@ -564,62 +567,62 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="glass-card border-0">
         <CardHeader>
-          <CardTitle className="text-lg">Quick Actions</CardTitle>
-          <p className="text-sm text-muted-foreground">Common tasks and management actions</p>
+          <CardTitle className="text-lg text-white/90">Quick Actions</CardTitle>
+          <p className="text-sm text-white/70">Common tasks and management actions</p>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             <Button 
               variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-4 flex flex-col items-center gap-2 glass-card glass-card-hover border-white/20 text-white"
               onClick={() => setLocation("/assets")}
               data-testid="button-add-asset"
             >
-              <Laptop className="h-5 w-5" />
+              <Laptop className="h-5 w-5 text-purple-400" />
               <div className="text-center">
                 <div className="font-medium">Add Asset</div>
-                <div className="text-xs text-muted-foreground">Register new equipment</div>
+                <div className="text-xs text-white/60">Register new equipment</div>
               </div>
             </Button>
             
             <Button 
               variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-4 flex flex-col items-center gap-2 glass-card glass-card-hover border-white/20 text-white"
               onClick={() => setLocation("/assignments")}
               data-testid="button-assign-asset"
             >
-              <Users className="h-5 w-5" />
+              <Users className="h-5 w-5 text-blue-400" />
               <div className="text-center">
                 <div className="font-medium">Assign Asset</div>
-                <div className="text-xs text-muted-foreground">Assign to employee</div>
+                <div className="text-xs text-white/60">Assign to employee</div>
               </div>
             </Button>
             
             <Button 
               variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-4 flex flex-col items-center gap-2 glass-card glass-card-hover border-white/20 text-white"
               onClick={() => setLocation("/maintenance")}
               data-testid="button-schedule-maintenance"
             >
-              <Wrench className="h-5 w-5" />
+              <Wrench className="h-5 w-5 text-orange-400" />
               <div className="text-center">
                 <div className="font-medium">Schedule Maintenance</div>
-                <div className="text-xs text-muted-foreground">Preventive service</div>
+                <div className="text-xs text-white/60">Preventive service</div>
               </div>
             </Button>
             
             <Button 
               variant="outline" 
-              className="h-auto p-4 flex flex-col items-center gap-2"
+              className="h-auto p-4 flex flex-col items-center gap-2 glass-card glass-card-hover border-white/20 text-white"
               onClick={() => setLocation("/reports")}
               data-testid="button-view-reports"
             >
-              <Eye className="h-5 w-5" />
+              <Eye className="h-5 w-5 text-green-400" />
               <div className="text-center">
                 <div className="font-medium">View Reports</div>
-                <div className="text-xs text-muted-foreground">Analytics & insights</div>
+                <div className="text-xs text-white/60">Analytics & insights</div>
               </div>
             </Button>
           </div>
