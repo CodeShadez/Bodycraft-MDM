@@ -171,7 +171,6 @@ export default function LoginPage() {
         {/* System Info */}
         <div className="text-center text-xs text-muted-foreground space-y-1">
           <p>BODYCRAFT IT Asset Management System</p>
-          <p>Serving 32 outlets across India</p>
         </div>
       </div>
     </div>
