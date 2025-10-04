@@ -21,7 +21,10 @@ import {
   MapPin,
   AlertTriangle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  SlidersHorizontal,
+  Filter
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"

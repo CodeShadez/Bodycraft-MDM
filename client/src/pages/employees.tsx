@@ -20,7 +20,10 @@ import {
   Building2,
   Laptop,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  SlidersHorizontal,
+  Filter
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -112,6 +115,8 @@ export default function EmployeesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [departmentFilter, setDepartmentFilter] = useState<string>("all")
   const [locationFilter, setLocationFilter] = useState<string>("all")
+  const [designationFilter, setDesignationFilter] = useState<string>("all")
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -138,8 +143,9 @@ export default function EmployeesPage() {
     queryKey: ["/api/assignments"],
   })
 
-  // Get unique departments for filter
+  // Get unique departments and designations for filters
   const departments = Array.from(new Set(employees?.map(emp => emp.department) || []))
+  const designations = Array.from(new Set(employees?.map(emp => emp.designation) || []))
 
   // Filter employees
   const filteredEmployees = employees?.filter(employee => {
@@ -154,9 +160,17 @@ export default function EmployeesPage() {
     const matchesStatus = statusFilter === "all" || employee.status === statusFilter
     const matchesDepartment = departmentFilter === "all" || employee.department === departmentFilter
     const matchesLocation = locationFilter === "all" || employee.locationId?.toString() === locationFilter
+    const matchesDesignation = designationFilter === "all" || employee.designation === designationFilter
     
-    return matchesSearch && matchesStatus && matchesDepartment && matchesLocation
+    return matchesSearch && matchesStatus && matchesDepartment && matchesLocation && matchesDesignation
   }) || []
+
+  // Count active filters
+  const activeFiltersCount = [
+    departmentFilter !== "all",
+    locationFilter !== "all",
+    designationFilter !== "all"
+  ].filter(Boolean).length
 
   // Create employee mutation
   const createEmployeeMutation = useMutation({
@@ -524,57 +538,133 @@ export default function EmployeesPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by Name, Employee Code, Email, Department..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+              <Input
+                placeholder="Search by Name, Employee Code, Email, Department..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-12 pl-12 pr-12 backdrop-blur-sm border-border/40 focus:border-primary/50 transition-all"
+                data-testid="input-search-employees"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-clear-search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            <Button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              variant="outline"
+              className="h-12 gap-2 min-w-[180px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+              data-testid="button-toggle-advanced-filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Advanced Filters
+              {activeFiltersCount > 0 && (
+                <Badge variant="default" className="ml-1 px-2 py-0.5 text-xs">
+                  {activeFiltersCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          {/* Quick Filters */}
+          <div className="flex flex-wrap gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px] backdrop-blur-sm border-border/40" data-testid="select-filter-status">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="on_leave">On Leave</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {(departmentFilter !== "all" || locationFilter !== "all" || designationFilter !== "all") && (
+              <Button
+                onClick={() => {
+                  setDepartmentFilter("all")
+                  setLocationFilter("all")
+                  setDesignationFilter("all")
+                }}
+                variant="ghost"
+                className="gap-2 text-muted-foreground hover:text-foreground backdrop-blur-sm"
+                data-testid="button-reset-filters"
+              >
+                <X className="h-4 w-4" />
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg bg-muted/10 backdrop-blur-sm border border-border/40 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Department
+                </label>
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-department">
+                    <SelectValue placeholder="All Departments" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    {departments.map(dept => (
+                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Location
+                </label>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-location">
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Locations</SelectItem>
+                    {locations?.map(location => (
+                      <SelectItem key={location.id} value={location.id.toString()}>
+                        {location.outletName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Designation
+                </label>
+                <Select value={designationFilter} onValueChange={setDesignationFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-designation">
+                    <SelectValue placeholder="All Designations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Designations</SelectItem>
+                    {designations.map(designation => (
+                      <SelectItem key={designation} value={designation}>{designation}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="on_leave">On Leave</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  {departments.map(dept => (
-                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {locations?.map(location => (
-                    <SelectItem key={location.id} value={location.id.toString()}>
-                      {location.outletName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          )}
           
           <div className="text-sm text-muted-foreground">
             Showing {filteredEmployees.length} of {employees?.length || 0} employees
