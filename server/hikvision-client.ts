@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { XMLParser } from 'fast-xml-parser';
 
 interface HikvisionConfig {
   baseUrl: string;
@@ -144,7 +145,7 @@ export class HikvisionClient {
     </timeSpan>
   </timeSpanList>
   <maxResults>40</maxResults>
-  <searchResultPostion>0</searchResultPostion>
+  <searchResultPosition>0</searchResultPosition>
   <metadataList>
     <metadataDescriptor>motion</metadataDescriptor>
   </metadataList>
@@ -186,14 +187,19 @@ export class HikvisionClient {
   }
 
   private parseXmlResponse(xml: string): any {
-    const result: any = {};
-    const tagRegex = /<(\w+)>([^<]*)<\/\1>/g;
-    let match;
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      textNodeName: "_text",
+      parseAttributeValue: true,
+      trimValues: true,
+    });
     
-    while ((match = tagRegex.exec(xml)) !== null) {
-      result[match[1]] = match[2];
+    try {
+      return parser.parse(xml);
+    } catch (error) {
+      console.error("XML parsing error:", error);
+      return {};
     }
-    
-    return result;
   }
 }
