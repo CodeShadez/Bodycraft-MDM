@@ -226,11 +226,53 @@ export const assetTypes = pgTable("asset_types", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// 14. APPROVAL REQUESTS - Multi-level approval system for asset transfers and assignments
+export const approvalRequests = pgTable("approval_requests", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  requestType: varchar("request_type", { length: 50 }).notNull(), // asset_transfer, asset_assignment, employee_transfer
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // asset, employee
+  entityId: varchar("entity_id", { length: 50 }).notNull(), // assetId or employeeId
+  
+  // Current and new values (JSON for flexibility)
+  currentValue: text("current_value"), // JSON: { locationId: 1, employeeId: null }
+  newValue: text("new_value").notNull(), // JSON: { locationId: 2, employeeId: 5 }
+  
+  reason: text("reason"), // Why this change is needed
+  requestedBy: integer("requested_by").notNull().references(() => users.id),
+  requestedAt: timestamp("requested_at").notNull().defaultNow(),
+  
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, rejected, cancelled
+  currentApprovalLevel: integer("current_approval_level").notNull().default(1), // Track multi-level progress
+  requiredApprovalLevels: integer("required_approval_levels").notNull().default(1), // How many levels needed
+  
+  completedAt: timestamp("completed_at"),
+  completedBy: integer("completed_by").references(() => users.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 15. APPROVAL ACTIONS - Track each approval/rejection action
+export const approvalActions = pgTable("approval_actions", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  requestId: integer("request_id").notNull().references(() => approvalRequests.id),
+  approvalLevel: integer("approval_level").notNull(), // 1, 2, 3 for multi-level approvals
+  
+  actionBy: integer("action_by").notNull().references(() => users.id),
+  action: varchar("action", { length: 20 }).notNull(), // approved, rejected
+  comments: text("comments"),
+  
+  actionAt: timestamp("action_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert Schemas for new tables
 export const insertUserSchema = createInsertSchema(users);
 export const insertUserSessionSchema = createInsertSchema(userSessions);
 export const insertCompanySettingsSchema = createInsertSchema(companySettings);
 export const insertAssetTypeSchema = createInsertSchema(assetTypes);
+export const insertApprovalRequestSchema = createInsertSchema(approvalRequests);
+export const insertApprovalActionSchema = createInsertSchema(approvalActions);
 
 // TypeScript Types for new tables
 export type User = typeof users.$inferSelect;
@@ -244,3 +286,9 @@ export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
 
 export type AssetType = typeof assetTypes.$inferSelect;
 export type InsertAssetType = z.infer<typeof insertAssetTypeSchema>;
+
+export type ApprovalRequest = typeof approvalRequests.$inferSelect;
+export type InsertApprovalRequest = z.infer<typeof insertApprovalRequestSchema>;
+
+export type ApprovalAction = typeof approvalActions.$inferSelect;
+export type InsertApprovalAction = z.infer<typeof insertApprovalActionSchema>;
