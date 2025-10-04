@@ -526,8 +526,7 @@
   }
 }
 
-/* Table Container with Stable Scrollbar - Global Scope */
+/* Table Container with Horizontal Scroll */
 .table-container-stable {
   overflow-x: auto;
-  scrollbar-gutter: stable;
 }
