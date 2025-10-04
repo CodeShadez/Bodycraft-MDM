@@ -88,6 +88,14 @@ interface Location {
 export default function Dashboard() {
   const [, setLocation] = useLocation()
   
+  // Helper function to navigate with query parameters
+  const navigateWithParams = (path: string, params: Record<string, string>) => {
+    const queryString = new URLSearchParams(params).toString()
+    const fullPath = `${path}?${queryString}`
+    window.history.pushState({}, '', fullPath)
+    setLocation(path)
+  }
+  
   // Fetch all data for dashboard statistics
   const { data: assets = [], isLoading: assetsLoading } = useQuery<Asset[]>({
     queryKey: ["/api/assets"],
@@ -236,6 +244,7 @@ export default function Dashboard() {
           onClick={() => {
             console.log("Total Assets card clicked - navigating to /assets")
             setLocation("/assets")
+            window.history.pushState({}, '', '/assets')
           }}
           role="button"
           tabIndex={0}
@@ -243,6 +252,7 @@ export default function Dashboard() {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault()
               setLocation("/assets")
+              window.history.pushState({}, '', '/assets')
             }
           }}
         >
@@ -264,7 +274,7 @@ export default function Dashboard() {
           style={{ animationDelay: "0.1s" }}
           onClick={() => {
             console.log("Asset Utilization card clicked - navigating to /assets?status=assigned")
-            setLocation("/assets?status=assigned")
+            navigateWithParams("/assets", { status: "assigned" })
           }}
           role="button"
           tabIndex={0}
@@ -280,7 +290,7 @@ export default function Dashboard() {
                 className="hover:text-white underline decoration-dotted cursor-pointer transition-colors"
                 onClick={(e) => {
                   e.stopPropagation()
-                  setLocation("/assets?status=assigned")
+                  navigateWithParams("/assets", { status: "assigned" })
                 }}
               >
                 {activeAssignments} assigned
@@ -290,7 +300,7 @@ export default function Dashboard() {
                 className="hover:text-white underline decoration-dotted cursor-pointer transition-colors"
                 onClick={(e) => {
                   e.stopPropagation()
-                  setLocation("/assets?status=available")
+                  navigateWithParams("/assets", { status: "available" })
                 }}
               >
                 {availableAssets} available
@@ -306,7 +316,7 @@ export default function Dashboard() {
           style={{ animationDelay: "0.2s" }}
           onClick={() => {
             console.log("Maintenance Activities card clicked - navigating to /assets?status=maintenance")
-            setLocation("/assets?status=maintenance")
+            navigateWithParams("/assets", { status: "maintenance" })
           }}
           role="button"
           tabIndex={0}
@@ -432,7 +442,7 @@ export default function Dashboard() {
                     key={type} 
                     className="group hover:bg-white/10 p-2 rounded-lg transition-all cursor-pointer"
                     onClick={() => {
-                      setLocation(`/assets?type=${encodeURIComponent(type)}`)
+                      navigateWithParams("/assets", { type: type })
                     }}
                     data-testid={`asset-type-${type.toLowerCase()}`}
                   >
@@ -476,7 +486,7 @@ export default function Dashboard() {
                   key={status} 
                   className="relative cursor-pointer hover:bg-white/5 p-3 rounded-lg -m-3 mb-1 transition-all group"
                   onClick={() => {
-                    setLocation(`/assets?status=${encodeURIComponent(status)}`)
+                    navigateWithParams("/assets", { status: status })
                   }}
                   data-testid={`asset-status-${status}`}
                 >
@@ -542,7 +552,7 @@ export default function Dashboard() {
             </div>
             <div 
               className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-xl border border-green-400/20 cursor-pointer hover:from-green-500/30 hover:to-green-600/20 transition-all group"
-              onClick={() => setLocation('/assets?status=available')}
+              onClick={() => navigateWithParams('/assets', { status: 'available' })}
               data-testid="resource-available"
             >
               <div className="flex items-center justify-between">

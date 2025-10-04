@@ -142,14 +142,9 @@ interface Employee {
 export default function AssetsPage() {
   const [location] = useLocation()
   
-  // Get URL search params to check for filters
-  const urlParams = new URLSearchParams(window.location.search)
-  const urlType = urlParams.get('type')
-  const urlStatus = urlParams.get('status')
-  
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>(urlStatus || "all")
-  const [typeFilter, setTypeFilter] = useState<string>(urlType || "all")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [typeFilter, setTypeFilter] = useState<string>("all")
   const [locationFilter, setLocationFilter] = useState<string>("all")
   const [conditionFilter, setConditionFilter] = useState<string>("all")
   const [ownershipFilter, setOwnershipFilter] = useState<string>("all")
@@ -157,17 +152,31 @@ export default function AssetsPage() {
   
   // Update filters when URL changes
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const newType = params.get('type')
-    const newStatus = params.get('status')
-    
-    console.log("URL changed - applying filters:", { type: newType, status: newStatus })
-    
-    if (newStatus) {
-      setStatusFilter(newStatus)
+    const handleUrlChange = () => {
+      const params = new URLSearchParams(window.location.search)
+      const newType = params.get('type')
+      const newStatus = params.get('status')
+      
+      console.log("URL changed - applying filters:", { type: newType, status: newStatus, fullUrl: window.location.href })
+      
+      if (newStatus) {
+        setStatusFilter(newStatus)
+      } else if (params.toString() === '' || !params.has('status')) {
+        setStatusFilter("all")
+      }
+      
+      if (newType) {
+        setTypeFilter(newType)
+      } else if (params.toString() === '' || !params.has('type')) {
+        setTypeFilter("all")
+      }
     }
-    if (newType) {
-      setTypeFilter(newType)
+    
+    handleUrlChange()
+    window.addEventListener('popstate', handleUrlChange)
+    
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange)
     }
   }, [location])
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
