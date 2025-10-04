@@ -62,6 +62,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { useUser } from "@/hooks/use-user"
 
 interface Assignment {
   assetId: string
@@ -119,6 +120,7 @@ export default function AssignmentsPage() {
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { data: currentUser } = useUser()
 
   // Fetch data
   const { data: assignments, isLoading: assignmentsLoading } = useQuery<Assignment[]>({
@@ -273,7 +275,7 @@ export default function AssignmentsPage() {
       assignmentReason: formData.get('assignmentReason'),
       conditionOnAssignment: formData.get('conditionOnAssignment'),
       backupDetails: formData.get('backupDetails') || null,
-      createdBy: 1, // TODO: Get from authentication context
+      createdBy: currentUser?.user?.id || 1,
     }
 
     assignAssetMutation.mutate(assignmentData)
@@ -663,7 +665,7 @@ export default function AssignmentsPage() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3 text-muted-foreground" />
-                        {getLocationName(employee?.locationId)}
+                        {getLocationName(employee?.locationId ?? null)}
                       </div>
                     </TableCell>
                     <TableCell>
