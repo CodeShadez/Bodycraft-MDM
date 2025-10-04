@@ -21,7 +21,9 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  Computer
+  Computer,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -976,13 +978,11 @@ export default function AssetsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-2 border-border/60">
-                  <TableHead className="font-semibold text-foreground h-14 w-[300px] px-6">Asset Information</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[160px] px-4">Department</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Status</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[220px] px-4">Location</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Assignment Type</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[180px] px-4">Assigned To</TableHead>
-                  <TableHead className="font-semibold text-foreground h-14 w-[140px] px-4">Service Tag</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 px-6">Asset</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 px-4">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 px-4">Location</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 px-4">Assigned To</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12 px-4 text-right w-[100px]">Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -992,103 +992,56 @@ export default function AssetsPage() {
                     <>
                       <TableRow 
                         key={asset.assetId}
-                        onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
-                        className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                        className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group"
                         data-testid={`row-asset-${asset.assetId}`}
                       >
-                        {/* Asset Information - ID, Type, Brand, Model, Ownership */}
-                        <TableCell className="py-5 px-6">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
+                        {/* Asset Information */}
+                        <TableCell className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
                               {getAssetIcon(asset.assetType)}
                             </div>
-                            <div className="min-w-0 flex-1 space-y-1.5">
-                              <div className="flex items-center gap-2.5 flex-wrap">
-                                <span className="font-semibold text-base text-foreground leading-none" data-testid={`text-asset-id-${asset.assetId}`}>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold text-sm text-foreground" data-testid={`text-asset-id-${asset.assetId}`}>
                                   {asset.assetId}
                                 </span>
-                                <Badge variant="outline" className="text-xs font-medium px-2 py-0.5" data-testid={`badge-type-${asset.assetId}`}>
+                                <Badge variant="outline" className="text-xs px-1.5 py-0" data-testid={`badge-type-${asset.assetId}`}>
                                   {asset.assetType}
                                 </Badge>
-                                <Badge 
-                                  variant={asset.ownershipType === 'company' ? 'default' : 'secondary'} 
-                                  className="text-xs font-medium px-2 py-0.5"
-                                  data-testid={`badge-ownership-${asset.assetId}`}
-                                >
-                                  {asset.ownershipType === 'company' ? 'Company' : 
-                                   asset.ownershipType === 'rented' ? 'Rented' : 
-                                   asset.ownershipType === 'personal' ? 'Personal' : '—'}
-                                </Badge>
                               </div>
-                              <p className="text-sm text-muted-foreground leading-tight truncate">
+                              <p className="text-sm text-muted-foreground truncate">
                                 {asset.brand} {asset.modelName}
                               </p>
                             </div>
                           </div>
                         </TableCell>
 
-                        {/* Department */}
-                        <TableCell className="py-5 px-4">
-                          <span className="text-sm font-medium text-foreground leading-relaxed" data-testid={`text-department-${asset.assetId}`}>
-                            {asset.departmentId 
-                              ? departments?.find(d => d.id === asset.departmentId)?.name || "—"
-                              : "—"}
-                          </span>
-                        </TableCell>
-
-                        {/* Status & Condition */}
-                        <TableCell className="py-5 px-4">
-                          <div className="space-y-2.5">
-                            <div className="flex items-center gap-2.5">
-                              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColors[asset.status]}`} />
-                              <span className="text-sm font-medium capitalize leading-none" data-testid={`text-status-${asset.assetId}`}>
-                                {asset.status}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2.5">
-                              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${conditionColors[asset.condition]}`} />
-                              <span className="text-sm text-muted-foreground capitalize leading-none" data-testid={`text-condition-${asset.assetId}`}>
-                                {asset.condition}
-                              </span>
-                            </div>
+                        {/* Status */}
+                        <TableCell className="py-4 px-4">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`} />
+                            <span className="text-sm font-medium capitalize" data-testid={`text-status-${asset.assetId}`}>
+                              {asset.status}
+                            </span>
                           </div>
                         </TableCell>
 
                         {/* Location */}
-                        <TableCell className="py-5 px-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                              <span className="text-sm font-medium text-foreground leading-tight truncate" data-testid={`text-location-${asset.assetId}`}>
-                                {getLocationName(asset.locationId)}
-                              </span>
-                            </div>
-                            {(asset.physicalLocation || asset.floor) && (
-                              <p className="text-xs text-muted-foreground leading-relaxed pl-6 truncate">
-                                {asset.physicalLocation && <span>{asset.physicalLocation}</span>}
-                                {asset.physicalLocation && asset.floor && <span className="mx-1.5">•</span>}
-                                {asset.floor && <span>{asset.floor}</span>}
-                              </p>
-                            )}
+                        <TableCell className="py-4 px-4">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm font-medium truncate" data-testid={`text-location-${asset.assetId}`}>
+                              {getLocationName(asset.locationId)}
+                            </span>
                           </div>
                         </TableCell>
 
-                        {/* Assignment Type */}
-                        <TableCell className="py-5 px-4">
-                          <Badge 
-                            variant="outline" 
-                            className="text-xs font-medium px-2.5 py-1"
-                            data-testid={`badge-assignment-${asset.assetId}`}
-                          >
-                            {asset.assignmentType === 'person' ? 'Person' : 'Outlet'}
-                          </Badge>
-                        </TableCell>
-
                         {/* Assigned To */}
-                        <TableCell className="py-5 px-4">
+                        <TableCell className="py-4 px-4">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm font-medium text-foreground leading-tight truncate" data-testid={`text-assigned-${asset.assetId}`}>
+                            <span className="text-sm truncate" data-testid={`text-assigned-${asset.assetId}`}>
                               {asset.assignmentType === 'outlet' 
                                 ? getLocationName(asset.locationId) 
                                 : getEmployeeName(asset.currentUserId)}
@@ -1096,55 +1049,146 @@ export default function AssetsPage() {
                           </div>
                         </TableCell>
 
-                        {/* Service Tag */}
-                        <TableCell className="py-5 px-4">
-                          <span className="text-sm font-mono text-muted-foreground leading-relaxed" data-testid={`text-service-tag-${asset.assetId}`}>
-                            {asset.serviceTag || "—"}
-                          </span>
+                        {/* Expand Button */}
+                        <TableCell className="py-4 px-4 text-right">
+                          <Button
+                            onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2"
+                            data-testid={`button-details-${asset.assetId}`}
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="h-4 w-4" />
+                                Hide
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-4 w-4" />
+                                Show
+                              </>
+                            )}
+                          </Button>
                         </TableCell>
                       </TableRow>
 
                       {/* Expanded Details Row */}
                       {isExpanded && (
                         <TableRow className="bg-muted/10 border-b-2 border-border/50">
-                          <TableCell colSpan={7} className="p-0">
-                            <div className="p-6 space-y-6">
-                              {/* Complete Asset Details */}
-                              <div className="grid grid-cols-3 gap-6">
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground mb-1">Purchase Date</Label>
-                                    <p className="text-sm font-medium">{asset.purchaseDate || "Not specified"}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground mb-1">Warranty Expiry</Label>
-                                    <p className="text-sm font-medium">{asset.warrantyExpiry || "Not specified"}</p>
-                                  </div>
+                          <TableCell colSpan={5} className="p-0">
+                            <div className="p-8 space-y-6">
+                              {/* Complete Details Header */}
+                              <div className="flex items-center gap-3 pb-4 border-b border-border/50">
+                                <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                                  {getAssetIcon(asset.assetType)}
                                 </div>
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground mb-1">Created At</Label>
-                                    <p className="text-sm font-medium">{new Date(asset.createdAt).toLocaleDateString()}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground mb-1">Last Updated</Label>
-                                    <p className="text-sm font-medium">{new Date(asset.updatedAt).toLocaleDateString()}</p>
-                                  </div>
+                                <div>
+                                  <h3 className="text-lg font-semibold text-foreground">{asset.assetId}</h3>
+                                  <p className="text-sm text-muted-foreground">{asset.brand} {asset.modelName}</p>
                                 </div>
+                              </div>
+
+                              {/* Complete Asset Information Grid */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {/* Column 1 - Basic Info */}
                                 <div className="space-y-4">
+                                  <h4 className="text-sm font-semibold text-foreground mb-3">Basic Information</h4>
                                   <div>
-                                    <Label className="text-xs text-muted-foreground mb-1">Full Location Path</Label>
-                                    <p className="text-sm font-medium">
-                                      {getLocationName(asset.locationId)}
-                                      {asset.physicalLocation && ` → ${asset.physicalLocation}`}
-                                      {asset.floor && ` (${asset.floor})`}
+                                    <Label className="text-xs text-muted-foreground">Asset Type</Label>
+                                    <p className="text-sm font-medium mt-1">{asset.assetType}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Brand</Label>
+                                    <p className="text-sm font-medium mt-1">{asset.brand}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Model</Label>
+                                    <p className="text-sm font-medium mt-1">{asset.modelName}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Service Tag</Label>
+                                    <p className="text-sm font-mono font-medium mt-1">{asset.serviceTag || "—"}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Ownership Type</Label>
+                                    <p className="text-sm font-medium mt-1">
+                                      {asset.ownershipType === 'company' ? 'Company Owned' : 
+                                       asset.ownershipType === 'rented' ? 'Rented' : 
+                                       asset.ownershipType === 'personal' ? 'Personal' : '—'}
                                     </p>
+                                  </div>
+                                </div>
+
+                                {/* Column 2 - Status & Location */}
+                                <div className="space-y-4">
+                                  <h4 className="text-sm font-semibold text-foreground mb-3">Status & Location</h4>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Status</Label>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <div className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`} />
+                                      <span className="text-sm font-medium capitalize">{asset.status}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Condition</Label>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <div className={`w-2 h-2 rounded-full ${conditionColors[asset.condition]}`} />
+                                      <span className="text-sm font-medium capitalize">{asset.condition}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Outlet Location</Label>
+                                    <p className="text-sm font-medium mt-1">{getLocationName(asset.locationId)}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Physical Location</Label>
+                                    <p className="text-sm font-medium mt-1">{asset.physicalLocation || "—"}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Floor</Label>
+                                    <p className="text-sm font-medium mt-1">{asset.floor || "—"}</p>
+                                  </div>
+                                </div>
+
+                                {/* Column 3 - Assignment & Dates */}
+                                <div className="space-y-4">
+                                  <h4 className="text-sm font-semibold text-foreground mb-3">Assignment & Timeline</h4>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Department</Label>
+                                    <p className="text-sm font-medium mt-1">
+                                      {asset.departmentId 
+                                        ? departments?.find(d => d.id === asset.departmentId)?.name || "—"
+                                        : "—"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Assignment Type</Label>
+                                    <p className="text-sm font-medium mt-1">
+                                      {asset.assignmentType === 'person' ? 'Assigned to Person' : 'Assigned to Outlet'}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Assigned To</Label>
+                                    <p className="text-sm font-medium mt-1">
+                                      {asset.assignmentType === 'outlet' 
+                                        ? getLocationName(asset.locationId) 
+                                        : getEmployeeName(asset.currentUserId)}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Purchase Date</Label>
+                                    <p className="text-sm font-medium mt-1">{asset.purchaseDate || "—"}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Warranty Expiry</Label>
+                                    <p className="text-sm font-medium mt-1">{asset.warrantyExpiry || "—"}</p>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Action Buttons */}
-                              <div className="flex items-center gap-3 pt-4 border-t border-border/50">
+                              <div className="flex items-center gap-3 pt-6 border-t border-border/50">
                                 <Button
                                   onClick={(e) => {
                                     e.stopPropagation()
