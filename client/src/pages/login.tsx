@@ -156,8 +156,8 @@ export default function LoginPage() {
                   htmlFor="username"
                   className={`absolute left-12 transition-all duration-300 pointer-events-none ${
                     usernameFocused || credentials.username
-                      ? 'top-2 text-xs text-purple-300 font-medium'
-                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60'
+                      ? 'opacity-0 invisible'
+                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60 opacity-100 visible'
                   }`}
                 >
                   Username
@@ -192,8 +192,8 @@ export default function LoginPage() {
                   htmlFor="password"
                   className={`absolute left-12 transition-all duration-300 pointer-events-none ${
                     passwordFocused || credentials.password
-                      ? 'top-2 text-xs text-purple-300 font-medium'
-                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60'
+                      ? 'opacity-0 invisible'
+                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60 opacity-100 visible'
                   }`}
                 >
                   Password
