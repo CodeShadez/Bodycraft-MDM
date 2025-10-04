@@ -978,9 +978,14 @@ export default function AssetsPage() {
                 <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border/50">
                   <TableHead className="font-semibold text-foreground h-12">Asset</TableHead>
                   <TableHead className="font-semibold text-foreground h-12">Type</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Department</TableHead>
                   <TableHead className="font-semibold text-foreground h-12">Status</TableHead>
                   <TableHead className="font-semibold text-foreground h-12">Condition</TableHead>
                   <TableHead className="font-semibold text-foreground h-12">Location</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Physical Location</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Floor</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Ownership</TableHead>
+                  <TableHead className="font-semibold text-foreground h-12">Assignment</TableHead>
                   <TableHead className="font-semibold text-foreground h-12">Assigned To</TableHead>
                   <TableHead className="font-semibold text-foreground h-12">Service Tag</TableHead>
                   <TableHead className="font-semibold text-foreground h-12 text-right">Actions</TableHead>
@@ -1014,6 +1019,13 @@ export default function AssetsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="py-4">
+                      <span className="text-sm font-medium" data-testid={`text-department-${asset.assetId}`}>
+                        {asset.departmentId 
+                          ? departments?.find(d => d.id === asset.departmentId)?.name || "—"
+                          : "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4">
                       <div className="flex items-center gap-2">
                         <div 
                           className={`w-2.5 h-2.5 rounded-full ${statusColors[asset.status]}`}
@@ -1042,10 +1054,43 @@ export default function AssetsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="py-4">
+                      <span className="text-sm font-medium" data-testid={`text-physical-location-${asset.assetId}`}>
+                        {asset.physicalLocation || "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <span className="text-sm font-medium" data-testid={`text-floor-${asset.assetId}`}>
+                        {asset.floor || "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <Badge 
+                        variant={asset.ownershipType === 'company' ? 'default' : 'secondary'} 
+                        className="font-medium capitalize"
+                        data-testid={`badge-ownership-${asset.assetId}`}
+                      >
+                        {asset.ownershipType === 'company' ? 'Company' : 
+                         asset.ownershipType === 'rented' ? 'Rented' : 
+                         asset.ownershipType === 'personal' ? 'Personal' : '—'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <Badge 
+                        variant="outline" 
+                        className="font-medium"
+                        data-testid={`badge-assignment-${asset.assetId}`}
+                      >
+                        {asset.assignmentType === 'person' ? 'Person' : 
+                         asset.assignmentType === 'outlet' ? 'Outlet' : '—'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-4">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium" data-testid={`text-assigned-${asset.assetId}`}>
-                          {getEmployeeName(asset.currentUserId)}
+                          {asset.assignmentType === 'outlet' 
+                            ? getLocationName(asset.locationId) 
+                            : getEmployeeName(asset.currentUserId)}
                         </span>
                       </div>
                     </TableCell>
