@@ -23,7 +23,11 @@ import {
   XCircle,
   Computer,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  SlidersHorizontal,
+  Building2,
+  FileText
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -144,6 +148,10 @@ export default function AssetsPage() {
   const [statusFilter, setStatusFilter] = useState<string>(urlStatus || "all")
   const [typeFilter, setTypeFilter] = useState<string>(urlType || "all")
   const [locationFilter, setLocationFilter] = useState<string>("all")
+  const [conditionFilter, setConditionFilter] = useState<string>("all")
+  const [ownershipFilter, setOwnershipFilter] = useState<string>("all")
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all")
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null)
@@ -206,9 +214,34 @@ export default function AssetsPage() {
     const matchesStatus = statusFilter === "all" || asset.status === statusFilter
     const matchesType = typeFilter === "all" || asset.assetType === typeFilter
     const matchesLocation = locationFilter === "all" || asset.locationId?.toString() === locationFilter
+    const matchesCondition = conditionFilter === "all" || asset.condition === conditionFilter
+    const matchesOwnership = ownershipFilter === "all" || asset.ownershipType === ownershipFilter
+    const matchesDepartment = departmentFilter === "all" || asset.departmentId?.toString() === departmentFilter
     
-    return matchesSearch && matchesStatus && matchesType && matchesLocation
+    return matchesSearch && matchesStatus && matchesType && matchesLocation && matchesCondition && matchesOwnership && matchesDepartment
   }) || []
+  
+  // Count active filters
+  const activeFiltersCount = [
+    statusFilter !== "all" ? 1 : 0,
+    typeFilter !== "all" ? 1 : 0,
+    locationFilter !== "all" ? 1 : 0,
+    conditionFilter !== "all" ? 1 : 0,
+    ownershipFilter !== "all" ? 1 : 0,
+    departmentFilter !== "all" ? 1 : 0,
+    searchTerm !== "" ? 1 : 0
+  ].reduce((sum, val) => sum + val, 0)
+  
+  // Reset all filters
+  const resetAllFilters = () => {
+    setSearchTerm("")
+    setStatusFilter("all")
+    setTypeFilter("all")
+    setLocationFilter("all")
+    setConditionFilter("all")
+    setOwnershipFilter("all")
+    setDepartmentFilter("all")
+  }
 
   // Create asset mutation
   const createAssetMutation = useMutation({
@@ -905,68 +938,208 @@ export default function AssetsPage() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card className="glass-card border-0 glass-card border-0">
-        <CardHeader>
-          <CardTitle className="text-lg">Search & Filter Assets</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* Advanced Search & Filters */}
+      <Card className="glass-card border-0">
+        <CardContent className="p-6 space-y-6">
+          {/* Search Bar with Clear */}
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by Asset ID, Model, Brand, or Service Tag..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/60" />
+              <Input
+                placeholder="Search by Asset ID, Model, Brand, Service Tag, or Location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 pr-12 h-12 text-base bg-background/50 backdrop-blur-sm border-border/40 focus:border-primary/50 transition-all"
+                data-testid="input-search-assets"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-clear-search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            <Button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              variant="outline"
+              className="h-12 gap-2 min-w-[180px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+              data-testid="button-toggle-advanced-filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Advanced Filters
+              {activeFiltersCount > 0 && (
+                <Badge variant="default" className="ml-1 px-2 py-0.5 text-xs">
+                  {activeFiltersCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          {/* Quick Filters */}
+          <div className="flex flex-wrap gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all" data-testid="select-filter-status">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="Status" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="available">✓ Available</SelectItem>
+                <SelectItem value="assigned">👤 Assigned</SelectItem>
+                <SelectItem value="maintenance">🔧 Maintenance</SelectItem>
+                <SelectItem value="retired">❌ Retired</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[160px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all" data-testid="select-filter-type">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="Type" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {assetTypes.map(type => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-[200px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all" data-testid="select-filter-location">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="Location" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                {locations?.map(location => (
+                  <SelectItem key={location.id} value={location.id.toString()}>
+                    {location.outletName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {activeFiltersCount > 0 && (
+              <Button
+                onClick={resetAllFilters}
+                variant="ghost"
+                className="gap-2 text-muted-foreground hover:text-foreground backdrop-blur-sm"
+                data-testid="button-reset-filters"
+              >
+                <X className="h-4 w-4" />
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg bg-muted/10 backdrop-blur-sm border border-border/40 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Condition
+                </label>
+                <Select value={conditionFilter} onValueChange={setConditionFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-condition">
+                    <SelectValue placeholder="All Conditions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Conditions</SelectItem>
+                    <SelectItem value="excellent">⭐ Excellent</SelectItem>
+                    <SelectItem value="good">👍 Good</SelectItem>
+                    <SelectItem value="fair">⚠️ Fair</SelectItem>
+                    <SelectItem value="poor">❗ Poor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  Ownership
+                </label>
+                <Select value={ownershipFilter} onValueChange={setOwnershipFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-ownership">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Ownership</SelectItem>
+                    <SelectItem value="company">🏢 Company Owned</SelectItem>
+                    <SelectItem value="rented">📋 Rented</SelectItem>
+                    <SelectItem value="personal">👤 Personal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  Department
+                </label>
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-department">
+                    <SelectValue placeholder="All Departments" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    {departments?.map(dept => (
+                      <SelectItem key={dept.id} value={dept.id.toString()}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="assigned">Assigned</SelectItem>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                  <SelectItem value="retired">Retired</SelectItem>
-                </SelectContent>
-              </Select>
+          )}
 
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  {assetTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {locations?.map(location => (
-                    <SelectItem key={location.id} value={location.id.toString()}>
-                      {location.outletName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Results Summary */}
+          <div className="flex items-center justify-between pt-2 border-t border-border/20">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Package className="h-4 w-4" />
+              <span className="font-medium text-foreground">
+                {filteredAssets.length}
+              </span>
+              <span>of</span>
+              <span className="font-medium text-foreground">
+                {assets?.length || 0}
+              </span>
+              <span>assets found</span>
             </div>
-          </div>
-          
-          <div className="text-sm text-muted-foreground">
-            Showing {filteredAssets.length} of {assets?.length || 0} assets
+            
+            {activeFiltersCount > 0 && (
+              <div className="flex gap-1">
+                {statusFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Status: {statusFilter}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setStatusFilter("all")} />
+                  </Badge>
+                )}
+                {typeFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Type: {typeFilter}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setTypeFilter("all")} />
+                  </Badge>
+                )}
+                {locationFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Location: {locations?.find(l => l.id.toString() === locationFilter)?.outletName}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setLocationFilter("all")} />
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
