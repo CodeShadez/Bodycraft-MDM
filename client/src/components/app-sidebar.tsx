@@ -47,8 +47,8 @@ const navigationItems = [
     icon: Wrench,
   },
   {
-    title: "Backup & Compliance",
-    url: "/compliance",
+    title: "Warranty",
+    url: "/warranty",
     icon: Shield,
   },
 ]

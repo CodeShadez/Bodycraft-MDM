@@ -288,7 +288,7 @@ export default function Dashboard() {
           data-testid="card-warranty-status" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.3s" }}
-          onClick={() => setLocation("/assets")}
+          onClick={() => setLocation("/warranty")}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/90">Warranty Management</CardTitle>

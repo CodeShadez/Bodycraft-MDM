@@ -13,6 +13,7 @@ import Employees from "@/pages/employees";
 import Assignments from "@/pages/assignments";
 import Locations from "@/pages/locations";
 import Maintenance from "@/pages/maintenance";
+import Warranty from "@/pages/warranty";
 import Compliance from "@/pages/compliance";
 import CCTV from "@/pages/cctv";
 import Biometric from "@/pages/biometric";
@@ -63,6 +64,9 @@ function Router() {
       </Route>
       <Route path="/maintenance">
         {(params) => <ProtectedRoute component={Maintenance} {...params} />}
+      </Route>
+      <Route path="/warranty">
+        {(params) => <ProtectedRoute component={Warranty} {...params} />}
       </Route>
       <Route path="/compliance">
         {(params) => <ProtectedRoute component={Compliance} {...params} />}
