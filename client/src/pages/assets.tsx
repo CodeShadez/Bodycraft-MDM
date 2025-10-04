@@ -128,9 +128,14 @@ interface Employee {
 }
 
 export default function AssetsPage() {
+  // Get URL search params to check for filters
+  const urlParams = new URLSearchParams(window.location.search)
+  const urlType = urlParams.get('type')
+  const urlStatus = urlParams.get('status')
+  
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
+  const [statusFilter, setStatusFilter] = useState<string>(urlStatus || "all")
+  const [typeFilter, setTypeFilter] = useState<string>(urlType || "all")
   const [locationFilter, setLocationFilter] = useState<string>("all")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)

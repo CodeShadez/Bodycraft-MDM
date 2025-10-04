@@ -389,10 +389,17 @@ export default function Dashboard() {
                 const percentage = totalAssets > 0 ? ((count as number) / totalAssets) * 100 : 0
                 
                 return (
-                  <div key={type} className="group hover:bg-white/5 p-2 rounded-lg transition-all">
+                  <div 
+                    key={type} 
+                    className="group hover:bg-white/10 p-2 rounded-lg transition-all cursor-pointer"
+                    onClick={() => {
+                      setLocation(`/assets?type=${encodeURIComponent(type)}`)
+                    }}
+                    data-testid={`asset-type-${type.toLowerCase()}`}
+                  >
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 ${colorClass} rounded-lg flex items-center justify-center`}>
+                        <div className={`w-10 h-10 ${colorClass} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
                           <span className="text-white font-bold text-xs">{(count as number)}</span>
                         </div>
                         <div>
@@ -400,6 +407,7 @@ export default function Dashboard() {
                           <div className="text-xs text-white/50">{percentage.toFixed(1)}% of total</div>
                         </div>
                       </div>
+                      <span className="text-white/50 group-hover:text-white/90 transition-colors">→</span>
                     </div>
                   </div>
                 )
@@ -425,17 +433,25 @@ export default function Dashboard() {
               const config = statusConfig[status as keyof typeof statusConfig] || { color: "bg-gray-400", icon: "⚪", label: status }
               
               return (
-                <div key={status} className="relative">
+                <div 
+                  key={status} 
+                  className="relative cursor-pointer hover:bg-white/5 p-3 rounded-lg -m-3 mb-1 transition-all group"
+                  onClick={() => {
+                    setLocation(`/assets?status=${encodeURIComponent(status)}`)
+                  }}
+                  data-testid={`asset-status-${status}`}
+                >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{config.icon}</span>
+                      <span className="text-lg group-hover:scale-110 transition-transform">{config.icon}</span>
                       <div>
                         <div className="text-sm font-medium text-white capitalize">{config.label}</div>
                         <div className="text-xs text-white/50">{count as number} assets</div>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex items-center gap-2">
                       <div className="text-lg font-bold text-white">{percentage.toFixed(0)}%</div>
+                      <span className="text-white/50 group-hover:text-white/90 transition-colors">→</span>
                     </div>
                   </div>
                   <div className="w-full bg-white/10 rounded-full h-1.5">
@@ -458,31 +474,49 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-xl border border-blue-400/20">
-                <Users className="h-6 w-6 text-blue-400 mb-2" />
+              <div 
+                className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-xl border border-blue-400/20 cursor-pointer hover:from-blue-500/30 hover:to-blue-600/20 transition-all group"
+                onClick={() => setLocation('/employees')}
+                data-testid="resource-workforce"
+              >
+                <Users className="h-6 w-6 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
                 <div className="text-2xl font-bold text-white">{totalEmployees}</div>
                 <div className="text-xs text-white/70">Total Workforce</div>
-                <div className="text-xs text-blue-300 mt-1">Active personnel</div>
+                <div className="text-xs text-blue-300 mt-1 flex items-center justify-between">
+                  <span>Active personnel</span>
+                  <span className="text-white/50 group-hover:text-white/90 transition-colors">→</span>
+                </div>
               </div>
-              <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-xl border border-purple-400/20">
-                <Laptop className="h-6 w-6 text-purple-400 mb-2" />
+              <div 
+                className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-xl border border-purple-400/20 cursor-pointer hover:from-purple-500/30 hover:to-purple-600/20 transition-all group"
+                onClick={() => setLocation('/assignments')}
+                data-testid="resource-deployed"
+              >
+                <Laptop className="h-6 w-6 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
                 <div className="text-2xl font-bold text-white">{activeAssignments}</div>
                 <div className="text-xs text-white/70">Deployed Assets</div>
-                <div className="text-xs text-purple-300 mt-1">{((activeAssignments / totalAssets) * 100).toFixed(0)}% utilization</div>
+                <div className="text-xs text-purple-300 mt-1 flex items-center justify-between">
+                  <span>{((activeAssignments / totalAssets) * 100).toFixed(0)}% utilization</span>
+                  <span className="text-white/50 group-hover:text-white/90 transition-colors">→</span>
+                </div>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-xl border border-green-400/20">
+            <div 
+              className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-xl border border-green-400/20 cursor-pointer hover:from-green-500/30 hover:to-green-600/20 transition-all group"
+              onClick={() => setLocation('/assets?status=available')}
+              data-testid="resource-available"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Database className="h-6 w-6 text-green-400" />
+                  <Database className="h-6 w-6 text-green-400 group-hover:scale-110 transition-transform" />
                   <div>
                     <div className="text-xl font-bold text-white">{availableAssets}</div>
                     <div className="text-xs text-white/70">Available for Assignment</div>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end">
                   <div className="text-sm font-medium text-green-300">{((availableAssets / totalAssets) * 100).toFixed(0)}%</div>
-                  <div className="text-xs text-white/50">Ready</div>
+                  <div className="text-xs text-white/50 group-hover:text-white/90 transition-colors">View →</div>
                 </div>
               </div>
             </div>
