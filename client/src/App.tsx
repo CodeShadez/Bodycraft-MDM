@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
 import Dashboard from "@/pages/dashboard";
 import Assets from "@/pages/assets";
 import Employees from "@/pages/employees";
@@ -113,11 +112,8 @@ function AppContent() {
 
         <AppSidebar />
         <div className="flex flex-col flex-1">
-          <header className="flex items-center justify-between p-3 glass-card border-0">
+          <header className="flex items-center p-3 glass-card border-0">
             <SidebarTrigger data-testid="button-sidebar-toggle" className="text-white/80 hover:text-white" />
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-            </div>
           </header>
           <main className="flex-1 overflow-auto">
             <Router />

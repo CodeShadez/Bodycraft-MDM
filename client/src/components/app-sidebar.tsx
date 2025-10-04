@@ -2,6 +2,7 @@ import { Building2, Users, Laptop, MapPin, BarChart3, Cable, Fingerprint, Calend
 import { Link, useLocation } from "wouter"
 import { apiRequest, queryClient } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 import {
   Sidebar,
@@ -162,6 +163,11 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <div className="px-2 py-1.5 flex items-center gap-2">
+                  <ThemeToggle />
+                </div>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout} data-testid="button-logout">
                   <LogOut className="h-4 w-4" />
