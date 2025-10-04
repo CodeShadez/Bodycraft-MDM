@@ -1194,8 +1194,8 @@ export default function AssetsPage() {
                       data-testid={`row-asset-${asset.assetId}`}
                     >
                         {/* Asset Details with Chevron */}
-                        <TableCell className="py-4 px-6">
-                          <div className="flex items-center gap-3">
+                        <TableCell className="py-3 px-4">
+                          <div className="flex items-center gap-2">
                             <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
                               {isExpanded ? (
                                 <ChevronUp className="h-4 w-4" />
@@ -1220,14 +1220,14 @@ export default function AssetsPage() {
                         </TableCell>
 
                         {/* Asset Type */}
-                        <TableCell className="py-4 px-6">
+                        <TableCell className="py-3 px-3">
                           <span className="text-sm font-medium" data-testid={`badge-type-${asset.assetId}`}>
                             {asset.assetType}
                           </span>
                         </TableCell>
 
                         {/* Status */}
-                        <TableCell className="py-4 px-4">
+                        <TableCell className="py-3 px-3">
                           <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`} />
                             <span className="text-sm font-medium capitalize" data-testid={`text-status-${asset.assetId}`}>
@@ -1237,17 +1237,17 @@ export default function AssetsPage() {
                         </TableCell>
 
                         {/* Location */}
-                        <TableCell className="py-4 px-4">
+                        <TableCell className="py-3 px-3">
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm font-medium truncate" data-testid={`text-location-${asset.assetId}`}>
+                            <span className="text-sm truncate" data-testid={`text-location-${asset.assetId}`}>
                               {getLocationName(asset.locationId)}
                             </span>
                           </div>
                         </TableCell>
 
                         {/* Assigned To */}
-                        <TableCell className="py-4 px-4">
+                        <TableCell className="py-3 px-3">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             <span className="text-sm truncate" data-testid={`text-assigned-${asset.assetId}`}>
@@ -1257,50 +1257,13 @@ export default function AssetsPage() {
                             </span>
                           </div>
                         </TableCell>
-
-                        {/* Actions */}
-                        <TableCell className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0" data-testid={`button-actions-${asset.assetId}`}>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedAsset(asset)
-                                  setIsEditDialogOpen(true)
-                                }}
-                                data-testid={`menu-edit-${asset.assetId}`}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Asset
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  if (window.confirm(`Are you sure you want to delete asset ${asset.assetId}? This action cannot be undone.`)) {
-                                    deleteAssetMutation.mutate(asset.assetId)
-                                  }
-                                }}
-                                className="text-red-600"
-                                data-testid={`menu-delete-${asset.assetId}`}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Asset
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
                       </TableRow>
                   ];
 
                   if (isExpanded) {
                     rows.push(
                       <TableRow key={`expanded-${asset.assetId}`} className="bg-muted/10 hover:bg-muted/10">
-                        <TableCell colSpan={6} className="p-6">
+                        <TableCell colSpan={5} className="p-6">
                             <div className="grid grid-cols-3 gap-6">
                               {/* Column 1 - Basic Info */}
                               <div className="space-y-4">
@@ -1397,6 +1360,36 @@ export default function AssetsPage() {
                                   </div>
                                 </div>
                               </div>
+
+                            <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedAsset(asset)
+                                  setIsEditDialogOpen(true)
+                                }}
+                                data-testid={`button-edit-asset-${asset.assetId}`}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Asset
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (window.confirm(`Are you sure you want to delete asset ${asset.assetId}? This action cannot be undone.`)) {
+                                    deleteAssetMutation.mutate(asset.assetId)
+                                  }
+                                }}
+                                data-testid={`button-delete-asset-${asset.assetId}`}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Asset
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                     )
@@ -1405,7 +1398,7 @@ export default function AssetsPage() {
                   return rows
                 }) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                       <Package className="mx-auto h-12 w-12 mb-4 opacity-40" />
                       <p className="text-lg font-medium mb-1">No assets found</p>
                       <p className="text-sm">Try adjusting your filters or create a new asset</p>
