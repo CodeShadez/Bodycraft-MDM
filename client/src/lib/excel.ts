@@ -24,15 +24,13 @@ export class ExcelExporter {
         'Brand': asset.brand,
         'Model': asset.modelName,
         'Type': asset.assetType,
-        'Serial Number': asset.serialNumber || 'N/A',
-        'Purchase Date': asset.purchaseDate ? new Date(asset.purchaseDate).toLocaleDateString() : 'N/A',
-        'Purchase Cost': asset.purchaseCost || 'N/A',
-        'Warranty Until': asset.warrantyUntil ? new Date(asset.warrantyUntil).toLocaleDateString() : 'N/A',
+        'Service Tag': asset.serviceTag || '',
+        'Purchase Date': asset.purchaseDate ? new Date(asset.purchaseDate).toISOString().split('T')[0] : '',
+        'Warranty Expiry': asset.warrantyExpiry ? new Date(asset.warrantyExpiry).toISOString().split('T')[0] : '',
         'Status': asset.status,
-        'Location': location ? `${location.outletName}, ${location.city}` : 'No Location',
-        'Condition': asset.condition || 'N/A',
-        'Created': new Date(asset.createdAt).toLocaleDateString(),
-        'Updated': new Date(asset.updatedAt).toLocaleDateString()
+        'Condition': asset.condition || 'good',
+        'Location ID': asset.locationId || '',
+        'Location Name': location ? `${location.outletName}, ${location.city}` : ''
       }
     })
     
@@ -192,10 +190,10 @@ export class ExcelImporter {
       reader.onload = (e) => {
         try {
           const data = e.target?.result
-          const workbook = XLSX.read(data, { type: 'binary' })
+          const workbook = XLSX.read(data, { type: 'binary', cellDates: true, dateNF: 'yyyy-mm-dd' })
           const sheetName = workbook.SheetNames[0]
           const worksheet = workbook.Sheets[sheetName]
-          const jsonData = XLSX.utils.sheet_to_json(worksheet)
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, dateNF: 'yyyy-mm-dd' })
           
           resolve(jsonData)
         } catch (error) {
@@ -217,35 +215,65 @@ export class ExcelImporter {
       const rowNumber = index + 2 // +2 because Excel rows start at 1 and we skip header
 
       // Required fields validation
-      if (!row['Asset ID']) {
+      if (!row['Asset ID']?.toString().trim()) {
         errors.push(`Row ${rowNumber}: Asset ID is required`)
         return
       }
-      if (!row['Brand']) {
+      if (!row['Brand']?.toString().trim()) {
         errors.push(`Row ${rowNumber}: Brand is required`)
         return
       }
-      if (!row['Model']) {
+      if (!row['Model']?.toString().trim()) {
         errors.push(`Row ${rowNumber}: Model is required`)
         return
       }
-      if (!row['Type']) {
+      if (!row['Type']?.toString().trim()) {
         errors.push(`Row ${rowNumber}: Type is required`)
         return
       }
 
+      // Helper function to parse dates safely
+      const parseDate = (dateValue: any): string | null => {
+        if (!dateValue) return null
+        
+        // If it's already a Date object (from cellDates: true)
+        if (dateValue instanceof Date) {
+          return dateValue.toISOString().split('T')[0]
+        }
+        
+        // If it's a string in YYYY-MM-DD format
+        if (typeof dateValue === 'string') {
+          const parsed = new Date(dateValue)
+          if (!isNaN(parsed.getTime())) {
+            return parsed.toISOString().split('T')[0]
+          }
+        }
+        
+        return null
+      }
+
+      // Helper function to parse numbers safely
+      const parseNumber = (value: any): number | null => {
+        if (!value) return null
+        const num = typeof value === 'number' ? value : parseFloat(value.toString().replace(/[^0-9.-]/g, ''))
+        return isNaN(num) ? null : num
+      }
+
+      // Parse location ID
+      const locationId = row['Location ID'] ? parseNumber(row['Location ID']) : null
+
       // Transform to API format
       const transformedRow = {
-        assetId: row['Asset ID'],
-        brand: row['Brand'],
-        modelName: row['Model'],
-        assetType: row['Type'],
-        serialNumber: row['Serial Number'] || null,
-        purchaseDate: row['Purchase Date'] ? new Date(row['Purchase Date']).toISOString() : null,
-        purchaseCost: row['Purchase Cost'] ? parseFloat(row['Purchase Cost']) : null,
-        warrantyUntil: row['Warranty Until'] ? new Date(row['Warranty Until']).toISOString() : null,
-        status: row['Status'] || 'available',
-        condition: row['Condition'] || 'good',
+        assetId: row['Asset ID'].toString().trim(),
+        brand: row['Brand'].toString().trim(),
+        modelName: row['Model'].toString().trim(),
+        assetType: row['Type'].toString().trim(),
+        serviceTag: row['Service Tag']?.toString().trim() || null,
+        purchaseDate: parseDate(row['Purchase Date']),
+        warrantyExpiry: parseDate(row['Warranty Expiry']),
+        status: row['Status']?.toString().trim() || 'available',
+        condition: row['Condition']?.toString().trim() || 'good',
+        locationId: locationId
       }
 
       valid.push(transformedRow)
@@ -306,13 +334,14 @@ export class ExcelImporter {
         'Asset ID': 'BFC001',
         'Brand': 'Lenovo',
         'Model': 'ThinkPad E15',
-        'Type': 'laptop',
-        'Serial Number': 'SN123456789',
+        'Type': 'Laptop',
+        'Service Tag': 'SN123456789',
         'Purchase Date': '2024-01-15',
-        'Purchase Cost': '45000',
-        'Warranty Until': '2027-01-15',
+        'Warranty Expiry': '2027-01-15',
         'Status': 'available',
-        'Condition': 'excellent'
+        'Condition': 'excellent',
+        'Location ID': '1',
+        'Location Name': 'Corporate HQ, Bangalore (for reference only)'
       }
     ]
     this.exportToExcel(templateData, 'Asset_Import_Template', 'Assets')
