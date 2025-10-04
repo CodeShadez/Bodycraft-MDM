@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Building2, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
+import bodycraftLogo from "@assets/620d58b4-6963-4ba5-a394-d3defdf84884_1759583383267.png";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -57,15 +58,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 px-4">
       <div className="w-full max-w-md space-y-6">
         {/* BODYCRAFT Branding */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-2 bg-primary rounded-lg">
-              <Building2 className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-primary">BODYCRAFT</h1>
-              <p className="text-sm text-muted-foreground">Master Data Management</p>
-            </div>
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center mb-4">
+            <img 
+              src={bodycraftLogo} 
+              alt="BODYCRAFT Logo" 
+              className="h-20 w-auto"
+            />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Master Data Management</p>
           </div>
           <p className="text-muted-foreground">
             Sign in to access your Master Data Management
