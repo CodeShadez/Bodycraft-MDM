@@ -233,7 +233,18 @@ export default function Dashboard() {
         <Card 
           data-testid="card-total-assets" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
-          onClick={() => setLocation("/assets")}
+          onClick={() => {
+            console.log("Total Assets card clicked - navigating to /assets")
+            setLocation("/assets")
+          }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              setLocation("/assets")
+            }
+          }}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/90">Total Assets</CardTitle>
@@ -251,7 +262,12 @@ export default function Dashboard() {
           data-testid="card-assigned-assets" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.1s" }}
-          onClick={() => setLocation("/assets?status=assigned")}
+          onClick={() => {
+            console.log("Asset Utilization card clicked - navigating to /assets?status=assigned")
+            setLocation("/assets?status=assigned")
+          }}
+          role="button"
+          tabIndex={0}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/90">Asset Utilization</CardTitle>
@@ -288,7 +304,12 @@ export default function Dashboard() {
           data-testid="card-maintenance-status" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.2s" }}
-          onClick={() => setLocation("/assets?status=maintenance")}
+          onClick={() => {
+            console.log("Maintenance Activities card clicked - navigating to /assets?status=maintenance")
+            setLocation("/assets?status=maintenance")
+          }}
+          role="button"
+          tabIndex={0}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white/90">Maintenance Activities</CardTitle>
