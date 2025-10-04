@@ -136,49 +136,49 @@ export const reportExecutions = pgTable("report_executions", {
 });
 
 // Insert Schemas - Zod schemas for validation
-export const insertLocationSchema = createInsertSchema(locations).omit({
-  id: true,
-  createdAt: true,
+export const insertLocationSchema = createInsertSchema(locations, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
-export const insertEmployeeSchema = createInsertSchema(employees).omit({
-  id: true,
-  createdAt: true,
+export const insertEmployeeSchema = createInsertSchema(employees, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
-export const insertAssetSchema = createInsertSchema(assets).omit({
-  createdAt: true,
-  updatedAt: true,
+export const insertAssetSchema = createInsertSchema(assets, {
+  createdAt: () => z.never(),
+  updatedAt: () => z.never(),
 });
 
-export const insertAssetAssignmentHistorySchema = createInsertSchema(assetAssignmentHistory).omit({
-  id: true,
-  createdAt: true,
+export const insertAssetAssignmentHistorySchema = createInsertSchema(assetAssignmentHistory, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
-export const insertAssetMaintenanceSchema = createInsertSchema(assetMaintenance).omit({
-  id: true,
-  createdAt: true,
+export const insertAssetMaintenanceSchema = createInsertSchema(assetMaintenance, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
-export const insertCctvSystemSchema = createInsertSchema(cctvSystems).omit({
-  id: true,
-  createdAt: true,
+export const insertCctvSystemSchema = createInsertSchema(cctvSystems, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
-export const insertBiometricSystemSchema = createInsertSchema(biometricSystems).omit({
-  id: true,
-  createdAt: true,
+export const insertBiometricSystemSchema = createInsertSchema(biometricSystems, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
-export const insertBackupSchema = createInsertSchema(backups).omit({
-  id: true,
-  createdAt: true,
+export const insertBackupSchema = createInsertSchema(backups, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
-export const insertReportExecutionSchema = createInsertSchema(reportExecutions).omit({
-  id: true,
-  createdAt: true,
+export const insertReportExecutionSchema = createInsertSchema(reportExecutions, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
 // TypeScript Types
@@ -261,25 +261,25 @@ export const assetTypes = pgTable("asset_types", {
 });
 
 // Insert Schemas for new tables
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertUserSchema = createInsertSchema(users, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
+  updatedAt: () => z.never(),
 });
 
-export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
-  createdAt: true,
+export const insertUserSessionSchema = createInsertSchema(userSessions, {
+  createdAt: () => z.never(),
 });
 
-export const insertCompanySettingsSchema = createInsertSchema(companySettings).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertCompanySettingsSchema = createInsertSchema(companySettings, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
+  updatedAt: () => z.never(),
 });
 
-export const insertAssetTypeSchema = createInsertSchema(assetTypes).omit({
-  id: true,
-  createdAt: true,
+export const insertAssetTypeSchema = createInsertSchema(assetTypes, {
+  id: () => z.never(),
+  createdAt: () => z.never(),
 });
 
 // TypeScript Types for new tables
