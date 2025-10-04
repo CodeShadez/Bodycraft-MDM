@@ -64,6 +64,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 interface BiometricSystem {
   id: number

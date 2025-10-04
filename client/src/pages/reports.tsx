@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 // TypeScript interfaces
 interface Location {

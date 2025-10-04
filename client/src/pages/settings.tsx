@@ -26,6 +26,7 @@ import {
   X
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 export default function SettingsPage() {
   const [companySettings, setCompanySettings] = useState({

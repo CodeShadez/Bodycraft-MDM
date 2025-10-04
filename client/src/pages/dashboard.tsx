@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useLocation } from "wouter"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -215,6 +216,8 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in" data-testid="dashboard-page">
+      <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
+      
       {/* Header with System Health */}
       <div className="flex items-center justify-between">
         <div>

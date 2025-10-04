@@ -111,14 +111,9 @@ function AppContent() {
         </div>
 
         <AppSidebar />
-        <div className="flex flex-col flex-1">
-          <header className="flex items-center p-3 glass-card border-0">
-            <SidebarTrigger data-testid="button-sidebar-toggle" className="text-white/80 hover:text-white" />
-          </header>
-          <main className="flex-1 overflow-auto">
-            <Router />
-          </main>
-        </div>
+        <main className="flex-1 overflow-auto">
+          <Router />
+        </main>
       </div>
     </SidebarProvider>
   );

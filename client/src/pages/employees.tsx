@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 // Status color mapping
 const statusColors: Record<string, string> = {
