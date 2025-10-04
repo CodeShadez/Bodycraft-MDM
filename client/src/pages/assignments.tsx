@@ -117,6 +117,9 @@ export default function AssignmentsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [locationFilter, setLocationFilter] = useState<string>("all")
+  const [assetTypeFilter, setAssetTypeFilter] = useState<string>("all")
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all")
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
   const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false)
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false)
@@ -145,6 +148,10 @@ export default function AssignmentsPage() {
     queryKey: ["/api/locations"],
   })
 
+  // Get unique asset types and departments for filters
+  const assetTypes = Array.from(new Set(assets?.map(a => a.assetType) || []))
+  const departments = Array.from(new Set(employees?.map(e => e.department) || []))
+
   // Filter assignments
   const filteredAssignments = assignments?.filter(assignment => {
     const asset = assets?.find(a => a.assetId === assignment.assetId)
@@ -167,9 +174,18 @@ export default function AssignmentsPage() {
       (statusFilter === "returned" && isReturned)
       
     const matchesLocation = locationFilter === "all" || employee?.locationId?.toString() === locationFilter
+    const matchesAssetType = assetTypeFilter === "all" || asset?.assetType === assetTypeFilter
+    const matchesDepartment = departmentFilter === "all" || employee?.department === departmentFilter
     
-    return matchesSearch && matchesStatus && matchesLocation
+    return matchesSearch && matchesStatus && matchesLocation && matchesAssetType && matchesDepartment
   }) || []
+
+  // Count active filters
+  const activeFiltersCount = [
+    locationFilter !== "all",
+    assetTypeFilter !== "all",
+    departmentFilter !== "all"
+  ].filter(Boolean).length
 
   // Available assets for assignment (not currently assigned)
   const availableAssets = assets?.filter(asset => 
@@ -540,44 +556,132 @@ export default function AssignmentsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by Asset ID, Employee Name, Employee Code..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+              <Input
+                placeholder="Search by Asset ID, Employee Name, Employee Code..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-12 pl-12 pr-12 backdrop-blur-sm border-border/40 focus:border-primary/50 transition-all"
+                data-testid="input-search-assignments"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-clear-search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            <Button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              variant="outline"
+              className="h-12 gap-2 min-w-[180px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+              data-testid="button-toggle-advanced-filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Advanced Filters
+              {activeFiltersCount > 0 && (
+                <Badge variant="default" className="ml-1 px-2 py-0.5 text-xs">
+                  {activeFiltersCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          {/* Quick Filters */}
+          <div className="flex flex-wrap gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px] backdrop-blur-sm border-border/40" data-testid="select-filter-status">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignments</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="returned">Returned</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {(locationFilter !== "all" || assetTypeFilter !== "all" || departmentFilter !== "all") && (
+              <Button
+                onClick={() => {
+                  setLocationFilter("all")
+                  setAssetTypeFilter("all")
+                  setDepartmentFilter("all")
+                }}
+                variant="ghost"
+                className="gap-2 text-muted-foreground hover:text-foreground backdrop-blur-sm"
+                data-testid="button-reset-filters"
+              >
+                <X className="h-4 w-4" />
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg bg-muted/10 backdrop-blur-sm border border-border/40 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Asset Type
+                </label>
+                <Select value={assetTypeFilter} onValueChange={setAssetTypeFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-asset-type">
+                    <SelectValue placeholder="All Asset Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Asset Types</SelectItem>
+                    {assetTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Location
+                </label>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-location">
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Locations</SelectItem>
+                    {locations?.map(location => (
+                      <SelectItem key={location.id} value={location.id.toString()}>
+                        {location.outletName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Department
+                </label>
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-department">
+                    <SelectValue placeholder="All Departments" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    {departments.map(dept => (
+                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Assignments</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="returned">Returned</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {locations?.map(location => (
-                    <SelectItem key={location.id} value={location.id.toString()}>
-                      {location.outletName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          )}
           
           <div className="text-sm text-muted-foreground">
             Showing {filteredAssignments.length} of {assignments?.length || 0} assignments

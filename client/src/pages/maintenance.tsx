@@ -23,7 +23,10 @@ import {
   FileText,
   Settings,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  SlidersHorizontal,
+  Filter
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -116,6 +119,8 @@ export default function MaintenancePage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [locationFilter, setLocationFilter] = useState<string>("all")
+  const [assetTypeFilter, setAssetTypeFilter] = useState<string>("all")
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedMaintenance, setSelectedMaintenance] = useState<Maintenance | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -152,6 +157,9 @@ export default function MaintenancePage() {
     return "scheduled"
   }
 
+  // Get unique asset types for filter
+  const assetTypes = Array.from(new Set(assets?.map(a => a.assetType) || []))
+
   // Filter maintenance records
   const filteredMaintenance = maintenance?.filter(record => {
     const asset = assets?.find(a => a.assetId === record.assetId)
@@ -168,9 +176,17 @@ export default function MaintenancePage() {
     const matchesStatus = statusFilter === "all" || status === statusFilter
     const matchesType = typeFilter === "all" || record.maintenanceType === typeFilter
     const matchesLocation = locationFilter === "all" || asset?.locationId?.toString() === locationFilter
+    const matchesAssetType = assetTypeFilter === "all" || asset?.assetType === assetTypeFilter
     
-    return matchesSearch && matchesStatus && matchesType && matchesLocation
+    return matchesSearch && matchesStatus && matchesType && matchesLocation && matchesAssetType
   }) || []
+
+  // Count active filters
+  const activeFiltersCount = [
+    typeFilter !== "all",
+    locationFilter !== "all",
+    assetTypeFilter !== "all"
+  ].filter(Boolean).length
 
   // Create maintenance mutation
   const createMaintenanceMutation = useMutation({
@@ -526,57 +542,133 @@ export default function MaintenancePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by Asset ID, Brand, Description, Technician..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+              <Input
+                placeholder="Search by Asset ID, Brand, Description, Technician..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-12 pl-12 pr-12 backdrop-blur-sm border-border/40 focus:border-primary/50 transition-all"
+                data-testid="input-search-maintenance"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-clear-search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            <Button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              variant="outline"
+              className="h-12 gap-2 min-w-[180px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+              data-testid="button-toggle-advanced-filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Advanced Filters
+              {activeFiltersCount > 0 && (
+                <Badge variant="default" className="ml-1 px-2 py-0.5 text-xs">
+                  {activeFiltersCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          {/* Quick Filters */}
+          <div className="flex flex-wrap gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px] backdrop-blur-sm border-border/40" data-testid="select-filter-status">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="scheduled">Scheduled</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {(typeFilter !== "all" || locationFilter !== "all" || assetTypeFilter !== "all") && (
+              <Button
+                onClick={() => {
+                  setTypeFilter("all")
+                  setLocationFilter("all")
+                  setAssetTypeFilter("all")
+                }}
+                variant="ghost"
+                className="gap-2 text-muted-foreground hover:text-foreground backdrop-blur-sm"
+                data-testid="button-reset-filters"
+              >
+                <X className="h-4 w-4" />
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg bg-muted/10 backdrop-blur-sm border border-border/40 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Maintenance Type
+                </label>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-type">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="preventive">Preventive</SelectItem>
+                    <SelectItem value="corrective">Corrective</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Location
+                </label>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-location">
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Locations</SelectItem>
+                    {locations?.map(location => (
+                      <SelectItem key={location.id} value={location.id.toString()}>
+                        {location.outletName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  Asset Type
+                </label>
+                <Select value={assetTypeFilter} onValueChange={setAssetTypeFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-asset-type">
+                    <SelectValue placeholder="All Asset Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Asset Types</SelectItem>
+                    {assetTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="overdue">Overdue</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="preventive">Preventive</SelectItem>
-                  <SelectItem value="corrective">Corrective</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {locations?.map(location => (
-                    <SelectItem key={location.id} value={location.id.toString()}>
-                      {location.outletName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          )}
           
           <div className="text-sm text-muted-foreground">
             Showing {filteredMaintenance.length} of {maintenance?.length || 0} maintenance records

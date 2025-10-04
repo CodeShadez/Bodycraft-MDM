@@ -20,7 +20,10 @@ import {
   BarChart3,
   Clock,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  SlidersHorizontal,
+  Filter
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -105,6 +108,8 @@ interface Assignment {
 export default function LocationsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [stateFilter, setStateFilter] = useState<string>("all")
+  const [cityFilter, setCityFilter] = useState<string>("all")
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -131,8 +136,9 @@ export default function LocationsPage() {
     queryKey: ["/api/assignments"],
   })
 
-  // Get unique states for filter
+  // Get unique states and cities for filter
   const states = Array.from(new Set(locations?.map(loc => loc.state) || []))
+  const cities = Array.from(new Set(locations?.map(loc => loc.city) || []))
 
   // Filter locations
   const filteredLocations = locations?.filter(location => {
@@ -143,9 +149,16 @@ export default function LocationsPage() {
       location.address.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesState = stateFilter === "all" || location.state === stateFilter
+    const matchesCity = cityFilter === "all" || location.city === cityFilter
     
-    return matchesSearch && matchesState
+    return matchesSearch && matchesState && matchesCity
   }) || []
+
+  // Count active filters
+  const activeFiltersCount = [
+    stateFilter !== "all",
+    cityFilter !== "all"
+  ].filter(Boolean).length
 
   // Create location mutation
   const createLocationMutation = useMutation({
@@ -472,31 +485,100 @@ export default function LocationsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by Outlet Name, City, Manager Name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+              <Input
+                placeholder="Search by Outlet Name, City, Manager Name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-12 pl-12 pr-12 backdrop-blur-sm border-border/40 focus:border-primary/50 transition-all"
+                data-testid="input-search-locations"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="button-clear-search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            <Button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              variant="outline"
+              className="h-12 gap-2 min-w-[180px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+              data-testid="button-toggle-advanced-filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Advanced Filters
+              {activeFiltersCount > 0 && (
+                <Badge variant="default" className="ml-1 px-2 py-0.5 text-xs">
+                  {activeFiltersCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          {/* Quick Filters - No quick filter for locations */}
+          <div className="flex flex-wrap gap-2">
+            {(stateFilter !== "all" || cityFilter !== "all") && (
+              <Button
+                onClick={() => {
+                  setStateFilter("all")
+                  setCityFilter("all")
+                }}
+                variant="ghost"
+                className="gap-2 text-muted-foreground hover:text-foreground backdrop-blur-sm"
+                data-testid="button-reset-filters"
+              >
+                <X className="h-4 w-4" />
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-muted/10 backdrop-blur-sm border border-border/40 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  State
+                </label>
+                <Select value={stateFilter} onValueChange={setStateFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-state">
+                    <SelectValue placeholder="All States" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All States</SelectItem>
+                    {states.map(state => (
+                      <SelectItem key={state} value={state}>{state}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  City
+                </label>
+                <Select value={cityFilter} onValueChange={setCityFilter}>
+                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-city">
+                    <SelectValue placeholder="All Cities" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Cities</SelectItem>
+                    {cities.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Select value={stateFilter} onValueChange={setStateFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="State" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All States</SelectItem>
-                  {states.map(state => (
-                    <SelectItem key={state} value={state}>{state}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          )}
           
           <div className="text-sm text-muted-foreground">
             Showing {filteredLocations.length} of {locations?.length || 0} locations
