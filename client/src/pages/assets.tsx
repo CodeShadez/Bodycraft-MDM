@@ -156,6 +156,7 @@ export default function AssetsPage() {
       const params = new URLSearchParams(window.location.search)
       const newType = params.get('type')
       const newStatus = params.get('status')
+      const action = params.get('action')
       
       if (newStatus) {
         setStatusFilter(newStatus)
@@ -167,6 +168,13 @@ export default function AssetsPage() {
         setTypeFilter(newType)
       } else if (params.toString() === '' || !params.has('type')) {
         setTypeFilter("all")
+      }
+
+      // Open create dialog if action=create
+      if (action === 'create') {
+        setIsCreateDialogOpen(true)
+        // Clean up URL without reloading
+        window.history.replaceState({}, '', window.location.pathname)
       }
     }
     
