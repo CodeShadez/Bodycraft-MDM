@@ -410,6 +410,8 @@ export default function ReportsPage() {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
+      <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
