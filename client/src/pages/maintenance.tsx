@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { 
   Wrench, 
@@ -131,9 +131,75 @@ export default function MaintenancePage() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+
+  // Form state for Create Maintenance dialog
+  const [createForm, setCreateForm] = useState({
+    assetId: '',
+    maintenanceType: '',
+    description: '',
+    scheduledDate: '',
+    cost: '',
+    technicianName: '',
+    partsReplaced: ''
+  })
+
+  // Form state for Update Maintenance dialog
+  const [updateForm, setUpdateForm] = useState({
+    description: '',
+    scheduledDate: '',
+    cost: '',
+    technicianName: '',
+    partsReplaced: ''
+  })
+
+  // Form state for Complete Maintenance dialog
+  const [completeForm, setCompleteForm] = useState({
+    cost: '',
+    technicianName: '',
+    partsReplaced: ''
+  })
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Reset create form when dialog opens
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      setCreateForm({
+        assetId: '',
+        maintenanceType: '',
+        description: '',
+        scheduledDate: '',
+        cost: '',
+        technicianName: '',
+        partsReplaced: ''
+      })
+    }
+  }, [isCreateDialogOpen])
+
+  // Populate update form when selectedMaintenance changes
+  useEffect(() => {
+    if (selectedMaintenance && isEditDialogOpen) {
+      setUpdateForm({
+        description: selectedMaintenance.description || '',
+        scheduledDate: selectedMaintenance.scheduledDate ? selectedMaintenance.scheduledDate.split('T')[0] : '',
+        cost: selectedMaintenance.cost?.toString() || '',
+        technicianName: selectedMaintenance.technicianName || '',
+        partsReplaced: selectedMaintenance.partsReplaced || ''
+      })
+    }
+  }, [selectedMaintenance, isEditDialogOpen])
+
+  // Populate complete form when selectedMaintenance changes
+  useEffect(() => {
+    if (selectedMaintenance && isCompleteDialogOpen) {
+      setCompleteForm({
+        cost: selectedMaintenance.cost?.toString() || '',
+        technicianName: selectedMaintenance.technicianName || '',
+        partsReplaced: selectedMaintenance.partsReplaced || ''
+      })
+    }
+  }, [selectedMaintenance, isCompleteDialogOpen])
 
   // Fetch data
   const { data: maintenance, isLoading: maintenanceLoading } = useQuery<Maintenance[]>({
@@ -341,16 +407,25 @@ export default function MaintenancePage() {
 
   const handleCreateMaintenance = (event: React.FormEvent) => {
     event.preventDefault()
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!createForm.assetId || !createForm.maintenanceType || !createForm.scheduledDate) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (Asset, Type, Scheduled Date)",
+        variant: "destructive",
+      })
+      return
+    }
     
     const maintenanceData = {
-      assetId: formData.get('assetId'),
-      maintenanceType: formData.get('maintenanceType'),
-      description: formData.get('description'),
-      scheduledDate: formData.get('scheduledDate'),
-      cost: formData.get('cost') ? parseFloat(formData.get('cost') as string) : null,
-      technicianName: formData.get('technicianName') || null,
-      partsReplaced: formData.get('partsReplaced') || null,
+      assetId: createForm.assetId,
+      maintenanceType: createForm.maintenanceType,
+      description: createForm.description?.trim() || null,
+      scheduledDate: createForm.scheduledDate,
+      cost: createForm.cost ? parseFloat(createForm.cost) : null,
+      technicianName: createForm.technicianName?.trim() || null,
+      partsReplaced: createForm.partsReplaced?.trim() || null,
     }
 
     createMaintenanceMutation.mutate(maintenanceData)
@@ -359,15 +434,23 @@ export default function MaintenancePage() {
   const handleUpdateMaintenance = (event: React.FormEvent) => {
     event.preventDefault()
     if (!selectedMaintenance) return
-    
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!updateForm.scheduledDate) {
+      toast({
+        title: "Validation Error",
+        description: "Scheduled date is required",
+        variant: "destructive",
+      })
+      return
+    }
     
     const maintenanceData = {
-      description: formData.get('description'),
-      scheduledDate: formData.get('scheduledDate'),
-      cost: formData.get('cost') ? parseFloat(formData.get('cost') as string) : null,
-      technicianName: formData.get('technicianName') || null,
-      partsReplaced: formData.get('partsReplaced') || null,
+      description: updateForm.description?.trim() || null,
+      scheduledDate: updateForm.scheduledDate,
+      cost: updateForm.cost ? parseFloat(updateForm.cost) : null,
+      technicianName: updateForm.technicianName?.trim() || null,
+      partsReplaced: updateForm.partsReplaced?.trim() || null,
     }
 
     updateMaintenanceMutation.mutate({ maintenanceId: selectedMaintenance.id, data: maintenanceData })
@@ -377,13 +460,11 @@ export default function MaintenancePage() {
     event.preventDefault()
     if (!selectedMaintenance) return
     
-    const formData = new FormData(event.target as HTMLFormElement)
-    
     const maintenanceData = {
       completedDate: new Date().toISOString(),
-      cost: formData.get('cost') ? parseFloat(formData.get('cost') as string) : selectedMaintenance.cost,
-      technicianName: formData.get('technicianName') || selectedMaintenance.technicianName,
-      partsReplaced: formData.get('partsReplaced') || selectedMaintenance.partsReplaced,
+      cost: completeForm.cost ? parseFloat(completeForm.cost) : selectedMaintenance.cost,
+      technicianName: completeForm.technicianName?.trim() || selectedMaintenance.technicianName,
+      partsReplaced: completeForm.partsReplaced?.trim() || selectedMaintenance.partsReplaced,
     }
 
     updateMaintenanceMutation.mutate({ maintenanceId: selectedMaintenance.id, data: maintenanceData })
@@ -485,7 +566,7 @@ export default function MaintenancePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="assetId">Asset *</Label>
-                    <Select name="assetId" required>
+                    <Select value={createForm.assetId} onValueChange={(value) => setCreateForm({ ...createForm, assetId: value })} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
@@ -500,7 +581,7 @@ export default function MaintenancePage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="maintenanceType">Type *</Label>
-                    <Select name="maintenanceType" required>
+                    <Select value={createForm.maintenanceType} onValueChange={(value) => setCreateForm({ ...createForm, maintenanceType: value })} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
@@ -516,10 +597,10 @@ export default function MaintenancePage() {
                   <Label htmlFor="description">Description *</Label>
                   <Textarea
                     id="description"
-                    name="description"
+                    value={createForm.description}
+                    onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
                     placeholder="Describe the maintenance work to be performed"
                     rows={3}
-                    required
                   />
                 </div>
 
@@ -528,8 +609,9 @@ export default function MaintenancePage() {
                     <Label htmlFor="scheduledDate">Scheduled Date *</Label>
                     <Input
                       id="scheduledDate"
-                      name="scheduledDate"
                       type="date"
+                      value={createForm.scheduledDate}
+                      onChange={(e) => setCreateForm({ ...createForm, scheduledDate: e.target.value })}
                       required
                     />
                   </div>
@@ -537,9 +619,10 @@ export default function MaintenancePage() {
                     <Label htmlFor="cost">Estimated Cost</Label>
                     <Input
                       id="cost"
-                      name="cost"
                       type="number"
                       step="0.01"
+                      value={createForm.cost}
+                      onChange={(e) => setCreateForm({ ...createForm, cost: e.target.value })}
                       placeholder="0.00"
                     />
                   </div>
@@ -550,7 +633,8 @@ export default function MaintenancePage() {
                     <Label htmlFor="technicianName">Technician Name</Label>
                     <Input
                       id="technicianName"
-                      name="technicianName"
+                      value={createForm.technicianName}
+                      onChange={(e) => setCreateForm({ ...createForm, technicianName: e.target.value })}
                       placeholder="John Doe, ABC Services"
                     />
                   </div>
@@ -558,7 +642,8 @@ export default function MaintenancePage() {
                     <Label htmlFor="partsReplaced">Expected Parts</Label>
                     <Input
                       id="partsReplaced"
-                      name="partsReplaced"
+                      value={createForm.partsReplaced}
+                      onChange={(e) => setCreateForm({ ...createForm, partsReplaced: e.target.value })}
                       placeholder="Hard drive, RAM, etc."
                     />
                   </div>
@@ -1132,10 +1217,9 @@ export default function MaintenancePage() {
                 <Label htmlFor="edit-description">Description *</Label>
                 <Textarea
                   id="edit-description"
-                  name="description"
-                  defaultValue={selectedMaintenance.description}
+                  value={updateForm.description}
+                  onChange={(e) => setUpdateForm({ ...updateForm, description: e.target.value })}
                   rows={3}
-                  required
                 />
               </div>
 
@@ -1144,9 +1228,9 @@ export default function MaintenancePage() {
                   <Label htmlFor="edit-scheduledDate">Scheduled Date *</Label>
                   <Input
                     id="edit-scheduledDate"
-                    name="scheduledDate"
                     type="date"
-                    defaultValue={selectedMaintenance.scheduledDate}
+                    value={updateForm.scheduledDate}
+                    onChange={(e) => setUpdateForm({ ...updateForm, scheduledDate: e.target.value })}
                     required
                   />
                 </div>
@@ -1154,10 +1238,10 @@ export default function MaintenancePage() {
                   <Label htmlFor="edit-cost">Cost</Label>
                   <Input
                     id="edit-cost"
-                    name="cost"
                     type="number"
                     step="0.01"
-                    defaultValue={selectedMaintenance.cost?.toString() || ""}
+                    value={updateForm.cost}
+                    onChange={(e) => setUpdateForm({ ...updateForm, cost: e.target.value })}
                   />
                 </div>
               </div>
@@ -1167,16 +1251,16 @@ export default function MaintenancePage() {
                   <Label htmlFor="edit-technicianName">Technician Name</Label>
                   <Input
                     id="edit-technicianName"
-                    name="technicianName"
-                    defaultValue={selectedMaintenance.technicianName || ""}
+                    value={updateForm.technicianName}
+                    onChange={(e) => setUpdateForm({ ...updateForm, technicianName: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-partsReplaced">Parts Replaced</Label>
                   <Input
                     id="edit-partsReplaced"
-                    name="partsReplaced"
-                    defaultValue={selectedMaintenance.partsReplaced || ""}
+                    value={updateForm.partsReplaced}
+                    onChange={(e) => setUpdateForm({ ...updateForm, partsReplaced: e.target.value })}
                   />
                 </div>
               </div>
@@ -1213,10 +1297,10 @@ export default function MaintenancePage() {
                 <Label htmlFor="complete-cost">Final Cost</Label>
                 <Input
                   id="complete-cost"
-                  name="cost"
                   type="number"
                   step="0.01"
-                  defaultValue={selectedMaintenance?.cost?.toString() || ""}
+                  value={completeForm.cost}
+                  onChange={(e) => setCompleteForm({ ...completeForm, cost: e.target.value })}
                   placeholder="Final maintenance cost"
                 />
               </div>
@@ -1224,8 +1308,8 @@ export default function MaintenancePage() {
                 <Label htmlFor="complete-technicianName">Technician Name</Label>
                 <Input
                   id="complete-technicianName"
-                  name="technicianName"
-                  defaultValue={selectedMaintenance?.technicianName || ""}
+                  value={completeForm.technicianName}
+                  onChange={(e) => setCompleteForm({ ...completeForm, technicianName: e.target.value })}
                   placeholder="Who performed the work"
                 />
               </div>
@@ -1235,8 +1319,8 @@ export default function MaintenancePage() {
               <Label htmlFor="complete-partsReplaced">Parts Replaced</Label>
               <Textarea
                 id="complete-partsReplaced"
-                name="partsReplaced"
-                defaultValue={selectedMaintenance?.partsReplaced || ""}
+                value={completeForm.partsReplaced}
+                onChange={(e) => setCompleteForm({ ...completeForm, partsReplaced: e.target.value })}
                 placeholder="List all parts that were replaced"
                 rows={3}
               />
