@@ -117,7 +117,9 @@ export default function SettingsPage() {
     user: null,
   });
   const [adminResetPassword, setAdminResetPassword] = useState("");
+  const [adminResetConfirmPassword, setAdminResetConfirmPassword] = useState("");
   const [showAdminResetPassword, setShowAdminResetPassword] = useState(false);
+  const [showAdminResetConfirmPassword, setShowAdminResetConfirmPassword] = useState(false);
 
   // Update company settings mutation
   const updateCompanySettingsMutation = useMutation({
@@ -241,8 +243,8 @@ export default function SettingsPage() {
 
   // Admin password reset mutation
   const adminPasswordResetMutation = useMutation({
-    mutationFn: async ({ userId, newPassword }: { userId: number; newPassword: string }) => {
-      return await apiRequest("POST", `/api/users/${userId}/reset-password`, { newPassword });
+    mutationFn: async ({ userId, newPassword, confirmPassword }: { userId: number; newPassword: string; confirmPassword: string }) => {
+      return await apiRequest("POST", `/api/users/${userId}/reset-password`, { newPassword, confirmPassword });
     },
     onSuccess: () => {
       toast({
@@ -251,6 +253,7 @@ export default function SettingsPage() {
       });
       setAdminResetDialog({ open: false, user: null });
       setAdminResetPassword("");
+      setAdminResetConfirmPassword("");
     },
     onError: (error: any) => {
       toast({
@@ -352,10 +355,10 @@ export default function SettingsPage() {
   };
 
   const handleAdminPasswordReset = () => {
-    if (!adminResetPassword) {
+    if (!adminResetPassword || !adminResetConfirmPassword) {
       toast({
         title: "Validation Error",
-        description: "Password is required",
+        description: "All password fields are required",
         variant: "destructive",
       });
       return;
@@ -370,6 +373,15 @@ export default function SettingsPage() {
       return;
     }
 
+    if (adminResetPassword !== adminResetConfirmPassword) {
+      toast({
+        title: "Validation Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!adminResetDialog.user) {
       return;
     }
@@ -377,6 +389,7 @@ export default function SettingsPage() {
     adminPasswordResetMutation.mutate({
       userId: adminResetDialog.user.id,
       newPassword: adminResetPassword,
+      confirmPassword: adminResetConfirmPassword,
     });
   };
 
@@ -1077,7 +1090,9 @@ export default function SettingsPage() {
         if (!open) {
           setAdminResetDialog({ open: false, user: null });
           setAdminResetPassword("");
+          setAdminResetConfirmPassword("");
           setShowAdminResetPassword(false);
+          setShowAdminResetConfirmPassword(false);
         }
       }}>
         <DialogContent className="glass-card border-white/10">
@@ -1117,6 +1132,31 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="admin-reset-confirm-password" className="text-white/80">
+                Confirm Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="admin-reset-confirm-password"
+                  type={showAdminResetConfirmPassword ? "text" : "password"}
+                  value={adminResetConfirmPassword}
+                  onChange={(e) => setAdminResetConfirmPassword(e.target.value)}
+                  placeholder="Re-enter the new password"
+                  className="glass-input pr-10"
+                  data-testid="input-admin-reset-confirm-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminResetConfirmPassword(!showAdminResetConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                  data-testid="button-toggle-admin-reset-confirm-password"
+                >
+                  {showAdminResetConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
             <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <p className="text-sm text-blue-300/90">
                 <strong>Note:</strong> The password must be at least 8 characters long.
@@ -1130,7 +1170,9 @@ export default function SettingsPage() {
               onClick={() => {
                 setAdminResetDialog({ open: false, user: null });
                 setAdminResetPassword("");
+                setAdminResetConfirmPassword("");
                 setShowAdminResetPassword(false);
+                setShowAdminResetConfirmPassword(false);
               }}
               data-testid="button-cancel-admin-reset"
             >
