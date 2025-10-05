@@ -66,13 +66,13 @@ interface Assignment {
 interface Maintenance {
   id: number
   assetId: string
-  maintenanceType: "preventive" | "corrective" | "warranty"
+  maintenanceType: "preventive" | "corrective" | "upgrade"
   description: string
   scheduledDate: string
   completedDate: string | null
   cost: number | null
-  vendor: string | null
-  status: "scheduled" | "in_progress" | "completed" | "cancelled"
+  technicianName: string | null
+  partsReplaced: string | null
 }
 
 interface Location {
