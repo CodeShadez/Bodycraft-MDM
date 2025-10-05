@@ -1,0 +1,97 @@
+Phase 2: Build Advanced Enterprise Features
+Proceed only after Phase 1 is fully functional and tested.
+
+Predictive Analytics Dashboard
+a. Endpoint GET /api/analytics/predictive-maintenance
+
+Gather assigned assets with maintenance history: purchase_date, maintenance_count, avg_maintenance_cost, last_maintenance_date, days_since_maintenance.
+
+Apply risk model: assign failure_risk (‘low’/‘medium’/‘high’), predicted_days_to_failure, recommended_action, estimated_cost.
+
+Return array of predictions.
+b. UI Component
+
+Display table or cards for each asset: ID, model, risk, days_to_failure, action, cost.
+
+Allow filters by location, asset type, and risk level.
+
+Enable drill-down to full maintenance history.
+
+Asset Utilization Optimization
+a. Endpoint GET /api/analytics/utilization-optimization
+
+Compute per-location: total_assets, assigned_assets, available_assets, total_employees, utilization_rate.
+
+Calculate assets_per_employee, efficiency_score, and generate AI-driven recommendations with priority levels.
+b. UI Component
+
+Render heatmap of utilization_rate across locations.
+
+List top recommendations per location with priority and expected gains.
+
+Provide export option (CSV/Excel) for recommendations.
+
+Multi-Location Management
+a. Endpoint GET /api/locations/performance-analytics
+
+For each outlet: total_assets, active_assets, total_employees, active_employees, total_maintenance, total_maintenance_cost, total_compliance_tasks, completed_compliance, avg_compliance_score.
+
+Compute metrics: utilization_rate, compliance_rate, asset_per_employee, avg_maintenance_cost, performance_score.
+
+Sort and rank locations by score; include performance_rank.
+b. Endpoint POST /api/locations/transfer-asset
+
+Validate asset exists and is not assigned.
+
+If Location User transferring cross-location, create approval request; return pending status.
+
+If Admin or same-location transfer, update asset.location_id, insert into asset_transfers and audit_logs.
+c. UI Components
+
+Location performance dashboard showing sortable table and charts.
+
+Transfer workflow: select asset, from/to locations, reason; show approval status or immediate transfer result.
+
+Real-Time Business Intelligence Dashboard
+a. Endpoint GET /api/dashboard/real-time-data
+
+Aggregate in one response: asset stats (total, assigned, available, maintenance, retired), financials (total_invoices, paid, pending, count), maintenance stats (total, completed, scheduled, overdue, avg_cost), compliance stats (total, completed, overdue, avg_score), recent_activities (last 10 events with type, entity, date).
+
+Compute rates: utilization_rate, collection_rate, maintenance_completion_rate, compliance_completion_rate.
+
+Include last_updated timestamp.
+b. Endpoint GET /api/dashboard/trends
+
+Accept metric (‘assets’, ‘maintenance’, ‘compliance’) and period (‘daily’, ‘weekly’, ‘monthly’).
+
+Return time-series data grouped by period with counts and relevant aggregates (e.g., cost, avg_score).
+c. UI Component
+
+Auto-refresh every 30 seconds.
+
+Interactive charts: bar/line charts for trends; pie charts for status distributions.
+
+Filter controls for period, location, and metric.
+
+Alerts banner when key rates drop below thresholds.
+
+General Best Practices
+Use parameterized queries to prevent SQL injection.
+
+Enforce role-based access in every route.
+
+Log all create/update/delete actions in audit trails.
+
+Add indexes and materialized views for analytics.
+
+Implement Redis caching for dashboard endpoints.
+
+Monitor API response times; log warnings if >1 second.
+
+Write unit and integration tests for each endpoint.
+
+Validate all user inputs on both frontend and backend.
+
+Provide clear error messages and use proper HTTP status codes.
+
+Proceed methodically: complete each task, test thoroughly, then move to the next. Provide progress updates after finishing each numbered item. Good luck!”

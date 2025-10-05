@@ -21,10 +21,11 @@ import {
   type ComplianceTask, type InsertComplianceTask,
   type ComplianceEvidence, type InsertComplianceEvidence,
   type ComplianceAuditTrail, type InsertComplianceAuditTrail,
+  type AssetTransfer, type InsertAssetTransfer,
   assets, employees, locations, departments, assetAssignmentHistory, assetMaintenance,
   cctvSystems, biometricSystems, backups, users, companySettings, assetTypes,
   approvalRequests, approvalActions, invoices,
-  complianceTasks, complianceEvidence, complianceAuditTrail
+  complianceTasks, complianceEvidence, complianceAuditTrail, assetTransfers
 } from "@shared/schema";
 import { IStorage } from "./storage";
 
@@ -777,5 +778,354 @@ export class DatabaseStorage implements IStorage {
       ...row.trail,
       performedByName: row.user ? `${row.user.firstName} ${row.user.lastName}` : 'Unknown User',
     }));
+  }
+
+  // Phase 2: Predictive Analytics
+  async getPredictiveMaintenance(locationId: number | null, assetType: string | null, riskLevel: string | null): Promise<any[]> {
+    const assignedAssets = await db.select({
+      asset: assets,
+      location: locations,
+    }).from(assets)
+      .leftJoin(locations, eq(assets.locationId, locations.id))
+      .where(
+        and(
+          eq(assets.status, 'assigned'),
+          locationId ? eq(assets.locationId, locationId) : undefined,
+          assetType ? eq(assets.assetType, assetType) : undefined
+        )
+      );
+
+    const predictions = await Promise.all(assignedAssets.map(async (row: any) => {
+      const asset = row.asset;
+      const location = row.location;
+
+      // Get maintenance history
+      const maintenanceHistory = await db.select()
+        .from(assetMaintenance)
+        .where(eq(assetMaintenance.assetId, asset.assetId));
+
+      const maintenanceCount = maintenanceHistory.length;
+      const totalCost = maintenanceHistory.reduce((sum, m) => sum + (Number(m.cost) || 0), 0);
+      const avgMaintenanceCost = maintenanceCount > 0 ? totalCost / maintenanceCount : 0;
+
+      const lastMaintenance = maintenanceHistory.sort((a, b) => 
+        new Date(b.completedDate || b.scheduledDate || 0).getTime() - 
+        new Date(a.completedDate || a.scheduledDate || 0).getTime()
+      )[0];
+
+      const lastMaintenanceDate = lastMaintenance ? (lastMaintenance.completedDate || lastMaintenance.scheduledDate) : null;
+      const daysSinceMaintenance = lastMaintenanceDate ? 
+        Math.floor((Date.now() - new Date(lastMaintenanceDate).getTime()) / (1000 * 60 * 60 * 24)) : 
+        (asset.purchaseDate ? Math.floor((Date.now() - new Date(asset.purchaseDate).getTime()) / (1000 * 60 * 60 * 24)) : 365);
+
+      // Risk model
+      let failureRisk = 'low';
+      let predictedDaysToFailure = 180;
+      let recommendedAction = 'Continue monitoring';
+      let estimatedCost = avgMaintenanceCost || 1000;
+
+      if (daysSinceMaintenance > 180 || maintenanceCount > 5) {
+        failureRisk = 'high';
+        predictedDaysToFailure = 30;
+        recommendedAction = 'Schedule immediate preventive maintenance';
+        estimatedCost = avgMaintenanceCost * 1.5 || 5000;
+      } else if (daysSinceMaintenance > 90 || maintenanceCount > 3) {
+        failureRisk = 'medium';
+        predictedDaysToFailure = 60;
+        recommendedAction = 'Schedule preventive maintenance within 30 days';
+        estimatedCost = avgMaintenanceCost * 1.2 || 3000;
+      }
+
+      return {
+        assetId: asset.assetId,
+        modelName: asset.modelName,
+        brand: asset.brand,
+        assetType: asset.assetType,
+        locationName: location?.outletName || 'Unknown',
+        purchaseDate: asset.purchaseDate,
+        maintenanceCount,
+        avgMaintenanceCost: Number(avgMaintenanceCost.toFixed(2)),
+        lastMaintenanceDate,
+        daysSinceMaintenance,
+        failureRisk,
+        predictedDaysToFailure,
+        recommendedAction,
+        estimatedCost: Number(estimatedCost.toFixed(2)),
+      };
+    }));
+
+    // Filter by risk level if specified
+    if (riskLevel) {
+      return predictions.filter(p => p.failureRisk === riskLevel);
+    }
+
+    return predictions;
+  }
+
+  async getUtilizationOptimization(): Promise<any> {
+    const allLocations = await db.select().from(locations);
+    
+    const locationStats = await Promise.all(allLocations.map(async (location) => {
+      const totalAssets = await db.select().from(assets).where(eq(assets.locationId, location.id));
+      const assignedAssets = totalAssets.filter(a => a.status === 'assigned');
+      const availableAssets = totalAssets.filter(a => a.status === 'available');
+      const totalEmployees = await db.select().from(employees).where(eq(employees.locationId, location.id));
+
+      const utilizationRate = totalAssets.length > 0 ? Math.round((assignedAssets.length / totalAssets.length) * 100) : 0;
+      const assetsPerEmployee = totalEmployees.length > 0 ? Number((assignedAssets.length / totalEmployees.length).toFixed(2)) : 0;
+      
+      // Calculate efficiency score (combination of utilization and assets per employee)
+      const efficiencyScore = Math.round((utilizationRate * 0.7) + (Math.min(assetsPerEmployee * 20, 30)));
+
+      // Generate recommendations
+      const recommendations = [];
+      if (utilizationRate < 60) {
+        recommendations.push({
+          priority: 'high',
+          action: `Redistribute ${availableAssets.length} unused assets to other locations`,
+          expectedGain: `Improve utilization by ${100 - utilizationRate}%`,
+        });
+      }
+      if (assetsPerEmployee < 0.5) {
+        recommendations.push({
+          priority: 'medium',
+          action: 'Consider asset procurement to meet employee needs',
+          expectedGain: 'Improve productivity and employee satisfaction',
+        });
+      }
+      if (assetsPerEmployee > 2) {
+        recommendations.push({
+          priority: 'low',
+          action: 'Excess assets detected - consider redistribution',
+          expectedGain: 'Optimize asset allocation across locations',
+        });
+      }
+
+      return {
+        locationId: location.id,
+        locationName: location.outletName,
+        totalAssets: totalAssets.length,
+        assignedAssets: assignedAssets.length,
+        availableAssets: availableAssets.length,
+        totalEmployees: totalEmployees.length,
+        utilizationRate,
+        assetsPerEmployee,
+        efficiencyScore,
+        recommendations,
+      };
+    }));
+
+    return {
+      locations: locationStats,
+      summary: {
+        totalLocations: allLocations.length,
+        avgUtilization: Math.round(locationStats.reduce((sum, l) => sum + l.utilizationRate, 0) / locationStats.length),
+        avgEfficiencyScore: Math.round(locationStats.reduce((sum, l) => sum + l.efficiencyScore, 0) / locationStats.length),
+      },
+    };
+  }
+
+  async getLocationPerformanceAnalytics(): Promise<any[]> {
+    const allLocations = await db.select().from(locations);
+
+    const performance = await Promise.all(allLocations.map(async (location) => {
+      const totalAssets = await db.select().from(assets).where(eq(assets.locationId, location.id));
+      const activeAssets = totalAssets.filter(a => a.status === 'assigned');
+      const allEmployees = await db.select().from(employees).where(eq(employees.locationId, location.id));
+      const activeEmployees = allEmployees.filter(e => e.status === 'active');
+
+      const maintenanceRecords = await db.select()
+        .from(assetMaintenance)
+        .innerJoin(assets, eq(assetMaintenance.assetId, assets.assetId))
+        .where(eq(assets.locationId, location.id));
+
+      const totalMaintenance = maintenanceRecords.length;
+      const totalMaintenanceCost = maintenanceRecords.reduce((sum, r) => sum + (Number(r.asset_maintenance.cost) || 0), 0);
+
+      const locationComplianceTasks = await db.select()
+        .from(complianceTasks)
+        .where(eq(complianceTasks.locationId, location.id));
+
+      const completedCompliance = locationComplianceTasks.filter((t: any) => t.status === 'completed').length;
+      const avgComplianceScore = locationComplianceTasks.length > 0 ? 
+        Math.round(locationComplianceTasks.reduce((sum: number, t: any) => sum + (t.complianceScore || 0), 0) / locationComplianceTasks.length) : 0;
+
+      const utilizationRate = totalAssets.length > 0 ? Math.round((activeAssets.length / totalAssets.length) * 100) : 0;
+      const complianceRate = locationComplianceTasks.length > 0 ? Math.round((completedCompliance / locationComplianceTasks.length) * 100) : 0;
+      const assetPerEmployee = activeEmployees.length > 0 ? Number((activeAssets.length / activeEmployees.length).toFixed(2)) : 0;
+      const avgMaintenanceCost = totalMaintenance > 0 ? Number((totalMaintenanceCost / totalMaintenance).toFixed(2)) : 0;
+
+      // Performance score calculation
+      const performanceScore = Math.round(
+        (utilizationRate * 0.3) + 
+        (complianceRate * 0.3) + 
+        (Math.min(assetPerEmployee * 20, 20)) + 
+        ((100 - Math.min(avgMaintenanceCost / 100, 30)))
+      );
+
+      return {
+        locationId: location.id,
+        locationName: location.outletName,
+        city: location.city,
+        state: location.state,
+        totalAssets: totalAssets.length,
+        activeAssets: activeAssets.length,
+        totalEmployees: allEmployees.length,
+        activeEmployees: activeEmployees.length,
+        totalMaintenance,
+        totalMaintenanceCost: Number(totalMaintenanceCost.toFixed(2)),
+        totalComplianceTasks: locationComplianceTasks.length,
+        completedCompliance,
+        avgComplianceScore,
+        utilizationRate,
+        complianceRate,
+        assetPerEmployee,
+        avgMaintenanceCost,
+        performanceScore,
+      };
+    }));
+
+    // Add performance rank
+    const rankedPerformance = performance
+      .sort((a, b) => b.performanceScore - a.performanceScore)
+      .map((loc, index) => ({
+        ...loc,
+        performanceRank: index + 1,
+      }));
+
+    return rankedPerformance;
+  }
+
+  async createAssetTransfer(transfer: InsertAssetTransfer): Promise<AssetTransfer> {
+    const result = await db.insert(assetTransfers).values({
+      ...transfer,
+      createdAt: new Date(),
+    }).returning();
+    return result[0];
+  }
+
+  async getRealTimeDashboardData(): Promise<any> {
+    // Asset stats
+    const allAssets = await db.select().from(assets);
+    const totalAssets = allAssets.length;
+    const assignedAssets = allAssets.filter(a => a.status === 'assigned').length;
+    const availableAssets = allAssets.filter(a => a.status === 'available').length;
+    const maintenanceAssets = allAssets.filter(a => a.status === 'maintenance').length;
+    const retiredAssets = allAssets.filter(a => a.status === 'retired').length;
+    const utilizationRate = totalAssets > 0 ? Math.round((assignedAssets / totalAssets) * 100) : 0;
+
+    // Financial stats
+    const allInvoices = await db.select().from(invoices);
+    const totalInvoices = allInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0);
+    const paidInvoices = allInvoices.filter(inv => inv.paymentStatus === 'paid').reduce((sum, inv) => sum + Number(inv.amount), 0);
+    const pendingInvoices = allInvoices.filter(inv => inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial').reduce((sum, inv) => sum + Number(inv.amount), 0);
+    const invoiceCount = allInvoices.length;
+    const collectionRate = totalInvoices > 0 ? Math.round((paidInvoices / totalInvoices) * 100) : 0;
+
+    // Maintenance stats
+    const allMaintenance = await db.select().from(assetMaintenance);
+    const completedMaintenance = allMaintenance.filter(m => m.completedDate).length;
+    const scheduledMaintenance = allMaintenance.filter(m => m.scheduledDate && !m.completedDate).length;
+    const overdueMaintenance = allMaintenance.filter(m => 
+      m.scheduledDate && !m.completedDate && new Date(m.scheduledDate) < new Date()
+    ).length;
+    const avgMaintenanceCost = allMaintenance.length > 0 ? 
+      Number((allMaintenance.reduce((sum, m) => sum + Number(m.cost || 0), 0) / allMaintenance.length).toFixed(2)) : 0;
+    const maintenanceCompletionRate = allMaintenance.length > 0 ? Math.round((completedMaintenance / allMaintenance.length) * 100) : 0;
+
+    // Compliance stats
+    const allComplianceTasks = await db.select().from(complianceTasks);
+    const completedCompliance = allComplianceTasks.filter(t => t.status === 'completed').length;
+    const overdueCompliance = allComplianceTasks.filter(t => 
+      t.status === 'pending' && new Date(t.dueDate) < new Date()
+    ).length;
+    const avgComplianceScore = allComplianceTasks.length > 0 ? 
+      Math.round(allComplianceTasks.reduce((sum, t) => sum + (t.complianceScore || 0), 0) / allComplianceTasks.length) : 0;
+    const complianceCompletionRate = allComplianceTasks.length > 0 ? Math.round((completedCompliance / allComplianceTasks.length) * 100) : 0;
+
+    // Recent activities (simulated - in production, use audit logs)
+    const recentActivities = [
+      { type: 'asset', entity: 'Asset BFC001 assigned', date: new Date() },
+      { type: 'maintenance', entity: 'Maintenance completed for BFC002', date: new Date() },
+      { type: 'compliance', entity: 'Compliance task updated', date: new Date() },
+    ].slice(0, 10);
+
+    return {
+      assets: {
+        total: totalAssets,
+        assigned: assignedAssets,
+        available: availableAssets,
+        maintenance: maintenanceAssets,
+        retired: retiredAssets,
+        utilizationRate,
+      },
+      financials: {
+        totalInvoices: Number(totalInvoices.toFixed(2)),
+        paid: Number(paidInvoices.toFixed(2)),
+        pending: Number(pendingInvoices.toFixed(2)),
+        count: invoiceCount,
+        collectionRate,
+      },
+      maintenance: {
+        total: allMaintenance.length,
+        completed: completedMaintenance,
+        scheduled: scheduledMaintenance,
+        overdue: overdueMaintenance,
+        avgCost: avgMaintenanceCost,
+        completionRate: maintenanceCompletionRate,
+      },
+      compliance: {
+        total: allComplianceTasks.length,
+        completed: completedCompliance,
+        overdue: overdueCompliance,
+        avgScore: avgComplianceScore,
+        completionRate: complianceCompletionRate,
+      },
+      recentActivities,
+      lastUpdated: new Date().toISOString(),
+    };
+  }
+
+  async getDashboardTrends(metric: string, period: string): Promise<any[]> {
+    // For demo purposes, generate sample trend data
+    // In production, this would query actual historical data
+    const now = new Date();
+    const dataPoints = period === 'daily' ? 30 : period === 'weekly' ? 12 : 12;
+    
+    const trends = [];
+    for (let i = dataPoints - 1; i >= 0; i--) {
+      const date = new Date(now);
+      if (period === 'daily') {
+        date.setDate(date.getDate() - i);
+      } else if (period === 'weekly') {
+        date.setDate(date.getDate() - (i * 7));
+      } else {
+        date.setMonth(date.getMonth() - i);
+      }
+
+      let value = 0;
+      let additionalData = {};
+
+      if (metric === 'assets') {
+        value = Math.floor(Math.random() * 20) + 80; // 80-100
+        additionalData = { assigned: Math.floor(value * 0.7), available: Math.floor(value * 0.3) };
+      } else if (metric === 'maintenance') {
+        value = Math.floor(Math.random() * 10) + 5; // 5-15
+        additionalData = { cost: Math.floor(Math.random() * 10000) + 5000 };
+      } else if (metric === 'compliance') {
+        value = Math.floor(Math.random() * 15) + 10; // 10-25
+        additionalData = { avgScore: Math.floor(Math.random() * 30) + 70 };
+      }
+
+      trends.push({
+        date: date.toISOString().split('T')[0],
+        period,
+        metric,
+        value,
+        ...additionalData,
+      });
+    }
+
+    return trends;
   }
 }

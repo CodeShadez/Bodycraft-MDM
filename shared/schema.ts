@@ -430,6 +430,33 @@ export type InsertComplianceEvidence = z.infer<typeof insertComplianceEvidenceSc
 export type ComplianceAuditTrail = typeof complianceAuditTrail.$inferSelect;
 export type InsertComplianceAuditTrail = z.infer<typeof insertComplianceAuditTrailSchema>;
 
+// 20. ASSET TRANSFERS - Track asset transfers between locations
+export const assetTransfers = pgTable("asset_transfers", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  assetId: varchar("asset_id", { length: 20 }).notNull().references(() => assets.assetId),
+  
+  fromLocationId: integer("from_location_id").notNull().references(() => locations.id),
+  toLocationId: integer("to_location_id").notNull().references(() => locations.id),
+  
+  transferReason: text("transfer_reason"),
+  transferDate: date("transfer_date").notNull(),
+  
+  requestedBy: integer("requested_by").notNull().references(() => users.id),
+  approvedBy: integer("approved_by").references(() => users.id),
+  
+  status: varchar("status", { length: 20 }).notNull().default("completed"), // completed, pending, cancelled
+  approvalRequestId: integer("approval_request_id").references(() => approvalRequests.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert Schema
+export const insertAssetTransferSchema = createInsertSchema(assetTransfers);
+
+// TypeScript Types
+export type AssetTransfer = typeof assetTransfers.$inferSelect;
+export type InsertAssetTransfer = z.infer<typeof insertAssetTransferSchema>;
+
 // Password Reset Schema (Self-service)
 export const passwordResetSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),

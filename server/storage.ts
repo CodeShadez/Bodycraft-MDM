@@ -121,6 +121,14 @@ export interface IStorage {
   uploadComplianceEvidence(evidence: any): Promise<any>;
   createComplianceAuditTrail(trail: any): Promise<any>;
   getComplianceAuditTrail(taskId: number): Promise<any[]>;
+  
+  // Phase 2: Advanced Analytics
+  getPredictiveMaintenance(locationId: number | null, assetType: string | null, riskLevel: string | null): Promise<any[]>;
+  getUtilizationOptimization(): Promise<any>;
+  getLocationPerformanceAnalytics(): Promise<any[]>;
+  createAssetTransfer(transfer: any): Promise<any>;
+  getRealTimeDashboardData(): Promise<any>;
+  getDashboardTrends(metric: string, period: string): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {

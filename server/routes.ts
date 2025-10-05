@@ -1469,6 +1469,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Phase 2: Predictive Analytics Dashboard
+  app.get("/api/analytics/predictive-maintenance", requireAuth, async (req, res) => {
+    try {
+      const locationId = req.query.locationId ? parseInt(req.query.locationId as string) : null;
+      const assetType = req.query.assetType as string | null;
+      const riskLevel = req.query.riskLevel as string | null;
+
+      const predictions = await storage.getPredictiveMaintenance(locationId, assetType, riskLevel);
+      res.json(predictions);
+    } catch (error) {
+      console.error("Error fetching predictive maintenance:", error);
+      res.status(500).json({ message: "Failed to fetch predictive maintenance data" });
+    }
+  });
+
+  // Asset Utilization Optimization
+  app.get("/api/analytics/utilization-optimization", requireAuth, async (req, res) => {
+    try {
+      const optimization = await storage.getUtilizationOptimization();
+      res.json(optimization);
+    } catch (error) {
+      console.error("Error fetching utilization optimization:", error);
+      res.status(500).json({ message: "Failed to fetch utilization optimization data" });
+    }
+  });
+
+  // Multi-Location Performance Analytics
+  app.get("/api/locations/performance-analytics", requireAuth, async (req, res) => {
+    try {
+      const performance = await storage.getLocationPerformanceAnalytics();
+      res.json(performance);
+    } catch (error) {
+      console.error("Error fetching location performance analytics:", error);
+      res.status(500).json({ message: "Failed to fetch location performance analytics" });
+    }
+  });
+
+  // Asset Transfer with Approval Workflow
+  app.post("/api/locations/transfer-asset", requireAuth, async (req, res) => {
+    try {
+      const validation = z.object({
+        assetId: z.string().min(1, "Asset ID is required"),
+        fromLocationId: z.number(),
+        toLocationId: z.number(),
+        transferReason: z.string().optional(),
+      }).safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({ message: "Invalid transfer data", errors: validation.error.issues });
+      }
+
+      const { assetId, fromLocationId, toLocationId, transferReason } = validation.data;
+      const userRole = req.session.role;
+      const userLocationId = req.session.locationId;
+      const userId = req.session.userId!;
+
+      // Check if asset exists
+      const asset = await storage.getAsset(assetId);
+      if (!asset) {
+        return res.status(404).json({ message: "Asset not found" });
+      }
+
+      // Check if asset is assigned
+      if (asset.status === 'assigned') {
+        return res.status(400).json({ message: "Cannot transfer an assigned asset. Please return it first." });
+      }
+
+      // Location User transferring cross-location requires approval
+      if (userRole === 'location_user' && fromLocationId !== toLocationId) {
+        // Create approval request
+        const approvalRequest = await storage.createApprovalRequest({
+          requestType: 'asset_transfer',
+          entityType: 'asset',
+          entityId: assetId,
+          currentValue: JSON.stringify({ locationId: fromLocationId }),
+          newValue: JSON.stringify({ locationId: toLocationId }),
+          reason: transferReason || 'Asset transfer between locations',
+          requestedBy: userId,
+        });
+
+        return res.json({
+          status: 'pending',
+          message: 'Transfer request created and pending approval',
+          approvalRequestId: approvalRequest.id,
+        });
+      }
+
+      // Admin or same-location transfer - execute immediately
+      const transfer = await storage.createAssetTransfer({
+        assetId,
+        fromLocationId,
+        toLocationId,
+        transferReason,
+        transferDate: new Date().toISOString().split('T')[0],
+        requestedBy: userId,
+        approvedBy: userRole === 'location_user' ? null : userId,
+        status: 'completed',
+      });
+
+      // Update asset location
+      await storage.updateAsset(assetId, { locationId: toLocationId });
+
+      res.json({
+        status: 'completed',
+        message: 'Asset transfer completed successfully',
+        transfer,
+      });
+    } catch (error) {
+      console.error("Error transferring asset:", error);
+      res.status(500).json({ message: "Failed to transfer asset" });
+    }
+  });
+
+  // Real-Time Business Intelligence Dashboard
+  app.get("/api/dashboard/real-time-data", requireAuth, async (req, res) => {
+    try {
+      const data = await storage.getRealTimeDashboardData();
+      res.json(data);
+    } catch (error) {
+      console.error("Error fetching real-time dashboard data:", error);
+      res.status(500).json({ message: "Failed to fetch real-time dashboard data" });
+    }
+  });
+
+  // Dashboard Trends
+  app.get("/api/dashboard/trends", requireAuth, async (req, res) => {
+    try {
+      const metric = req.query.metric as string || 'assets';
+      const period = req.query.period as string || 'daily';
+
+      if (!['assets', 'maintenance', 'compliance'].includes(metric)) {
+        return res.status(400).json({ message: "Invalid metric. Use: assets, maintenance, or compliance" });
+      }
+
+      if (!['daily', 'weekly', 'monthly'].includes(period)) {
+        return res.status(400).json({ message: "Invalid period. Use: daily, weekly, or monthly" });
+      }
+
+      const trends = await storage.getDashboardTrends(metric, period);
+      res.json(trends);
+    } catch (error) {
+      console.error("Error fetching dashboard trends:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard trends" });
+    }
+  });
+
   // User Management Routes
   app.get("/api/users", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
