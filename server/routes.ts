@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
+import { AIOrchestrator } from "./ai-orchestrator";
+import { BackupVerifier } from "./backup-verifier";
 import { 
   insertAssetSchema, 
   insertEmployeeSchema, 
@@ -2678,6 +2680,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching compliance analytics:", error);
       res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Initialize automation services
+  const aiOrchestrator = new AIOrchestrator(storage);
+  const backupVerifier = new BackupVerifier(storage);
+
+  // Automation APIs
+  
+  // POST /api/compliance/automation/run - Trigger automation
+  app.post("/api/compliance/automation/run", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const { locationId } = req.body;
+      
+      await aiOrchestrator.runAutomation(locationId);
+      
+      res.json({ 
+        success: true, 
+        message: locationId ? `Automation run completed for location ${locationId}` : "Automation run completed for all locations"
+      });
+    } catch (error) {
+      console.error("Error running automation:", error);
+      res.status(500).json({ error: "Failed to run automation" });
+    }
+  });
+
+  // GET /api/compliance/automation/summary - Get automation run stats
+  app.get("/api/compliance/automation/summary", requireAuth, async (req, res) => {
+    try {
+      const summary = await storage.getAutomationRunSummary();
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching automation summary:", error);
+      res.status(500).json({ error: "Failed to fetch automation summary" });
+    }
+  });
+
+  // GET /api/compliance/risk-insights - Get risk insights by location
+  app.get("/api/compliance/risk-insights", requireAuth, async (req, res) => {
+    try {
+      const locationId = req.query.locationId ? parseInt(req.query.locationId as string) : undefined;
+      const insights = await aiOrchestrator.getRiskInsights(locationId);
+      res.json(insights);
+    } catch (error) {
+      console.error("Error fetching risk insights:", error);
+      res.status(500).json({ error: "Failed to fetch risk insights" });
+    }
+  });
+
+  // GET /api/compliance/predictive-alerts - Get predictive alerts
+  app.get("/api/compliance/predictive-alerts", requireAuth, async (req, res) => {
+    try {
+      const locationId = req.query.locationId ? parseInt(req.query.locationId as string) : undefined;
+      const alerts = await aiOrchestrator.getPredictiveAlerts(locationId);
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching predictive alerts:", error);
+      res.status(500).json({ error: "Failed to fetch predictive alerts" });
+    }
+  });
+
+  // POST /api/compliance/tasks/auto-generate - Auto-generate compliance tasks
+  app.post("/api/compliance/tasks/auto-generate", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const { locationId } = req.body;
+      
+      // Run automation which includes task generation
+      await aiOrchestrator.runAutomation(locationId);
+      
+      res.json({ 
+        success: true, 
+        message: locationId ? `Tasks auto-generated for location ${locationId}` : "Tasks auto-generated for all locations"
+      });
+    } catch (error) {
+      console.error("Error auto-generating tasks:", error);
+      res.status(500).json({ error: "Failed to auto-generate tasks" });
+    }
+  });
+
+  // GET /api/backups/verification - Get backup verification results
+  app.get("/api/backups/verification", requireAuth, async (req, res) => {
+    try {
+      const assetId = req.query.assetId as string | undefined;
+      const verifications = await backupVerifier.getVerificationHistory(assetId);
+      res.json(verifications);
+    } catch (error) {
+      console.error("Error fetching backup verifications:", error);
+      res.status(500).json({ error: "Failed to fetch backup verifications" });
+    }
+  });
+
+  // POST /api/backups/verification/trigger - Trigger backup verification
+  app.post("/api/backups/verification/trigger", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const { locationId } = req.body;
+      
+      await backupVerifier.runVerification(locationId);
+      
+      res.json({ 
+        success: true, 
+        message: locationId ? `Backup verification completed for location ${locationId}` : "Backup verification completed for all locations"
+      });
+    } catch (error) {
+      console.error("Error running backup verification:", error);
+      res.status(500).json({ error: "Failed to run backup verification" });
+    }
+  });
+
+  // GET /api/backups/health - Get backup health summary
+  app.get("/api/backups/health", requireAuth, async (req, res) => {
+    try {
+      const locationId = req.query.locationId ? parseInt(req.query.locationId as string) : undefined;
+      const health = await backupVerifier.getBackupHealthSummary(locationId);
+      res.json(health);
+    } catch (error) {
+      console.error("Error fetching backup health:", error);
+      res.status(500).json({ error: "Failed to fetch backup health" });
+    }
+  });
+
+  // GET /api/ai/recommendations - Get AI recommendations
+  app.get("/api/ai/recommendations", requireAuth, async (req, res) => {
+    try {
+      const targetType = req.query.targetType as string | undefined;
+      const status = req.query.status as string | undefined;
+      const recommendations = await storage.getAiRecommendations({ targetType, status });
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching AI recommendations:", error);
+      res.status(500).json({ error: "Failed to fetch AI recommendations" });
     }
   });
 
