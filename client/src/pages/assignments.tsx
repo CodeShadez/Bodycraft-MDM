@@ -174,8 +174,12 @@ export default function AssignmentsPage() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('action') === 'create') {
       setIsAssignDialogOpen(true)
-      // Clean up URL without reloading
-      window.history.replaceState({}, '', window.location.pathname)
+      // Clean up URL without reloading, preserving other params
+      params.delete('action')
+      const newUrl = params.toString() 
+        ? `${window.location.pathname}?${params.toString()}`
+        : window.location.pathname
+      window.history.replaceState({}, '', newUrl)
     }
   }, [])
 
