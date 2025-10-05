@@ -284,19 +284,20 @@ export default function FinancialOverview() {
                 <TableHead>Vendor</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
                     <p className="text-lg font-medium">Loading invoices...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
                     <p className="text-lg font-medium mb-1">No invoices found</p>
                     <p className="text-sm">
@@ -362,13 +363,28 @@ export default function FinancialOverview() {
                           ₹{parseFloat(invoice.amount).toLocaleString('en-IN')}
                         </span>
                       </TableCell>
+
+                      {/* Status */}
+                      <TableCell className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            invoice.paymentStatus === 'paid' ? 'bg-green-500' :
+                            invoice.paymentStatus === 'pending' ? 'bg-yellow-500' :
+                            invoice.paymentStatus === 'overdue' ? 'bg-red-500' :
+                            'bg-red-400'
+                          }`} />
+                          <span className="text-sm font-medium capitalize" data-testid={`text-status-${invoice.id}`}>
+                            {invoice.paymentStatus}
+                          </span>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ];
 
                   if (isExpanded) {
                     rows.push(
                       <TableRow key={`expanded-${invoice.id}`} className="bg-muted/10 hover:bg-muted/10">
-                        <TableCell colSpan={4} className="p-6">
+                        <TableCell colSpan={5} className="p-6">
                           <div className="grid grid-cols-3 gap-6">
                             {/* Column 1 - Invoice Information */}
                             <div className="space-y-4">
