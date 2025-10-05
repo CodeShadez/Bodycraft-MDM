@@ -1180,16 +1180,8 @@ export default function AssetsPage() {
 
           {/* Results Summary */}
           <div className="flex items-center justify-between pt-2 border-t border-border/20">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Package className="h-4 w-4" />
-              <span className="font-medium text-foreground">
-                {filteredAssets.length}
-              </span>
-              <span>of</span>
-              <span className="font-medium text-foreground">
-                {assets?.length || 0}
-              </span>
-              <span>assets found</span>
+            <div className="text-sm text-muted-foreground">
+              Showing {filteredAssets.length} of {assets?.length || 0} assets
             </div>
             
             {activeFiltersCount > 0 && (
