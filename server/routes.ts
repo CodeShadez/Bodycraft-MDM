@@ -1103,7 +1103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reports API endpoints
   
   // Get available report templates
-  app.get("/api/reports/templates", async (req, res) => {
+  app.get("/api/reports/templates", requireAuth, async (req, res) => {
     try {
       const templates = [
         {
@@ -1164,7 +1164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate and export report
-  app.post("/api/reports/generate", async (req, res) => {
+  app.post("/api/reports/generate", requireAuth, async (req, res) => {
     try {
       const { templateId, filters, format = 'excel' } = req.body;
       
@@ -1341,7 +1341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get custom reports
-  app.get("/api/reports/custom", async (req, res) => {
+  app.get("/api/reports/custom", requireAuth, async (req, res) => {
     try {
       // In a real implementation, this would fetch from database
       // For now, returning mock data with proper structure
@@ -1366,7 +1366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create custom report
-  app.post("/api/reports/custom", async (req, res) => {
+  app.post("/api/reports/custom", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const { name, description, entity, fields, filters } = req.body;
       
@@ -1398,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate custom report
-  app.post("/api/reports/custom/:id/generate", async (req, res) => {
+  app.post("/api/reports/custom/:id/generate", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const { format = 'excel' } = req.body;
