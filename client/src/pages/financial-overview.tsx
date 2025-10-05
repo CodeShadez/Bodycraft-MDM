@@ -8,11 +8,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertInvoiceSchema, type Invoice, type InsertInvoice } from "@shared/schema";
-import { Search, Plus, Download, Trash2, DollarSign, FileText, Clock, CheckCircle, X, Upload } from "lucide-react";
+import { Search, Plus, Download, Trash2, DollarSign, FileText, Clock, CheckCircle, X, Upload, ChevronDown, ChevronUp, MoreHorizontal, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
@@ -27,6 +36,7 @@ export default function FinancialOverview() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string>("");
+  const [expandedInvoiceId, setExpandedInvoiceId] = useState<number | null>(null);
 
   const { data: invoices = [], isLoading } = useQuery<Invoice[]>({
     queryKey: ['/api/invoices'],
@@ -182,68 +192,68 @@ export default function FinancialOverview() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border-white/20 dark:border-gray-700/50" data-testid="card-total-amount">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="glass-card border-0" data-testid="card-total-amount">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white" data-testid="text-total-amount">₹{totalAmount.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{totalInvoices} total invoices</p>
+            <div className="text-2xl font-bold text-white/90" data-testid="text-total-amount">₹{totalAmount.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground">{totalInvoices} total invoices</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border-white/20 dark:border-gray-700/50" data-testid="card-paid-amount">
+        <Card className="glass-card border-0" data-testid="card-paid-amount">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Paid Amount</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <CardTitle className="text-sm font-medium">Paid Amount</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white" data-testid="text-paid-amount">₹{paidAmount.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{paidCount} paid invoices</p>
+            <div className="text-2xl font-bold text-white/90" data-testid="text-paid-amount">₹{paidAmount.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground">{paidCount} paid invoices</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border-white/20 dark:border-gray-700/50" data-testid="card-pending-amount">
+        <Card className="glass-card border-0" data-testid="card-pending-amount">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Pending Amount</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+            <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white" data-testid="text-pending-amount">₹{pendingAmount.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{pendingCount} pending invoices</p>
+            <div className="text-2xl font-bold text-white/90" data-testid="text-pending-amount">₹{pendingAmount.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground">{pendingCount} pending invoices</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border-white/20 dark:border-gray-700/50" data-testid="card-invoice-count">
+        <Card className="glass-card border-0" data-testid="card-invoice-count">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Invoices</CardTitle>
-            <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white" data-testid="text-invoice-count">{totalInvoices}</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">All time records</p>
+            <div className="text-2xl font-bold text-white/90" data-testid="text-invoice-count">{totalInvoices}</div>
+            <p className="text-xs text-muted-foreground">All time records</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters and Search */}
-      <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border-white/20 dark:border-gray-700/50">
+      <Card className="glass-card border-0">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by invoice number, vendor, or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white dark:bg-gray-900"
+                className="pl-10 backdrop-blur-sm border-border/40"
                 data-testid="input-search-invoice"
               />
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full md:w-[200px] bg-white dark:bg-gray-900" data-testid="select-category-filter">
+              <SelectTrigger className="w-full md:w-[200px] backdrop-blur-sm border-border/40" data-testid="select-category-filter">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -251,11 +261,13 @@ export default function FinancialOverview() {
                 <SelectItem value="hardware">Hardware</SelectItem>
                 <SelectItem value="software">Software</SelectItem>
                 <SelectItem value="maintenance">Maintenance</SelectItem>
+                <SelectItem value="repairs">Repairs</SelectItem>
+                <SelectItem value="internet">Internet</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[200px] bg-white dark:bg-gray-900" data-testid="select-status-filter">
+              <SelectTrigger className="w-full md:w-[200px] backdrop-blur-sm border-border/40" data-testid="select-status-filter">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
@@ -271,102 +283,243 @@ export default function FinancialOverview() {
       </Card>
 
       {/* Invoices Table */}
-      <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border-white/20 dark:border-gray-700/50">
-        <CardHeader>
-          <CardTitle className="text-gray-900 dark:text-white">Invoice Records</CardTitle>
-          <CardDescription className="text-gray-600 dark:text-gray-400">
-            {filteredInvoices.length} of {invoices.length} invoices
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8 text-gray-600 dark:text-gray-400">Loading invoices...</div>
-          ) : filteredInvoices.length === 0 ? (
-            <div className="text-center py-8 text-gray-600 dark:text-gray-400">
-              {searchTerm || categoryFilter !== "all" || statusFilter !== "all" 
-                ? "No invoices match your filters" 
-                : "No invoices found. Create your first invoice to get started."}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-gray-200 dark:border-gray-700">
-                    <TableHead className="text-gray-700 dark:text-gray-300">Invoice #</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Date</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Vendor</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Category</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Amount</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Status</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">File</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInvoices.map((invoice) => (
-                    <TableRow key={invoice.id} className="border-gray-200 dark:border-gray-700" data-testid={`row-invoice-${invoice.id}`}>
-                      <TableCell className="font-medium text-gray-900 dark:text-white" data-testid={`text-invoice-number-${invoice.id}`}>
-                        {invoice.invoiceNumber}
+      <Card className="glass-card border-0">
+        <CardContent className="p-0 table-container-stable">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Invoice Details</TableHead>
+                <TableHead>Vendor</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
+                    <p className="text-lg font-medium">Loading invoices...</p>
+                  </TableCell>
+                </TableRow>
+              ) : filteredInvoices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
+                    <p className="text-lg font-medium mb-1">No invoices found</p>
+                    <p className="text-sm">
+                      {searchTerm || categoryFilter !== "all" || statusFilter !== "all" 
+                        ? "Try adjusting your filters" 
+                        : "Create your first invoice to get started"}
+                    </p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredInvoices.flatMap((invoice) => {
+                  const isExpanded = expandedInvoiceId === invoice.id;
+                  const rows = [
+                    <TableRow
+                      key={`main-${invoice.id}`}
+                      onClick={() => setExpandedInvoiceId(isExpanded ? null : invoice.id)}
+                      className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
+                      data-testid={`row-invoice-${invoice.id}`}
+                    >
+                      {/* Invoice Details with Chevron */}
+                      <TableCell className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
+                              <FileText className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-sm text-foreground" data-testid={`text-invoice-number-${invoice.id}`}>
+                                {invoice.invoiceNumber}
+                              </div>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {format(new Date(invoice.invoiceDate), "MMM dd, yyyy")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </TableCell>
-                      <TableCell className="text-gray-700 dark:text-gray-300">
-                        {format(new Date(invoice.invoiceDate), "MMM dd, yyyy")}
+
+                      {/* Vendor */}
+                      <TableCell className="py-3 px-3">
+                        <span className="text-sm font-medium truncate">
+                          {invoice.vendorName || "—"}
+                        </span>
                       </TableCell>
-                      <TableCell className="text-gray-700 dark:text-gray-300">{invoice.vendorName || "-"}</TableCell>
-                      <TableCell className="text-gray-700 dark:text-gray-300 capitalize">{invoice.category}</TableCell>
-                      <TableCell className="text-gray-900 dark:text-white font-semibold">
-                        ₹{parseFloat(invoice.amount).toLocaleString('en-IN')}
+
+                      {/* Category */}
+                      <TableCell className="py-3 px-3">
+                        <span className="text-sm font-medium capitalize">
+                          {invoice.category}
+                        </span>
                       </TableCell>
-                      <TableCell>
-                        <Select
-                          value={invoice.paymentStatus}
-                          onValueChange={(value) => updateStatusMutation.mutate({ id: invoice.id, status: value })}
-                        >
-                          <SelectTrigger className="w-[130px] h-8 border-0 bg-transparent p-0" data-testid={`select-status-${invoice.id}`}>
-                            <SelectValue>{getStatusBadge(invoice.paymentStatus)}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="paid">Paid</SelectItem>
-                            <SelectItem value="unpaid">Unpaid</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="overdue">Overdue</SelectItem>
-                          </SelectContent>
-                        </Select>
+
+                      {/* Amount */}
+                      <TableCell className="py-3 px-3">
+                        <span className="text-sm font-bold">
+                          ₹{parseFloat(invoice.amount).toLocaleString('en-IN')}
+                        </span>
                       </TableCell>
-                      <TableCell>
-                        {invoice.fileUrl ? (
-                          <a 
-                            href={invoice.fileUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-purple-600 dark:text-purple-400 hover:underline"
-                            data-testid={`link-file-${invoice.id}`}
-                          >
-                            <Download className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
+
+                      {/* Status */}
+                      <TableCell className="py-3 px-3">
+                        {getStatusBadge(invoice.paymentStatus)}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedInvoice(invoice);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          data-testid={`button-delete-${invoice.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+
+                      {/* Actions */}
+                      <TableCell className="py-3 px-3">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" data-testid={`button-actions-${invoice.id}`}>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateStatusMutation.mutate({
+                                  id: invoice.id,
+                                  status: invoice.paymentStatus === "paid" ? "unpaid" : "paid"
+                                });
+                              }}
+                              data-testid={`menu-toggle-status-${invoice.id}`}
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Toggle Payment Status
+                            </DropdownMenuItem>
+                            {invoice.fileUrl && (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(invoice.fileUrl!, '_blank');
+                                }}
+                                data-testid={`menu-download-${invoice.id}`}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                Download File
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedInvoice(invoice);
+                                setDeleteDialogOpen(true);
+                              }}
+                              className="text-destructive focus:text-destructive"
+                              data-testid={`menu-delete-${invoice.id}`}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Invoice
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  ];
+
+                  if (isExpanded) {
+                    rows.push(
+                      <TableRow key={`expanded-${invoice.id}`} className="bg-muted/10 hover:bg-muted/10">
+                        <TableCell colSpan={6} className="p-6">
+                          <div className="grid grid-cols-3 gap-6">
+                            {/* Column 1 - Invoice Information */}
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Invoice Information</h4>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Invoice Number</Label>
+                                <p className="text-sm font-medium mt-1">{invoice.invoiceNumber}</p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Date</Label>
+                                <p className="text-sm font-medium mt-1">{format(new Date(invoice.invoiceDate), "MMMM dd, yyyy")}</p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Category</Label>
+                                <p className="text-sm font-medium mt-1 capitalize">{invoice.category}</p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Vendor</Label>
+                                <p className="text-sm font-medium mt-1">{invoice.vendorName || "—"}</p>
+                              </div>
+                            </div>
+
+                            {/* Column 2 - Payment Details */}
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Payment Details</h4>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Amount</Label>
+                                <p className="text-sm font-bold mt-1">₹{parseFloat(invoice.amount).toLocaleString('en-IN')}</p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Payment Status</Label>
+                                <div className="mt-1">
+                                  {getStatusBadge(invoice.paymentStatus)}
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Description</Label>
+                                <p className="text-sm mt-1">{invoice.description || "—"}</p>
+                              </div>
+                            </div>
+
+                            {/* Column 3 - File & Metadata */}
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Attachments & Info</h4>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Attached File</Label>
+                                {invoice.fileUrl ? (
+                                  <div className="mt-1">
+                                    <a
+                                      href={invoice.fileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-primary hover:underline flex items-center gap-1"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Download className="h-3 w-3" />
+                                      Download File
+                                    </a>
+                                  </div>
+                                ) : (
+                                  <p className="text-sm mt-1 text-muted-foreground">No file attached</p>
+                                )}
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Created At</Label>
+                                <p className="text-sm mt-1">{invoice.createdAt ? format(new Date(invoice.createdAt), "MMM dd, yyyy HH:mm") : "—"}</p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Last Updated</Label>
+                                <p className="text-sm mt-1">{invoice.updatedAt ? format(new Date(invoice.updatedAt), "MMM dd, yyyy HH:mm") : "—"}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  return rows;
+                })
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
