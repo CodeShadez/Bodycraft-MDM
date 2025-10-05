@@ -370,4 +370,8 @@ export const passwordResetSchema = z.object({
 // Admin Password Reset Schema (For admins resetting other users' passwords)
 export const adminPasswordResetSchema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(1, "Please confirm the password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
