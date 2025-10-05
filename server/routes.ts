@@ -1924,6 +1924,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Object Storage upload URL route
+  app.post("/api/object-storage/upload-url", async (req, res) => {
+    try {
+      const { fileName } = req.body;
+      
+      if (!fileName) {
+        return res.status(400).json({ error: "File name is required" });
+      }
+
+      // Import object storage functions
+      const { getSignedUploadUrl } = await import("./objectStorage");
+      
+      const signedUrl = await getSignedUploadUrl(fileName);
+      res.json({ url: signedUrl });
+    } catch (error) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ error: "Failed to get upload URL" });
+    }
+  });
+
   // Invoice routes
   app.get("/api/invoices", async (req, res) => {
     try {

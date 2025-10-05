@@ -19,6 +19,7 @@ import CCTV from "@/pages/cctv";
 import Biometric from "@/pages/biometric";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import FinancialOverview from "@/pages/financial-overview";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
@@ -79,6 +80,9 @@ function Router() {
       </Route>
       <Route path="/reports">
         {(params) => <ProtectedRoute component={Reports} {...params} />}
+      </Route>
+      <Route path="/financial">
+        {(params) => <ProtectedRoute component={FinancialOverview} {...params} />}
       </Route>
       <Route path="/settings">
         {(params) => <ProtectedRoute component={Settings} {...params} />}
