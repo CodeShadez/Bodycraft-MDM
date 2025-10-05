@@ -1100,7 +1100,7 @@ export default function SettingsPage() {
           setShowAdminResetConfirmPassword(false);
         }
       }}>
-        <DialogContent className="glass-card border-white/10 sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-purple-900/40 via-blue-900/40 to-purple-900/40 backdrop-blur-xl border border-white/10">
           <DialogHeader>
             <DialogTitle className="text-white/90 flex items-center gap-2">
               <Key className="h-5 w-5 text-purple-400" />
