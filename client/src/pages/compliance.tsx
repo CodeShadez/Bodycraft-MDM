@@ -23,7 +23,8 @@ import {
   Camera,
   Fingerprint,
   Settings,
-  Archive
+  Archive,
+  History
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -421,6 +422,7 @@ export default function CompliancePage() {
               <form onSubmit={(e) => {
                 e.preventDefault()
                 const formData = new FormData(e.currentTarget)
+                const assignedToValue = formData.get('assignedTo') as string;
                 const data = {
                   taskName: formData.get('taskName') as string,
                   taskType: formData.get('taskType') as string,
@@ -429,7 +431,7 @@ export default function CompliancePage() {
                   priority: formData.get('priority') as string,
                   locationId: parseInt(formData.get('locationId') as string),
                   dueDate: formData.get('dueDate') as string,
-                  assignedTo: formData.get('assignedTo') ? parseInt(formData.get('assignedTo') as string) : null,
+                  assignedTo: assignedToValue && assignedToValue !== 'unassigned' ? parseInt(assignedToValue) : null,
                 }
                 createTaskMutation.mutate(data)
               }} className="space-y-4">
@@ -537,7 +539,7 @@ export default function CompliancePage() {
                         <SelectValue placeholder="Select user (optional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Unassigned</SelectItem>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
                         {users?.map(user => (
                           <SelectItem key={user.id} value={user.id.toString()}>
                             {user.fullName} ({user.role})

@@ -1,14 +1,19 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from "recharts"
 import {
   TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock, 
-  BarChart3, PieChart as PieChartIcon, Activity
+  BarChart3, PieChartIcon, Activity, Brain, Zap, Play, Shield,
+  AlertTriangle, TrendingDown as TrendingDownIcon, Sparkles
 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { apiRequest, queryClient } from "@/lib/queryClient"
 
 const COLORS = {
   completed: '#10b981',
@@ -18,6 +23,13 @@ const COLORS = {
   high: '#f97316',
   medium: '#eab308',
   low: '#84cc16',
+}
+
+interface UpcomingTask {
+  taskName: string
+  taskType: string
+  priority: string
+  dueDate: string
 }
 
 interface AnalyticsData {
@@ -31,13 +43,95 @@ interface AnalyticsData {
   statusDistribution: Record<string, number>
   priorityDistribution: Record<string, number>
   typeDistribution: Record<string, number>
-  upcomingTasks: any[]
+  upcomingTasks: UpcomingTask[]
   trends: { date: string; completed: number }[]
 }
 
+interface AutomationSummary {
+  totalRuns: number
+  tasksGenerated: number
+  signalsRaised: number
+  recommendationsGenerated: number
+  period: string
+}
+
+interface RiskInsight {
+  locationId: number
+  locationName: string
+  riskCount: number
+  averageRiskScore: number
+  criticalRisks: number
+}
+
+interface PredictiveAlert {
+  id: number
+  alertType: string
+  assetId: string
+  prediction: string
+  confidence: number
+  severity: string
+  createdAt: string
+}
+
+interface AIRecommendation {
+  id: number
+  targetType: string
+  targetId: string
+  recommendation: string
+  reasoning: string
+  confidenceScore: number
+  impactScore: number
+  status: string
+  createdAt: string
+}
+
 export default function ComplianceAnalyticsPage() {
+  const { toast } = useToast()
+  
   const { data: analytics, isLoading } = useQuery<AnalyticsData>({
     queryKey: ["/api/compliance/analytics"],
+  })
+
+  const { data: automationSummary } = useQuery<AutomationSummary>({
+    queryKey: ["/api/compliance/automation/summary"],
+  })
+
+  const { data: riskInsights } = useQuery<RiskInsight[]>({
+    queryKey: ["/api/compliance/risk-insights"],
+  })
+
+  const { data: predictiveAlerts } = useQuery<PredictiveAlert[]>({
+    queryKey: ["/api/compliance/predictive-alerts"],
+  })
+
+  const { data: aiRecommendations } = useQuery<AIRecommendation[]>({
+    queryKey: ["/api/ai/recommendations"],
+  })
+
+  const triggerAutomation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/compliance/automation/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      })
+      if (!response.ok) throw new Error("Failed to trigger automation")
+      return response.json()
+    },
+    onSuccess: () => {
+      toast({ title: "AI Automation triggered successfully" })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/automation/summary"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/risk-insights"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/predictive-alerts"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/ai/recommendations"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/backups/verification"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/backups/health"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/tasks"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/analytics"] })
+    },
+    onError: () => {
+      toast({ title: "Failed to trigger automation", variant: "destructive" })
+    },
   })
 
   if (isLoading || !analytics) {
@@ -72,10 +166,24 @@ export default function ComplianceAnalyticsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Compliance Analytics</h1>
           <p className="text-muted-foreground mt-1">
-            Comprehensive insights and trends for compliance management
+            Comprehensive insights and AI-powered automation
           </p>
         </div>
       </div>
+
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview" data-testid="tab-overview">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="automation" data-testid="tab-automation">
+            <Brain className="h-4 w-4 mr-2" />
+            AI Automation
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -292,6 +400,189 @@ export default function ComplianceAnalyticsPage() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="automation" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              AI-powered automation for predictive compliance management
+            </p>
+            <Button 
+              onClick={() => triggerAutomation.mutate()} 
+              disabled={triggerAutomation.isPending}
+              data-testid="button-trigger-automation"
+              className="gap-2"
+            >
+              {triggerAutomation.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Running...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" />
+                  Trigger AI Automation
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Automation Summary */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card data-testid="card-automation-runs">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Runs</CardTitle>
+                <Zap className="h-4 w-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{automationSummary?.totalRuns || 0}</div>
+                <p className="text-xs text-muted-foreground">Last 30 days</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-auto-generated-tasks">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Auto-Generated Tasks</CardTitle>
+                <Sparkles className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{automationSummary?.tasksGenerated || 0}</div>
+                <p className="text-xs text-muted-foreground">AI-created compliance tasks</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-risk-signals">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Risk Signals</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{automationSummary?.signalsRaised || 0}</div>
+                <p className="text-xs text-muted-foreground">Detected issues</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-ai-recommendations">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">AI Recommendations</CardTitle>
+                <Brain className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{aiRecommendations?.length || 0}</div>
+                <p className="text-xs text-muted-foreground">Active suggestions</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Risk Insights by Location */}
+          {riskInsights && riskInsights.length > 0 && (
+            <Card data-testid="card-risk-insights">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Risk Insights by Location
+                </CardTitle>
+                <CardDescription>AI-identified compliance risks across outlets</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {riskInsights.map((insight, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-4 rounded-lg border bg-card"
+                      data-testid={`risk-insight-${index}`}
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{insight.locationName}</p>
+                        <p className="text-sm text-muted-foreground">{insight.riskCount} risk factors identified</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant={
+                          insight.averageRiskScore >= 80 ? 'destructive' : 
+                          insight.averageRiskScore >= 50 ? 'default' : 
+                          'secondary'
+                        }>
+                          Risk Score: {insight.averageRiskScore}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Predictive Alerts */}
+          {predictiveAlerts && predictiveAlerts.length > 0 && (
+            <Card data-testid="card-predictive-alerts">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingDownIcon className="h-5 w-5" />
+                  Predictive Alerts
+                </CardTitle>
+                <CardDescription>AI predictions for upcoming compliance issues</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {predictiveAlerts.slice(0, 5).map((alert, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-4 rounded-lg border bg-card"
+                      data-testid={`predictive-alert-${index}`}
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{alert.alertType}: {alert.assetId}</p>
+                        <p className="text-sm text-muted-foreground">{alert.prediction}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Confidence: {alert.confidence}%</p>
+                      </div>
+                      <Badge variant={alert.severity === 'high' ? 'destructive' : 'default'}>
+                        {alert.severity}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* AI Recommendations */}
+          {aiRecommendations && aiRecommendations.length > 0 && (
+            <Card data-testid="card-ai-recommendations-list">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  AI Recommendations
+                </CardTitle>
+                <CardDescription>Intelligent suggestions for compliance improvement</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {aiRecommendations.slice(0, 5).map((rec, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-4 rounded-lg border bg-card"
+                      data-testid={`ai-recommendation-${index}`}
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{rec.recommendation}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {rec.targetType}: {rec.targetId} | {rec.reasoning}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Confidence: {rec.confidenceScore}% | Impact: {rec.impactScore}
+                        </p>
+                      </div>
+                      <Badge variant={rec.status === 'applied' ? 'default' : 'secondary'}>
+                        {rec.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

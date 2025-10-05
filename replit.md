@@ -8,6 +8,16 @@ The BODYCRAFT Master Data Management (MDM) System is a web application for manag
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Phase 2: AI-Powered Compliance Automation (October 2025)
+- **AI Orchestrator Service**: OpenAI GPT-4o-mini integration for automated compliance task generation, risk scoring, and intelligent assignment optimization
+- **Backup Verification Engine**: Automated backup health monitoring with signal generation for failures
+- **Automation Dashboard**: Comprehensive frontend showing automation run statistics, risk insights by location, predictive alerts, and AI recommendations
+- **9 Automation APIs**: Full REST API suite for triggering automation, fetching risk insights, predictive alerts, backup verification, and AI recommendations
+- **Type-Safe Implementation**: Strongly-typed interfaces for all automation data (AutomationSummary, RiskInsight, PredictiveAlert, AIRecommendation)
+- **Comprehensive Cache Invalidation**: All automation-related data refreshes after automation runs
+
 ## System Architecture
 
 ### Frontend
