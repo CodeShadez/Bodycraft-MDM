@@ -725,7 +725,7 @@ export default function SettingsPage() {
                               </div>
                             </div>
                             
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 items-center min-w-[280px] justify-end">
                               {/* Reset Password Button - Available to admins and super admins */}
                               {isAdmin && user.id !== currentUser?.user?.id && canResetUserPassword(user) && (
                                 <Button
@@ -733,6 +733,7 @@ export default function SettingsPage() {
                                   size="sm"
                                   onClick={() => setAdminResetDialog({ open: true, user })}
                                   data-testid={`button-reset-password-${user.id}`}
+                                  className="shrink-0"
                                 >
                                   <Key className="h-4 w-4 mr-2" />
                                   Reset Password
@@ -747,6 +748,7 @@ export default function SettingsPage() {
                                   onClick={() => handleToggleUserStatus(user.id, user.status)}
                                   disabled={updateUserMutation.isPending}
                                   data-testid={`button-toggle-status-${user.id}`}
+                                  className="shrink-0 min-w-[100px]"
                                 >
                                   {user.status === 'active' ? 'Deactivate' : 'Activate'}
                                 </Button>
