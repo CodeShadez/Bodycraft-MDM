@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { 
   Calendar,
@@ -130,9 +130,67 @@ export default function AssignmentsPage() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+
+  // Form state for Assign Asset dialog
+  const [assignForm, setAssignForm] = useState({
+    assetId: '',
+    employeeId: '',
+    assignmentReason: '',
+    conditionOnAssignment: ''
+  })
+
+  // Form state for Return Asset dialog
+  const [returnForm, setReturnForm] = useState({
+    returnReason: '',
+    conditionOnReturn: ''
+  })
+
+  // Form state for Transfer Asset dialog
+  const [transferForm, setTransferForm] = useState({
+    toEmployeeId: '',
+    returnReason: '',
+    conditionOnReturn: '',
+    newAssignmentReason: '',
+    conditionOnNewAssignment: ''
+  })
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Reset assign form when dialog opens
+  useEffect(() => {
+    if (isAssignDialogOpen) {
+      setAssignForm({
+        assetId: '',
+        employeeId: '',
+        assignmentReason: '',
+        conditionOnAssignment: ''
+      })
+    }
+  }, [isAssignDialogOpen])
+
+  // Populate return form when selectedAssignment changes
+  useEffect(() => {
+    if (selectedAssignment && isReturnDialogOpen) {
+      setReturnForm({
+        returnReason: '',
+        conditionOnReturn: ''
+      })
+    }
+  }, [selectedAssignment, isReturnDialogOpen])
+
+  // Populate transfer form when selectedAssignment changes
+  useEffect(() => {
+    if (selectedAssignment && isTransferDialogOpen) {
+      setTransferForm({
+        toEmployeeId: '',
+        returnReason: '',
+        conditionOnReturn: '',
+        newAssignmentReason: '',
+        conditionOnNewAssignment: ''
+      })
+    }
+  }, [selectedAssignment, isTransferDialogOpen])
   const { data: currentUser } = useUser()
 
   // Fetch data
@@ -379,15 +437,23 @@ export default function AssignmentsPage() {
       })
       return
     }
-    
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!assignForm.assetId || !assignForm.employeeId || !assignForm.conditionOnAssignment) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (Asset, Employee, Condition)",
+        variant: "destructive",
+      })
+      return
+    }
     
     const assignmentData = {
-      assetId: formData.get('assetId'),
-      employeeId: parseInt(formData.get('employeeId') as string),
-      assignmentReason: formData.get('assignmentReason'),
-      conditionOnAssignment: formData.get('conditionOnAssignment'),
-      backupDetails: formData.get('backupDetails') || null,
+      assetId: assignForm.assetId,
+      employeeId: parseInt(assignForm.employeeId),
+      assignmentReason: assignForm.assignmentReason?.trim() || null,
+      conditionOnAssignment: assignForm.conditionOnAssignment,
+      backupDetails: null,
       createdBy: currentUser.user.id,
     }
 
@@ -397,14 +463,22 @@ export default function AssignmentsPage() {
   const handleReturnAsset = (event: React.FormEvent) => {
     event.preventDefault()
     if (!selectedAssignment) return
-    
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!returnForm.conditionOnReturn) {
+      toast({
+        title: "Validation Error",
+        description: "Please select the condition on return",
+        variant: "destructive",
+      })
+      return
+    }
     
     const returnData = {
       assetId: selectedAssignment.assetId,
       employeeId: selectedAssignment.employeeId,
-      returnReason: formData.get('returnReason'),
-      conditionOnReturn: formData.get('conditionOnReturn'),
+      returnReason: returnForm.returnReason?.trim() || null,
+      conditionOnReturn: returnForm.conditionOnReturn,
     }
 
     returnAssetMutation.mutate(returnData)
@@ -413,17 +487,25 @@ export default function AssignmentsPage() {
   const handleTransferAsset = (event: React.FormEvent) => {
     event.preventDefault()
     if (!selectedAssignment) return
-    
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!transferForm.toEmployeeId || !transferForm.conditionOnReturn || !transferForm.conditionOnNewAssignment) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
     
     const transferData = {
       assetId: selectedAssignment.assetId,
       fromEmployeeId: selectedAssignment.employeeId,
-      toEmployeeId: parseInt(formData.get('toEmployeeId') as string),
-      returnReason: formData.get('returnReason'),
-      conditionOnReturn: formData.get('conditionOnReturn'),
-      newAssignmentReason: formData.get('newAssignmentReason'),
-      conditionOnNewAssignment: formData.get('conditionOnNewAssignment'),
+      toEmployeeId: parseInt(transferForm.toEmployeeId),
+      returnReason: transferForm.returnReason?.trim() || null,
+      conditionOnReturn: transferForm.conditionOnReturn,
+      newAssignmentReason: transferForm.newAssignmentReason?.trim() || null,
+      conditionOnNewAssignment: transferForm.conditionOnNewAssignment,
     }
 
     transferAssetMutation.mutate(transferData)
@@ -520,7 +602,7 @@ export default function AssignmentsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="assetId">Asset *</Label>
-                    <Select name="assetId" required>
+                    <Select value={assignForm.assetId} onValueChange={(value) => setAssignForm({ ...assignForm, assetId: value })} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
@@ -535,7 +617,7 @@ export default function AssignmentsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="employeeId">Employee *</Label>
-                    <Select name="employeeId" required>
+                    <Select value={assignForm.employeeId} onValueChange={(value) => setAssignForm({ ...assignForm, employeeId: value })} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select employee" />
                       </SelectTrigger>
@@ -552,24 +634,17 @@ export default function AssignmentsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="assignmentReason">Assignment Reason *</Label>
-                  <Select name="assignmentReason" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select reason" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="New Employee">New Employee</SelectItem>
-                      <SelectItem value="Replacement">Replacement</SelectItem>
-                      <SelectItem value="Upgrade">Upgrade</SelectItem>
-                      <SelectItem value="Temporary">Temporary</SelectItem>
-                      <SelectItem value="Project Requirement">Project Requirement</SelectItem>
-                      <SelectItem value="Department Transfer">Department Transfer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="assignmentReason"
+                    value={assignForm.assignmentReason}
+                    onChange={(e) => setAssignForm({ ...assignForm, assignmentReason: e.target.value })}
+                    placeholder="Enter assignment reason"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="conditionOnAssignment">Condition on Assignment *</Label>
-                  <Select name="conditionOnAssignment" required>
+                  <Select value={assignForm.conditionOnAssignment} onValueChange={(value) => setAssignForm({ ...assignForm, conditionOnAssignment: value })} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select condition" />
                     </SelectTrigger>
@@ -1213,26 +1288,18 @@ export default function AssignmentsPage() {
           </DialogHeader>
           <form onSubmit={handleReturnAsset} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="returnReason">Return Reason *</Label>
-              <Select name="returnReason" required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select return reason" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Employee Left">Employee Left</SelectItem>
-                  <SelectItem value="Upgrade">Upgrade</SelectItem>
-                  <SelectItem value="Replacement">Replacement</SelectItem>
-                  <SelectItem value="Maintenance">Maintenance</SelectItem>
-                  <SelectItem value="Department Transfer">Department Transfer</SelectItem>
-                  <SelectItem value="Project Ended">Project Ended</SelectItem>
-                  <SelectItem value="Retirement">Retirement</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="returnReason">Return Reason</Label>
+              <Input
+                id="returnReason"
+                value={returnForm.returnReason}
+                onChange={(e) => setReturnForm({ ...returnForm, returnReason: e.target.value })}
+                placeholder="Enter return reason (optional)"
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="conditionOnReturn">Condition on Return *</Label>
-              <Select name="conditionOnReturn" required>
+              <Select value={returnForm.conditionOnReturn} onValueChange={(value) => setReturnForm({ ...returnForm, conditionOnReturn: value })} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select condition" />
                 </SelectTrigger>
@@ -1273,7 +1340,7 @@ export default function AssignmentsPage() {
           <form onSubmit={handleTransferAsset} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="toEmployeeId">Transfer to Employee *</Label>
-              <Select name="toEmployeeId" required>
+              <Select value={transferForm.toEmployeeId} onValueChange={(value) => setTransferForm({ ...transferForm, toEmployeeId: value })} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select new assignee" />
                 </SelectTrigger>
@@ -1289,21 +1356,17 @@ export default function AssignmentsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="returnReason">Return Reason *</Label>
-                <Select name="returnReason" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select reason" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Transfer">Transfer</SelectItem>
-                    <SelectItem value="Replacement">Replacement</SelectItem>
-                    <SelectItem value="Department Change">Department Change</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="returnReason">Return Reason</Label>
+                <Input
+                  id="returnReason"
+                  value={transferForm.returnReason}
+                  onChange={(e) => setTransferForm({ ...transferForm, returnReason: e.target.value })}
+                  placeholder="Transfer reason (optional)"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="conditionOnReturn">Condition on Return *</Label>
-                <Select name="conditionOnReturn" required>
+                <Select value={transferForm.conditionOnReturn} onValueChange={(value) => setTransferForm({ ...transferForm, conditionOnReturn: value })} required>
                   <SelectTrigger>
                     <SelectValue placeholder="Condition" />
                   </SelectTrigger>
@@ -1319,22 +1382,17 @@ export default function AssignmentsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="newAssignmentReason">New Assignment Reason *</Label>
-                <Select name="newAssignmentReason" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select reason" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Transfer">Transfer</SelectItem>
-                    <SelectItem value="Replacement">Replacement</SelectItem>
-                    <SelectItem value="New Employee">New Employee</SelectItem>
-                    <SelectItem value="Department Change">Department Change</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="newAssignmentReason">New Assignment Reason</Label>
+                <Input
+                  id="newAssignmentReason"
+                  value={transferForm.newAssignmentReason}
+                  onChange={(e) => setTransferForm({ ...transferForm, newAssignmentReason: e.target.value })}
+                  placeholder="Assignment reason (optional)"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="conditionOnNewAssignment">Condition for New Assignment *</Label>
-                <Select name="conditionOnNewAssignment" required>
+                <Select value={transferForm.conditionOnNewAssignment} onValueChange={(value) => setTransferForm({ ...transferForm, conditionOnNewAssignment: value })} required>
                   <SelectTrigger>
                     <SelectValue placeholder="Condition" />
                   </SelectTrigger>
