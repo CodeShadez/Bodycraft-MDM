@@ -16,9 +16,10 @@ import {
   type AssetType, type InsertAssetType,
   type ApprovalRequest, type InsertApprovalRequest,
   type ApprovalAction, type InsertApprovalAction,
+  type Invoice, type InsertInvoice,
   assets, employees, locations, departments, assetAssignmentHistory, assetMaintenance,
   cctvSystems, biometricSystems, backups, users, companySettings, assetTypes,
-  approvalRequests, approvalActions
+  approvalRequests, approvalActions, invoices
 } from "@shared/schema";
 import { IStorage } from "./storage";
 
@@ -514,5 +515,41 @@ export class DatabaseStorage implements IStorage {
       createdAt: new Date(),
     }).returning();
     return result[0];
+  }
+
+  // Invoices
+  async getAllInvoices(): Promise<Invoice[]> {
+    return await db.select().from(invoices).orderBy(desc(invoices.invoiceDate));
+  }
+
+  async getInvoice(id: number): Promise<Invoice | undefined> {
+    const result = await db.select().from(invoices).where(eq(invoices.id, id));
+    return result[0];
+  }
+
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    const result = await db.insert(invoices).values({
+      ...invoice,
+      paymentStatus: invoice.paymentStatus || "unpaid",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    return result[0];
+  }
+
+  async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> {
+    const result = await db.update(invoices)
+      .set({
+        ...invoice,
+        updatedAt: new Date(),
+      })
+      .where(eq(invoices.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteInvoice(id: number): Promise<boolean> {
+    const result = await db.delete(invoices).where(eq(invoices.id, id));
+    return result.rowCount > 0;
   }
 }

@@ -12,7 +12,8 @@ import {
   type CompanySettings, type InsertCompanySettings,
   type AssetType, type InsertAssetType,
   type ApprovalRequest, type InsertApprovalRequest,
-  type ApprovalAction, type InsertApprovalAction
+  type ApprovalAction, type InsertApprovalAction,
+  type Invoice, type InsertInvoice
 } from "@shared/schema";
 
 // BODYCRAFT MDM Storage Interface
@@ -97,6 +98,13 @@ export interface IStorage {
   // Approval Actions
   getApprovalActions(requestId: number): Promise<ApprovalAction[]>;
   createApprovalAction(action: InsertApprovalAction): Promise<ApprovalAction>;
+  
+  // Invoices
+  getAllInvoices(): Promise<Invoice[]>;
+  getInvoice(id: number): Promise<Invoice | undefined>;
+  createInvoice(invoice: InsertInvoice): Promise<Invoice>;
+  updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
+  deleteInvoice(id: number): Promise<boolean>;
   
   // Dashboard Statistics
   getDashboardStats(): Promise<any>;
