@@ -25,7 +25,11 @@ import {
   Plus,
   Check,
   X,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Key,
+  Lock,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -95,6 +99,16 @@ export default function SettingsPage() {
     name: "",
     description: "",
   });
+
+  // Password reset state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Update company settings mutation
   const updateCompanySettingsMutation = useMutation({
@@ -191,6 +205,31 @@ export default function SettingsPage() {
     },
   });
 
+  // Password reset mutation
+  const passwordResetMutation = useMutation({
+    mutationFn: async (data: typeof passwordData) => {
+      return await apiRequest("POST", "/api/auth/reset-password", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      });
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSaveCompanySettings = () => {
     if (editingCompanySettings) {
       updateCompanySettingsMutation.mutate(editingCompanySettings);
@@ -235,6 +274,50 @@ export default function SettingsPage() {
     }
     
     createAssetTypeMutation.mutate(newAssetType);
+  };
+
+  const handlePasswordReset = () => {
+    // Validate fields
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast({
+        title: "Validation Error",
+        description: "All password fields are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check password length
+    if (passwordData.newPassword.length < 8) {
+      toast({
+        title: "Validation Error",
+        description: "New password must be at least 8 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check passwords match
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        title: "Validation Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if new password is different from current
+    if (passwordData.newPassword === passwordData.currentPassword) {
+      toast({
+        title: "Validation Error",
+        description: "New password must be different from current password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    passwordResetMutation.mutate(passwordData);
   };
 
   const isSuperAdmin = currentUser?.user?.role === 'super_admin';
@@ -694,6 +777,123 @@ export default function SettingsPage() {
 
           {/* Security Settings */}
           <TabsContent value="security" className="space-y-6">
+            {/* Password Reset Card */}
+            <Card className="glass-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-white/90">
+                  <Key className="h-5 w-5 text-purple-400" />
+                  Change Password
+                </CardTitle>
+                <CardDescription className="text-white/60">
+                  Update your account password for enhanced security
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-1 max-w-xl">
+                  {/* Current Password */}
+                  <div className="space-y-2">
+                    <Label htmlFor="current-password" className="text-white/80">
+                      Current Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="current-password"
+                        type={showCurrentPassword ? "text" : "password"}
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        className="glass-input pr-10"
+                        placeholder="Enter current password"
+                        data-testid="input-current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                        data-testid="button-toggle-current-password"
+                      >
+                        {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* New Password */}
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password" className="text-white/80">
+                      New Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="new-password"
+                        type={showNewPassword ? "text" : "password"}
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        className="glass-input pr-10"
+                        placeholder="Enter new password (min. 8 characters)"
+                        data-testid="input-new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                        data-testid="button-toggle-new-password"
+                      >
+                        {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className="text-white/80">
+                      Confirm New Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="confirm-password"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        className="glass-input pr-10"
+                        placeholder="Re-enter new password"
+                        data-testid="input-confirm-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                        data-testid="button-toggle-confirm-password"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <Button
+                    onClick={handlePasswordReset}
+                    disabled={passwordResetMutation.isPending}
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 w-full md:w-auto"
+                    data-testid="button-reset-password"
+                  >
+                    <Lock className="h-4 w-4 mr-2" />
+                    {passwordResetMutation.isPending ? "Updating..." : "Update Password"}
+                  </Button>
+                </div>
+
+                <div className="mt-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <p className="text-sm text-blue-300/90">
+                    <strong>Password Requirements:</strong>
+                  </p>
+                  <ul className="text-sm text-blue-300/70 mt-2 space-y-1 list-disc list-inside">
+                    <li>Minimum 8 characters long</li>
+                    <li>Must be different from your current password</li>
+                    <li>Both new password fields must match</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Security Information Card */}
             <Card className="glass-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white/90">
