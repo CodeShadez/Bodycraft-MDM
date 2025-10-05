@@ -254,6 +254,9 @@ export default function SettingsPage() {
       setAdminResetDialog({ open: false, user: null });
       setAdminResetPassword("");
       setAdminResetConfirmPassword("");
+      setShowAdminResetPassword(false);
+      setShowAdminResetConfirmPassword(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
     },
     onError: (error: any) => {
       toast({
