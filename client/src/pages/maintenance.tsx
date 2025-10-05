@@ -162,6 +162,16 @@ export default function MaintenancePage() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
+  // Check URL params to auto-open create dialog
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('action') === 'create') {
+      setIsCreateDialogOpen(true)
+      // Clean up URL without reloading
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [])
+
   // Reset create form when dialog opens
   useEffect(() => {
     if (isCreateDialogOpen) {
