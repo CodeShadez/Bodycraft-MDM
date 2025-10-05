@@ -103,6 +103,26 @@ export default function FinancialOverview() {
     },
   });
 
+  const generateDemoMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('POST', '/api/invoices/generate-demo', {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/invoices'] });
+      toast({
+        title: "Success",
+        description: "Demo invoice data generated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to generate demo data",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch = 
       invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -174,10 +194,22 @@ export default function FinancialOverview() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Financial Overview</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage invoices and track financial data</p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700" data-testid="button-create-invoice">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Invoice
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => generateDemoMutation.mutate()} 
+            variant="outline" 
+            className="border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950" 
+            data-testid="button-generate-demo"
+            disabled={generateDemoMutation.isPending}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {generateDemoMutation.isPending ? "Generating..." : "Generate Demo Data"}
+          </Button>
+          <Button onClick={() => setCreateDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700" data-testid="button-create-invoice">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Invoice
+          </Button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
