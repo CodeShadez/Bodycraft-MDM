@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { 
   MapPin, 
@@ -119,9 +119,57 @@ export default function LocationsPage() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+
+  // Form state for Create Location dialog
+  const [createForm, setCreateForm] = useState({
+    outletName: '',
+    city: '',
+    state: '',
+    address: '',
+    managerName: '',
+    contactDetails: ''
+  })
+
+  // Form state for Update Location dialog
+  const [updateForm, setUpdateForm] = useState({
+    outletName: '',
+    city: '',
+    state: '',
+    address: '',
+    managerName: '',
+    contactDetails: ''
+  })
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Reset create form when dialog opens
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      setCreateForm({
+        outletName: '',
+        city: '',
+        state: '',
+        address: '',
+        managerName: '',
+        contactDetails: ''
+      })
+    }
+  }, [isCreateDialogOpen])
+
+  // Populate update form when selectedLocation changes
+  useEffect(() => {
+    if (selectedLocation && isEditDialogOpen) {
+      setUpdateForm({
+        outletName: selectedLocation.outletName,
+        city: selectedLocation.city,
+        state: selectedLocation.state,
+        address: selectedLocation.address || '',
+        managerName: selectedLocation.managerName || '',
+        contactDetails: selectedLocation.contactDetails || ''
+      })
+    }
+  }, [selectedLocation, isEditDialogOpen])
 
   // Fetch data
   const { data: locations, isLoading: locationsLoading } = useQuery<Location[]>({
@@ -310,15 +358,24 @@ export default function LocationsPage() {
 
   const handleCreateLocation = (event: React.FormEvent) => {
     event.preventDefault()
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!createForm.outletName?.trim() || !createForm.city?.trim() || !createForm.state) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (Outlet Name, City, State)",
+        variant: "destructive",
+      })
+      return
+    }
     
     const locationData = {
-      outletName: formData.get('outletName'),
-      city: formData.get('city'),
-      state: formData.get('state'),
-      address: formData.get('address'),
-      managerName: formData.get('managerName'),
-      contactDetails: formData.get('contactDetails'),
+      outletName: createForm.outletName.trim(),
+      city: createForm.city.trim(),
+      state: createForm.state,
+      address: createForm.address?.trim() || null,
+      managerName: createForm.managerName?.trim() || null,
+      contactDetails: createForm.contactDetails?.trim() || null,
     }
 
     createLocationMutation.mutate(locationData)
@@ -327,16 +384,24 @@ export default function LocationsPage() {
   const handleUpdateLocation = (event: React.FormEvent) => {
     event.preventDefault()
     if (!selectedLocation) return
-    
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!updateForm.outletName?.trim() || !updateForm.city?.trim() || !updateForm.state) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (Outlet Name, City, State)",
+        variant: "destructive",
+      })
+      return
+    }
     
     const locationData = {
-      outletName: formData.get('outletName'),
-      city: formData.get('city'),
-      state: formData.get('state'),
-      address: formData.get('address'),
-      managerName: formData.get('managerName'),
-      contactDetails: formData.get('contactDetails'),
+      outletName: updateForm.outletName.trim(),
+      city: updateForm.city.trim(),
+      state: updateForm.state,
+      address: updateForm.address?.trim() || null,
+      managerName: updateForm.managerName?.trim() || null,
+      contactDetails: updateForm.contactDetails?.trim() || null,
     }
 
     updateLocationMutation.mutate({ locationId: selectedLocation.id, data: locationData })
@@ -435,7 +500,8 @@ export default function LocationsPage() {
                     <Label htmlFor="outletName">Outlet Name *</Label>
                     <Input
                       id="outletName"
-                      name="outletName"
+                      value={createForm.outletName}
+                      onChange={(e) => setCreateForm({ ...createForm, outletName: e.target.value })}
                       placeholder="JP Nagar Outlet"
                       required
                     />
@@ -444,7 +510,8 @@ export default function LocationsPage() {
                     <Label htmlFor="city">City *</Label>
                     <Input
                       id="city"
-                      name="city"
+                      value={createForm.city}
+                      onChange={(e) => setCreateForm({ ...createForm, city: e.target.value })}
                       placeholder="Bangalore"
                       required
                     />
@@ -453,7 +520,7 @@ export default function LocationsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="state">State *</Label>
-                  <Select name="state" required>
+                  <Select value={createForm.state} onValueChange={(value) => setCreateForm({ ...createForm, state: value })} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
@@ -478,7 +545,8 @@ export default function LocationsPage() {
                   <Label htmlFor="address">Complete Address *</Label>
                   <Input
                     id="address"
-                    name="address"
+                    value={createForm.address}
+                    onChange={(e) => setCreateForm({ ...createForm, address: e.target.value })}
                     placeholder="123 Main Street, JP Nagar, Bangalore"
                     required
                   />
@@ -489,7 +557,8 @@ export default function LocationsPage() {
                     <Label htmlFor="managerName">Manager Name *</Label>
                     <Input
                       id="managerName"
-                      name="managerName"
+                      value={createForm.managerName}
+                      onChange={(e) => setCreateForm({ ...createForm, managerName: e.target.value })}
                       placeholder="John Doe"
                       required
                     />
@@ -498,7 +567,8 @@ export default function LocationsPage() {
                     <Label htmlFor="contactDetails">Contact Details *</Label>
                     <Input
                       id="contactDetails"
-                      name="contactDetails"
+                      value={createForm.contactDetails}
+                      onChange={(e) => setCreateForm({ ...createForm, contactDetails: e.target.value })}
                       placeholder="+91 9876543210, manager@bodycraft.com"
                       required
                     />
@@ -1061,8 +1131,8 @@ export default function LocationsPage() {
                   <Label htmlFor="edit-outletName">Outlet Name *</Label>
                   <Input
                     id="edit-outletName"
-                    name="outletName"
-                    defaultValue={selectedLocation.outletName}
+                    value={updateForm.outletName}
+                    onChange={(e) => setUpdateForm({ ...updateForm, outletName: e.target.value })}
                     required
                   />
                 </div>
@@ -1070,8 +1140,8 @@ export default function LocationsPage() {
                   <Label htmlFor="edit-city">City *</Label>
                   <Input
                     id="edit-city"
-                    name="city"
-                    defaultValue={selectedLocation.city}
+                    value={updateForm.city}
+                    onChange={(e) => setUpdateForm({ ...updateForm, city: e.target.value })}
                     required
                   />
                 </div>
@@ -1079,7 +1149,7 @@ export default function LocationsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-state">State *</Label>
-                <Select name="state" defaultValue={selectedLocation.state} required>
+                <Select value={updateForm.state} onValueChange={(value) => setUpdateForm({ ...updateForm, state: value })} required>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1104,8 +1174,8 @@ export default function LocationsPage() {
                 <Label htmlFor="edit-address">Complete Address *</Label>
                 <Input
                   id="edit-address"
-                  name="address"
-                  defaultValue={selectedLocation.address}
+                  value={updateForm.address}
+                  onChange={(e) => setUpdateForm({ ...updateForm, address: e.target.value })}
                   required
                 />
               </div>
@@ -1115,8 +1185,8 @@ export default function LocationsPage() {
                   <Label htmlFor="edit-managerName">Manager Name *</Label>
                   <Input
                     id="edit-managerName"
-                    name="managerName"
-                    defaultValue={selectedLocation.managerName}
+                    value={updateForm.managerName}
+                    onChange={(e) => setUpdateForm({ ...updateForm, managerName: e.target.value })}
                     required
                   />
                 </div>
@@ -1124,8 +1194,8 @@ export default function LocationsPage() {
                   <Label htmlFor="edit-contactDetails">Contact Details *</Label>
                   <Input
                     id="edit-contactDetails"
-                    name="contactDetails"
-                    defaultValue={selectedLocation.contactDetails}
+                    value={updateForm.contactDetails}
+                    onChange={(e) => setUpdateForm({ ...updateForm, contactDetails: e.target.value })}
                     required
                   />
                 </div>
