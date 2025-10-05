@@ -15,6 +15,7 @@ import {
   insertBackupSchema,
   insertInvoiceSchema,
   passwordResetSchema,
+  adminPasswordResetSchema,
   type InsertInvoice
 } from "@shared/schema";
 
@@ -1566,6 +1567,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Admin Password Reset - Admins can reset passwords for other users
+  app.post("/api/users/:id/reset-password", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Validate request body
+      const validation = adminPasswordResetSchema.safeParse(req.body);
+      if (!validation.success) {
+        const errors = validation.error.errors.map(e => e.message).join(", ");
+        return res.status(400).json({ message: errors });
+      }
+
+      const { newPassword } = validation.data;
+
+      // Get the target user
+      const targetUser = await storage.getUserById(userId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Authorization checks based on role hierarchy
+      if (req.session.role === 'admin') {
+        // Admins cannot reset passwords for super_admins
+        if (targetUser.role === 'super_admin') {
+          return res.status(403).json({ message: "Admins cannot reset passwords for super admins" });
+        }
+      }
+
+      // Prevent users from resetting their own password via this endpoint (use self-service endpoint instead)
+      if (targetUser.id === req.session.userId) {
+        return res.status(400).json({ message: "Use the self-service password reset to change your own password" });
+      }
+
+      // Hash new password
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await storage.updateUser(userId, { passwordHash: newPasswordHash, updatedAt: new Date() });
+
+      res.json({ message: `Password reset successfully for user ${targetUser.username}` });
+    } catch (error) {
+      console.error("Admin password reset error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
