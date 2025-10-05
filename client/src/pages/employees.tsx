@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { 
   Users, 
@@ -126,9 +126,37 @@ export default function EmployeesPage() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+
+  // Form state for edit dialog
+  const [editEmployee, setEditEmployee] = useState({
+    firstName: '',
+    lastName: '',
+    department: '',
+    designation: '',
+    email: '',
+    phone: '',
+    status: 'active',
+    locationId: ''
+  })
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Populate editEmployee when selectedEmployee changes
+  useEffect(() => {
+    if (selectedEmployee && isEditDialogOpen) {
+      setEditEmployee({
+        firstName: selectedEmployee.firstName,
+        lastName: selectedEmployee.lastName,
+        department: selectedEmployee.department,
+        designation: selectedEmployee.designation,
+        email: selectedEmployee.email || '',
+        phone: selectedEmployee.phone || '',
+        status: selectedEmployee.status,
+        locationId: selectedEmployee.locationId?.toString() || ''
+      })
+    }
+  }, [selectedEmployee, isEditDialogOpen])
 
   // Fetch data
   const { data: employees, isLoading: employeesLoading } = useQuery<Employee[]>({
@@ -335,17 +363,25 @@ export default function EmployeesPage() {
     event.preventDefault()
     if (!selectedEmployee) return
     
-    const formData = new FormData(event.target as HTMLFormElement)
+    // Validate required fields
+    if (!editEmployee.firstName?.trim() || !editEmployee.lastName?.trim() || !editEmployee.department?.trim() || !editEmployee.designation?.trim()) {
+      toast({ 
+        title: "Validation Error", 
+        description: "Please fill in all required fields (First Name, Last Name, Department, Designation)", 
+        variant: "destructive" 
+      })
+      return
+    }
     
     const employeeData = {
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
-      department: formData.get('department'),
-      designation: formData.get('designation'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      status: formData.get('status'),
-      locationId: formData.get('locationId') ? parseInt(formData.get('locationId') as string) : null,
+      firstName: editEmployee.firstName.trim(),
+      lastName: editEmployee.lastName.trim(),
+      department: editEmployee.department,
+      designation: editEmployee.designation.trim(),
+      email: editEmployee.email?.trim() || null,
+      phone: editEmployee.phone?.trim() || null,
+      status: editEmployee.status,
+      locationId: editEmployee.locationId ? parseInt(editEmployee.locationId) : null,
     }
 
     updateEmployeeMutation.mutate({ employeeId: selectedEmployee.id, data: employeeData })
@@ -1125,8 +1161,8 @@ export default function EmployeesPage() {
                   <Label htmlFor="edit-firstName">First Name *</Label>
                   <Input
                     id="edit-firstName"
-                    name="firstName"
-                    defaultValue={selectedEmployee.firstName}
+                    value={editEmployee.firstName}
+                    onChange={(e) => setEditEmployee({ ...editEmployee, firstName: e.target.value })}
                     required
                   />
                 </div>
@@ -1134,8 +1170,8 @@ export default function EmployeesPage() {
                   <Label htmlFor="edit-lastName">Last Name *</Label>
                   <Input
                     id="edit-lastName"
-                    name="lastName"
-                    defaultValue={selectedEmployee.lastName}
+                    value={editEmployee.lastName}
+                    onChange={(e) => setEditEmployee({ ...editEmployee, lastName: e.target.value })}
                     required
                   />
                 </div>
@@ -1144,7 +1180,7 @@ export default function EmployeesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-department">Department *</Label>
-                  <Select name="department" defaultValue={selectedEmployee.department} required>
+                  <Select value={editEmployee.department} onValueChange={(value) => setEditEmployee({ ...editEmployee, department: value })} required>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1163,8 +1199,8 @@ export default function EmployeesPage() {
                   <Label htmlFor="edit-designation">Designation *</Label>
                   <Input
                     id="edit-designation"
-                    name="designation"
-                    defaultValue={selectedEmployee.designation}
+                    value={editEmployee.designation}
+                    onChange={(e) => setEditEmployee({ ...editEmployee, designation: e.target.value })}
                     required
                   />
                 </div>
@@ -1175,9 +1211,9 @@ export default function EmployeesPage() {
                   <Label htmlFor="edit-email">Email Address *</Label>
                   <Input
                     id="edit-email"
-                    name="email"
                     type="email"
-                    defaultValue={selectedEmployee.email}
+                    value={editEmployee.email}
+                    onChange={(e) => setEditEmployee({ ...editEmployee, email: e.target.value })}
                     required
                   />
                 </div>
@@ -1185,8 +1221,8 @@ export default function EmployeesPage() {
                   <Label htmlFor="edit-phone">Phone Number *</Label>
                   <Input
                     id="edit-phone"
-                    name="phone"
-                    defaultValue={selectedEmployee.phone}
+                    value={editEmployee.phone}
+                    onChange={(e) => setEditEmployee({ ...editEmployee, phone: e.target.value })}
                     required
                   />
                 </div>
@@ -1195,7 +1231,7 @@ export default function EmployeesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-locationId">Location</Label>
-                  <Select name="locationId" defaultValue={selectedEmployee.locationId?.toString() || ""}>
+                  <Select value={editEmployee.locationId} onValueChange={(value) => setEditEmployee({ ...editEmployee, locationId: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
@@ -1210,7 +1246,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-status">Status</Label>
-                  <Select name="status" defaultValue={selectedEmployee.status}>
+                  <Select value={editEmployee.status} onValueChange={(value: any) => setEditEmployee({ ...editEmployee, status: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

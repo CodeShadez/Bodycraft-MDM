@@ -205,9 +205,49 @@ export default function AssetsPage() {
     status: 'available',
     condition: 'good'
   })
+
+  // Form state for edit dialog
+  const [editAsset, setEditAsset] = useState({
+    assetType: '',
+    brand: '',
+    modelName: '',
+    serviceTag: '',
+    locationId: '',
+    departmentId: '',
+    physicalLocation: '',
+    floor: '',
+    ownershipType: 'company',
+    assignmentType: 'person',
+    purchaseDate: '',
+    warrantyExpiry: '',
+    status: 'available',
+    condition: 'good'
+  })
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Populate editAsset when selectedAsset changes
+  useEffect(() => {
+    if (selectedAsset && isEditDialogOpen) {
+      setEditAsset({
+        assetType: selectedAsset.assetType,
+        brand: selectedAsset.brand,
+        modelName: selectedAsset.modelName,
+        serviceTag: selectedAsset.serviceTag || '',
+        locationId: selectedAsset.locationId?.toString() || '',
+        departmentId: selectedAsset.departmentId?.toString() || '',
+        physicalLocation: selectedAsset.physicalLocation || '',
+        floor: selectedAsset.floor || '',
+        ownershipType: selectedAsset.ownershipType || 'company',
+        assignmentType: selectedAsset.assignmentType || 'person',
+        purchaseDate: selectedAsset.purchaseDate || '',
+        warrantyExpiry: selectedAsset.warrantyExpiry || '',
+        status: selectedAsset.status,
+        condition: selectedAsset.condition
+      })
+    }
+  }, [selectedAsset, isEditDialogOpen])
 
   // Fetch data
   const { data: assets, isLoading: assetsLoading } = useQuery<Asset[]>({
@@ -409,23 +449,31 @@ export default function AssetsPage() {
     event.preventDefault()
     if (!selectedAsset) return
     
-    const formData = new FormData(event.target as HTMLFormElement)
+    // Validate required fields
+    if (!editAsset.assetType?.trim() || !editAsset.brand?.trim() || !editAsset.modelName?.trim()) {
+      toast({ 
+        title: "Validation Error", 
+        description: "Please fill in all required fields (Asset Type, Brand, Model Name)", 
+        variant: "destructive" 
+      })
+      return
+    }
     
     const assetData = {
-      modelName: formData.get('modelName'),
-      brand: formData.get('brand'),
-      serviceTag: formData.get('serviceTag') || null,
-      assetType: formData.get('assetType'),
-      purchaseDate: formData.get('purchaseDate') || null,
-      warrantyExpiry: formData.get('warrantyExpiry') || null,
-      status: formData.get('status'),
-      condition: formData.get('condition'),
-      locationId: formData.get('locationId') ? parseInt(formData.get('locationId') as string) : null,
-      departmentId: formData.get('departmentId') ? parseInt(formData.get('departmentId') as string) : null,
-      physicalLocation: formData.get('physicalLocation') || null,
-      floor: formData.get('floor') || null,
-      ownershipType: formData.get('ownershipType'),
-      assignmentType: formData.get('assignmentType'),
+      modelName: editAsset.modelName.trim(),
+      brand: editAsset.brand.trim(),
+      serviceTag: editAsset.serviceTag?.trim() || null,
+      assetType: editAsset.assetType,
+      purchaseDate: editAsset.purchaseDate || null,
+      warrantyExpiry: editAsset.warrantyExpiry || null,
+      status: editAsset.status,
+      condition: editAsset.condition,
+      locationId: editAsset.locationId ? parseInt(editAsset.locationId) : null,
+      departmentId: editAsset.departmentId ? parseInt(editAsset.departmentId) : null,
+      physicalLocation: editAsset.physicalLocation?.trim() || null,
+      floor: editAsset.floor?.trim() || null,
+      ownershipType: editAsset.ownershipType,
+      assignmentType: editAsset.assignmentType,
     }
 
     updateAssetMutation.mutate({ assetId: selectedAsset.assetId, data: assetData })
@@ -1424,7 +1472,7 @@ export default function AssetsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-assetType">Asset Type *</Label>
-                  <Select name="assetType" defaultValue={selectedAsset.assetType} required>
+                  <Select value={editAsset.assetType} onValueChange={(value) => setEditAsset({ ...editAsset, assetType: value })} required>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1445,8 +1493,8 @@ export default function AssetsPage() {
                   <Label htmlFor="edit-brand">Brand *</Label>
                   <Input
                     id="edit-brand"
-                    name="brand"
-                    defaultValue={selectedAsset.brand}
+                    value={editAsset.brand}
+                    onChange={(e) => setEditAsset({ ...editAsset, brand: e.target.value })}
                     required
                   />
                 </div>
@@ -1457,8 +1505,8 @@ export default function AssetsPage() {
                   <Label htmlFor="edit-modelName">Model Name *</Label>
                   <Input
                     id="edit-modelName"
-                    name="modelName"
-                    defaultValue={selectedAsset.modelName}
+                    value={editAsset.modelName}
+                    onChange={(e) => setEditAsset({ ...editAsset, modelName: e.target.value })}
                     required
                   />
                 </div>
@@ -1466,8 +1514,8 @@ export default function AssetsPage() {
                   <Label htmlFor="edit-serviceTag">Service Tag</Label>
                   <Input
                     id="edit-serviceTag"
-                    name="serviceTag"
-                    defaultValue={selectedAsset.serviceTag || ""}
+                    value={editAsset.serviceTag}
+                    onChange={(e) => setEditAsset({ ...editAsset, serviceTag: e.target.value })}
                   />
                 </div>
               </div>
@@ -1475,7 +1523,7 @@ export default function AssetsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-locationId">Location</Label>
-                  <Select name="locationId" defaultValue={selectedAsset.locationId?.toString() || ""}>
+                  <Select value={editAsset.locationId} onValueChange={(value) => setEditAsset({ ...editAsset, locationId: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
@@ -1492,9 +1540,9 @@ export default function AssetsPage() {
                   <Label htmlFor="edit-purchaseDate">Purchase Date</Label>
                   <Input
                     id="edit-purchaseDate"
-                    name="purchaseDate"
                     type="date"
-                    defaultValue={selectedAsset.purchaseDate || ""}
+                    value={editAsset.purchaseDate}
+                    onChange={(e) => setEditAsset({ ...editAsset, purchaseDate: e.target.value })}
                   />
                 </div>
               </div>
@@ -1504,14 +1552,14 @@ export default function AssetsPage() {
                   <Label htmlFor="edit-warrantyExpiry">Warranty Expiry</Label>
                   <Input
                     id="edit-warrantyExpiry"
-                    name="warrantyExpiry"
                     type="date"
-                    defaultValue={selectedAsset.warrantyExpiry || ""}
+                    value={editAsset.warrantyExpiry}
+                    onChange={(e) => setEditAsset({ ...editAsset, warrantyExpiry: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-status">Status</Label>
-                  <Select name="status" defaultValue={selectedAsset.status}>
+                  <Select value={editAsset.status} onValueChange={(value: any) => setEditAsset({ ...editAsset, status: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1527,7 +1575,7 @@ export default function AssetsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-condition">Condition</Label>
-                <Select name="condition" defaultValue={selectedAsset.condition}>
+                <Select value={editAsset.condition} onValueChange={(value: any) => setEditAsset({ ...editAsset, condition: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1542,7 +1590,7 @@ export default function AssetsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-departmentId">Department</Label>
-                <Select name="departmentId" defaultValue={selectedAsset.departmentId?.toString() || ""}>
+                <Select value={editAsset.departmentId} onValueChange={(value) => setEditAsset({ ...editAsset, departmentId: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
@@ -1561,18 +1609,18 @@ export default function AssetsPage() {
                   <Label htmlFor="edit-physicalLocation">Physical Location</Label>
                   <Input
                     id="edit-physicalLocation"
-                    name="physicalLocation"
                     placeholder="Reception, Front Desk, Room 1..."
-                    defaultValue={selectedAsset.physicalLocation || ""}
+                    value={editAsset.physicalLocation}
+                    onChange={(e) => setEditAsset({ ...editAsset, physicalLocation: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-floor">Floor</Label>
                   <Input
                     id="edit-floor"
-                    name="floor"
                     placeholder="Ground Floor, 1st Floor..."
-                    defaultValue={selectedAsset.floor || ""}
+                    value={editAsset.floor}
+                    onChange={(e) => setEditAsset({ ...editAsset, floor: e.target.value })}
                   />
                 </div>
               </div>
@@ -1580,7 +1628,7 @@ export default function AssetsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-ownershipType">Ownership Type</Label>
-                  <Select name="ownershipType" defaultValue={selectedAsset.ownershipType || "company"}>
+                  <Select value={editAsset.ownershipType} onValueChange={(value: any) => setEditAsset({ ...editAsset, ownershipType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1593,7 +1641,7 @@ export default function AssetsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-assignmentType">Assignment Type</Label>
-                  <Select name="assignmentType" defaultValue={selectedAsset.assignmentType || "person"}>
+                  <Select value={editAsset.assignmentType} onValueChange={(value: any) => setEditAsset({ ...editAsset, assignmentType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
