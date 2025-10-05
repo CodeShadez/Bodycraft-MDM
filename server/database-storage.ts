@@ -648,14 +648,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getComplianceTask(id: number): Promise<any | undefined> {
+    const assignedToUser = alias(users, 'assignedToUser');
+    const createdByUser = alias(users, 'createdByUser');
+    
     const result = await db.select({
       task: complianceTasks,
-      assignedToUser: users,
-      createdByUser: users,
+      assignedToUser: assignedToUser,
+      createdByUser: createdByUser,
       location: locations,
     }).from(complianceTasks)
-      .leftJoin(users, eq(complianceTasks.assignedTo, users.id))
-      .leftJoin(users, eq(complianceTasks.createdBy, users.id))
+      .leftJoin(assignedToUser, eq(complianceTasks.assignedTo, assignedToUser.id))
+      .leftJoin(createdByUser, eq(complianceTasks.createdBy, createdByUser.id))
       .leftJoin(locations, eq(complianceTasks.locationId, locations.id))
       .where(eq(complianceTasks.id, id));
     
