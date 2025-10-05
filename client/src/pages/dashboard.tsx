@@ -92,8 +92,7 @@ export default function Dashboard() {
   const navigateWithParams = (path: string, params: Record<string, string>) => {
     const queryString = new URLSearchParams(params).toString()
     const fullPath = `${path}?${queryString}`
-    window.history.pushState({}, '', fullPath)
-    setLocation(path)
+    setLocation(fullPath)
   }
   
   // Fetch all data for dashboard statistics
@@ -241,17 +240,13 @@ export default function Dashboard() {
         <Card 
           data-testid="card-total-assets" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
-          onClick={() => {
-            setLocation("/assets")
-            window.history.pushState({}, '', '/assets')
-          }}
+          onClick={() => setLocation("/assets")}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault()
               setLocation("/assets")
-              window.history.pushState({}, '', '/assets')
             }
           }}
         >
@@ -312,9 +307,7 @@ export default function Dashboard() {
           data-testid="card-maintenance-status" 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0 animate-slide-up"
           style={{ animationDelay: "0.2s" }}
-          onClick={() => {
-            navigateWithParams("/assets", { status: "maintenance" })
-          }}
+          onClick={() => setLocation("/maintenance")}
           role="button"
           tabIndex={0}
         >
