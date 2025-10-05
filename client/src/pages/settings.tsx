@@ -243,17 +243,16 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen glass-bg p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
+        <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger className="glass-card p-2" />
-            <div>
-              <h1 className="text-3xl font-bold text-white/90 flex items-center gap-3">
-                <Settings className="h-8 w-8 text-purple-400" />
-                System Settings
-              </h1>
-              <p className="text-white/60 mt-1">Manage system configuration and preferences</p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white/90 flex items-center gap-3">
+              <Settings className="h-8 w-8 text-purple-400" />
+              System Settings
+            </h1>
+            <p className="text-white/60 mt-1">Manage system configuration and preferences</p>
           </div>
         </div>
 
