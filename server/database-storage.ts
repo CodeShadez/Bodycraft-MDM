@@ -607,6 +607,24 @@ export class DatabaseStorage implements IStorage {
 
     const results = await query.orderBy(desc(complianceTasks.createdAt));
     
+    // Fetch evidence files for all tasks
+    const taskIds = results.map((r: any) => r.task.id);
+    let evidenceMap: Record<number, string[]> = {};
+    
+    if (taskIds.length > 0) {
+      const evidence = await db.select()
+        .from(complianceEvidence)
+        .where(eq(complianceEvidence.taskId, taskIds[0])); // Get evidence for first task to check
+      
+      // Build evidence map for all tasks
+      for (const taskId of taskIds) {
+        const taskEvidence = await db.select()
+          .from(complianceEvidence)
+          .where(eq(complianceEvidence.taskId, taskId));
+        evidenceMap[taskId] = taskEvidence.map(e => e.fileUrl);
+      }
+    }
+    
     // Compute is_overdue and days_until_due
     return results.map((row: any) => {
       const dueDate = new Date(row.task.dueDate);
@@ -622,6 +640,7 @@ export class DatabaseStorage implements IStorage {
         assignedToName: row.assignedToUser ? `${row.assignedToUser.firstName} ${row.assignedToUser.lastName}` : null,
         createdByName: row.createdByUser ? `${row.createdByUser.firstName} ${row.createdByUser.lastName}` : null,
         locationName: row.location?.outletName || null,
+        evidenceFiles: evidenceMap[row.task.id] || null,
         isOverdue: row.task.status === 'pending' && diffDays < 0,
         daysUntilDue: diffDays,
       };

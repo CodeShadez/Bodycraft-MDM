@@ -68,6 +68,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { ObjectUploader } from "@/components/ObjectUploader"
 
 interface ComplianceRecord {
   id: number
@@ -256,6 +257,50 @@ export default function CompliancePage() {
       })
     }
   })
+
+  // Evidence upload mutation
+  const uploadEvidenceMutation = useMutation({
+    mutationFn: async ({ taskId, fileName, fileUrl, fileType, fileSize }: { taskId: number, fileName: string, fileUrl: string, fileType: string, fileSize: number }) => {
+      const response = await fetch(`/api/compliance/tasks/${taskId}/evidence`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName, fileUrl, fileType, fileSize }),
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to upload evidence')
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks'] })
+      toast({ title: "Success", description: "Evidence uploaded successfully" })
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to upload evidence", 
+        variant: "destructive" 
+      })
+    }
+  })
+
+  // Function to get upload parameters for object storage
+  const getUploadParameters = async () => {
+    const response = await fetch('/api/object-storage/upload-url', {
+      method: 'POST',
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error('Failed to get upload URL')
+    }
+    const data = await response.json()
+    return {
+      method: 'PUT' as const,
+      url: data.url
+    }
+  }
 
   // Helper function to get compliance status
   const getComplianceStatus = (record: ComplianceRecord) => {
@@ -806,21 +851,23 @@ export default function CompliancePage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Task Type</Label>
                   <div className="text-sm p-2 bg-muted rounded capitalize">
-                    {selectedRecord.type.replace('_', ' ')}
+                    {selectedRecord.taskType.replace('_', ' ')}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Category</Label>
-                  <div className="text-sm p-2 bg-muted rounded capitalize">
-                    {selectedRecord.category.replace('_', ' ')}
+                  <Label className="text-sm font-medium">Priority</Label>
+                  <div className="text-sm p-2 bg-muted rounded">
+                    <Badge variant={selectedRecord.priority === 'critical' ? 'destructive' : 'secondary'}>
+                      {selectedRecord.priority}
+                    </Badge>
                   </div>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Title</Label>
+                <Label className="text-sm font-medium">Task Name</Label>
                 <div className="text-sm p-2 bg-muted rounded font-medium">
-                  {selectedRecord.title}
+                  {selectedRecord.taskName}
                 </div>
               </div>
 
@@ -836,6 +883,11 @@ export default function CompliancePage() {
                   <Label className="text-sm font-medium">Due Date</Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {formatDate(selectedRecord.dueDate)}
+                    {selectedRecord.daysUntilDue !== undefined && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {selectedRecord.daysUntilDue >= 0 ? `${selectedRecord.daysUntilDue} days remaining` : `${Math.abs(selectedRecord.daysUntilDue)} days overdue`}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -852,43 +904,75 @@ export default function CompliancePage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Assigned To</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {selectedRecord.assignedTo}
+                    {selectedRecord.assignedToName || "Unassigned"}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Evidence</Label>
+                  <Label className="text-sm font-medium">Location</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {selectedRecord.evidenceUrl ? (
-                      <div className="flex items-center gap-2 text-green-600">
-                        <CheckCircle className="h-4 w-4" />
-                        {selectedRecord.evidenceUrl}
-                      </div>
-                    ) : (
-                      <div className="text-gray-500">No evidence uploaded</div>
-                    )}
+                    {selectedRecord.locationName || "N/A"}
                   </div>
                 </div>
               </div>
 
-              {selectedRecord.complianceNotes && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Compliance Notes</Label>
-                  <div className="text-sm p-2 bg-muted rounded">
-                    {selectedRecord.complianceNotes}
-                  </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Evidence Files</Label>
+                  <ObjectUploader
+                    maxNumberOfFiles={5}
+                    maxFileSize={10485760}
+                    onGetUploadParameters={getUploadParameters}
+                    onComplete={(result) => {
+                      const file = result.successful[0];
+                      if (file && file.uploadURL) {
+                        uploadEvidenceMutation.mutate({
+                          taskId: selectedRecord.id,
+                          fileName: file.name,
+                          fileUrl: file.uploadURL.split('?')[0],
+                          fileType: file.type || 'application/octet-stream',
+                          fileSize: file.size
+                        });
+                      }
+                    }}
+                    buttonClassName="gap-2 h-8 text-xs"
+                  >
+                    <Upload className="h-3 w-3" />
+                    Upload Evidence
+                  </ObjectUploader>
                 </div>
-              )}
+                <div className="border rounded-md p-3 bg-muted/50">
+                  {selectedRecord.evidenceFiles && selectedRecord.evidenceFiles.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedRecord.evidenceFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{file}</span>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => window.open(file, '_blank')}
+                            data-testid={`button-download-evidence-${index}`}
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground text-center py-2">
+                      No evidence files uploaded
+                    </div>
+                  )}
+                </div>
+              </div>
 
-              {selectedRecord.assetId && (
+              {selectedRecord.notes && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Related Asset</Label>
+                  <Label className="text-sm font-medium">Notes</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {selectedRecord.assetId}
-                    {getAssetInfo(selectedRecord.assetId) && (
-                      <div className="text-xs text-muted-foreground">
-                        {getAssetInfo(selectedRecord.assetId)?.brand} {getAssetInfo(selectedRecord.assetId)?.modelName}
-                      </div>
-                    )}
+                    {selectedRecord.notes}
                   </div>
                 </div>
               )}
