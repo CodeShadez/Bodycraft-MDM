@@ -13,7 +13,8 @@ import {
   insertCctvSystemSchema,
   insertBiometricSystemSchema,
   insertBackupSchema,
-  insertInvoiceSchema 
+  insertInvoiceSchema,
+  type InsertInvoice
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1921,6 +1922,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("❌ Error during sample data cleanup:", error);
       res.status(500).json({ error: "Failed to cleanup sample data", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Generate demo invoice data
+  app.post("/api/invoices/generate-demo", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const demoInvoices: InsertInvoice[] = [
+        {
+          invoiceNumber: "INV-2024-001",
+          invoiceDate: "2024-10-01",
+          amount: "45000",
+          category: "repairs",
+          vendorName: "Tech Repairs India",
+          paymentStatus: "paid",
+          description: "Laptop screen replacement and motherboard repair for Store #12",
+        },
+        {
+          invoiceNumber: "INV-2024-002",
+          invoiceDate: "2024-10-05",
+          amount: "125000",
+          category: "hardware",
+          vendorName: "Dell India",
+          paymentStatus: "paid",
+          description: "Purchase of 5 new laptops for new store opening",
+        },
+        {
+          invoiceNumber: "INV-2024-003",
+          invoiceDate: "2024-10-08",
+          amount: "8500",
+          category: "internet",
+          vendorName: "Airtel Business",
+          paymentStatus: "paid",
+          description: "Monthly internet bill for Store #1 - October 2024",
+        },
+        {
+          invoiceNumber: "INV-2024-004",
+          invoiceDate: "2024-10-10",
+          amount: "15000",
+          category: "software",
+          vendorName: "Microsoft India",
+          paymentStatus: "unpaid",
+          description: "Microsoft Office 365 annual renewal for 10 users",
+        },
+        {
+          invoiceNumber: "INV-2024-005",
+          invoiceDate: "2024-10-12",
+          amount: "32000",
+          category: "repairs",
+          vendorName: "Quick Fix IT Solutions",
+          paymentStatus: "unpaid",
+          description: "CCTV camera repair and networking equipment maintenance",
+        },
+        {
+          invoiceNumber: "INV-2024-006",
+          invoiceDate: "2024-10-15",
+          amount: "75000",
+          category: "hardware",
+          vendorName: "HP Enterprise",
+          paymentStatus: "paid",
+          description: "Purchase of 3 desktop computers and 2 printers",
+        },
+        {
+          invoiceNumber: "INV-2024-007",
+          invoiceDate: "2024-10-18",
+          amount: "9500",
+          category: "internet",
+          vendorName: "Jio Fiber Business",
+          paymentStatus: "paid",
+          description: "Monthly internet bill for Store #5 - October 2024",
+        },
+        {
+          invoiceNumber: "INV-2024-008",
+          invoiceDate: "2024-10-20",
+          amount: "28000",
+          category: "software",
+          vendorName: "Adobe India",
+          paymentStatus: "unpaid",
+          description: "Adobe Creative Cloud subscription for design team",
+        },
+        {
+          invoiceNumber: "INV-2024-009",
+          invoiceDate: "2024-10-22",
+          amount: "18500",
+          category: "maintenance",
+          vendorName: "City IT Services",
+          paymentStatus: "paid",
+          description: "Quarterly maintenance contract for all IT equipment at HQ",
+        },
+        {
+          invoiceNumber: "INV-2024-010",
+          invoiceDate: "2024-10-25",
+          amount: "52000",
+          category: "hardware",
+          vendorName: "Lenovo India",
+          paymentStatus: "unpaid",
+          description: "Purchase of 2 servers for backup infrastructure",
+        },
+      ];
+
+      const createdInvoices = [];
+      for (const invoice of demoInvoices) {
+        const created = await storage.createInvoice(invoice);
+        createdInvoices.push(created);
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Successfully created ${createdInvoices.length} demo invoices`,
+        invoices: createdInvoices 
+      });
+    } catch (error) {
+      console.error("Error generating demo invoices:", error);
+      res.status(500).json({ error: "Failed to generate demo invoices" });
     }
   });
 

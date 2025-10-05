@@ -397,7 +397,7 @@ export default function Dashboard() {
 
         <Card 
           className="glass-card glass-card-hover cursor-pointer transition-all duration-300 border-0"
-          onClick={() => setLocation("/reports")}
+          onClick={() => setLocation("/financial")}
           data-testid="card-financial-overview"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
