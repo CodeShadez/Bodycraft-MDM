@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertInvoiceSchema, type Invoice, type InsertInvoice } from "@shared/schema";
-import { Search, Plus, Download, Trash2, DollarSign, FileText, Clock, CheckCircle, X, Upload, ChevronDown, ChevronUp, MoreHorizontal, Edit } from "lucide-react";
+import { Search, Plus, Download, Trash2, DollarSign, FileText, Clock, CheckCircle, X, Upload, ChevronDown, ChevronUp, MoreHorizontal, Edit, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
@@ -292,21 +292,20 @@ export default function FinancialOverview() {
                 <TableHead>Vendor</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
                     <p className="text-lg font-medium">Loading invoices...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
                     <p className="text-lg font-medium mb-1">No invoices found</p>
                     <p className="text-sm">
@@ -373,11 +372,6 @@ export default function FinancialOverview() {
                         </span>
                       </TableCell>
 
-                      {/* Status */}
-                      <TableCell className="py-3 px-3">
-                        {getStatusBadge(invoice.paymentStatus)}
-                      </TableCell>
-
                       {/* Actions */}
                       <TableCell className="py-3 px-3">
                         <DropdownMenu>
@@ -394,25 +388,54 @@ export default function FinancialOverview() {
                                 e.stopPropagation();
                                 updateStatusMutation.mutate({
                                   id: invoice.id,
-                                  status: invoice.paymentStatus === "paid" ? "unpaid" : "paid"
+                                  status: "paid"
                                 });
                               }}
-                              data-testid={`menu-toggle-status-${invoice.id}`}
+                              data-testid={`menu-mark-paid-${invoice.id}`}
                             >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Toggle Payment Status
+                              <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                              Mark as Paid
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateStatusMutation.mutate({
+                                  id: invoice.id,
+                                  status: "pending"
+                                });
+                              }}
+                              data-testid={`menu-mark-pending-${invoice.id}`}
+                            >
+                              <Clock className="mr-2 h-4 w-4 text-yellow-500" />
+                              Mark as Pending
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateStatusMutation.mutate({
+                                  id: invoice.id,
+                                  status: "unpaid"
+                                });
+                              }}
+                              data-testid={`menu-mark-unpaid-${invoice.id}`}
+                            >
+                              <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                              Mark as Unpaid
                             </DropdownMenuItem>
                             {invoice.fileUrl && (
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(invoice.fileUrl!, '_blank');
-                                }}
-                                data-testid={`menu-download-${invoice.id}`}
-                              >
-                                <Download className="mr-2 h-4 w-4" />
-                                Download File
-                              </DropdownMenuItem>
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(invoice.fileUrl!, '_blank');
+                                  }}
+                                  data-testid={`menu-download-${invoice.id}`}
+                                >
+                                  <Download className="mr-2 h-4 w-4" />
+                                  Download File
+                                </DropdownMenuItem>
+                              </>
                             )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -436,7 +459,7 @@ export default function FinancialOverview() {
                   if (isExpanded) {
                     rows.push(
                       <TableRow key={`expanded-${invoice.id}`} className="bg-muted/10 hover:bg-muted/10">
-                        <TableCell colSpan={6} className="p-6">
+                        <TableCell colSpan={5} className="p-6">
                           <div className="grid grid-cols-3 gap-6">
                             {/* Column 1 - Invoice Information */}
                             <div className="space-y-4">
