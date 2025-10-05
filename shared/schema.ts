@@ -357,7 +357,7 @@ export const insertInvoiceSchema = createInsertSchema(invoices);
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 
-// Password Reset Schema
+// Password Reset Schema (Self-service)
 export const passwordResetSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
@@ -365,4 +365,9 @@ export const passwordResetSchema = z.object({
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
+});
+
+// Admin Password Reset Schema (For admins resetting other users' passwords)
+export const adminPasswordResetSchema = z.object({
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
