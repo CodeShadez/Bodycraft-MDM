@@ -479,21 +479,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllApprovalRequests(filters?: { status?: string; requestedBy?: number }): Promise<ApprovalRequest[]> {
-    let query = db.select().from(approvalRequests);
+    if (!filters || (!filters.status && !filters.requestedBy)) {
+      return await db
+        .select()
+        .from(approvalRequests)
+        .orderBy(desc(approvalRequests.requestedAt));
+    }
     
-    const conditions = [];
-    if (filters?.status) {
+    const conditions: SQL<unknown>[] = [];
+    if (filters.status) {
       conditions.push(eq(approvalRequests.status, filters.status));
     }
-    if (filters?.requestedBy) {
+    if (filters.requestedBy) {
       conditions.push(eq(approvalRequests.requestedBy, filters.requestedBy));
     }
     
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
-    }
-    
-    return await query.orderBy(desc(approvalRequests.requestedAt));
+    return await db
+      .select()
+      .from(approvalRequests)
+      .where(and(...conditions))
+      .orderBy(desc(approvalRequests.requestedAt));
   }
 
   async createApprovalRequest(request: InsertApprovalRequest): Promise<ApprovalRequest> {
@@ -577,7 +582,7 @@ export class DatabaseStorage implements IStorage {
     const assignedToUser = alias(users, 'assignedToUser');
     const createdByUser = alias(users, 'createdByUser');
     
-    let query = db.select({
+    const baseQuery = db.select({
       task: complianceTasks,
       assignedToUser: assignedToUser,
       createdByUser: createdByUser,
@@ -587,7 +592,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(createdByUser, eq(complianceTasks.createdBy, createdByUser.id))
       .leftJoin(locations, eq(complianceTasks.locationId, locations.id));
 
-    const conditions = [];
+    const conditions: SQL<unknown>[] = [];
     
     if (filters?.status) {
       conditions.push(eq(complianceTasks.status, filters.status));
@@ -610,11 +615,9 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(complianceTasks.status, 'pending'));
     }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
-    }
-
-    const results = await query.orderBy(desc(complianceTasks.createdAt));
+    const results = conditions.length > 0 
+      ? await baseQuery.where(and(...conditions)).orderBy(desc(complianceTasks.createdAt))
+      : await baseQuery.orderBy(desc(complianceTasks.createdAt));
     
     // Fetch evidence files for all tasks
     const taskIds = results.map((r: any) => r.task.id);
