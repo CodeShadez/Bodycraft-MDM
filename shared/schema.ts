@@ -475,3 +475,149 @@ export const adminPasswordResetSchema = z.object({
   message: "Passwords do not match",
   path: ["confirmPassword"],
 });
+
+// ==================== AI COMPLIANCE AUTOMATION TABLES ====================
+
+// 21. COMPLIANCE SIGNALS - Asset telemetry snapshots for AI analysis
+export const complianceSignals = pgTable("compliance_signals", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  assetId: varchar("asset_id", { length: 20 }).references(() => assets.assetId),
+  locationId: integer("location_id").references(() => locations.id),
+  
+  signalType: varchar("signal_type", { length: 50 }).notNull(), // backup_missing, maintenance_overdue, license_expiring, etc.
+  signalData: text("signal_data"), // JSON string with signal details
+  severity: varchar("severity", { length: 20 }).notNull(), // low, medium, high, critical
+  
+  detectedAt: timestamp("detected_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+  status: varchar("status", { length: 20 }).notNull().default("active"), // active, resolved, ignored
+});
+
+// 22. COMPLIANCE RISK SCORES - AI-calculated risk scores per asset/location
+export const complianceRiskScores = pgTable("compliance_risk_scores", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  assetId: varchar("asset_id", { length: 20 }).references(() => assets.assetId),
+  locationId: integer("location_id").references(() => locations.id),
+  
+  riskScore: integer("risk_score").notNull(), // 0-100
+  riskLevel: varchar("risk_level", { length: 20 }).notNull(), // low, medium, high, critical
+  riskFactors: text("risk_factors"), // JSON array of contributing factors
+  
+  aiModel: varchar("ai_model", { length: 100 }), // Model used for scoring
+  confidence: integer("confidence"), // 0-100 confidence level
+  
+  calculatedAt: timestamp("calculated_at").defaultNow(),
+  validUntil: timestamp("valid_until"),
+});
+
+// 23. AUTOMATION RUNS - Tracks AI orchestrator executions
+export const automationRuns = pgTable("automation_runs", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  runType: varchar("run_type", { length: 50 }).notNull(), // nightly_batch, real_time_trigger, manual
+  
+  tasksGenerated: integer("tasks_generated").default(0),
+  risksDetected: integer("risks_detected").default(0),
+  backupsVerified: integer("backups_verified").default(0),
+  assignmentsCreated: integer("assignments_created").default(0),
+  
+  status: varchar("status", { length: 20 }).notNull().default("running"), // running, completed, failed, partial
+  errorMessage: text("error_message"),
+  executionTimeMs: integer("execution_time_ms"),
+  
+  triggeredBy: integer("triggered_by").references(() => users.id),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// 24. AI RECOMMENDATIONS - Intelligent remediation suggestions
+export const aiRecommendations = pgTable("ai_recommendations", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  
+  targetType: varchar("target_type", { length: 50 }).notNull(), // asset, location, compliance_task
+  targetId: varchar("target_id", { length: 50 }).notNull(),
+  
+  recommendationType: varchar("recommendation_type", { length: 50 }).notNull(), // maintenance, backup, security, upgrade
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  actionItems: text("action_items"), // JSON array of specific actions
+  
+  priority: varchar("priority", { length: 20 }).notNull().default("medium"),
+  estimatedCost: integer("estimated_cost"),
+  estimatedImpact: varchar("estimated_impact", { length: 50 }), // high, medium, low
+  
+  aiModel: varchar("ai_model", { length: 100 }),
+  confidence: integer("confidence"), // 0-100
+  
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, accepted, rejected, implemented
+  implementedBy: integer("implemented_by").references(() => users.id),
+  implementedAt: timestamp("implemented_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 25. BACKUP VERIFICATION - Automated backup health checks
+export const backupVerification = pgTable("backup_verification", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  backupId: integer("backup_id").references(() => backups.id),
+  assetId: varchar("asset_id", { length: 20 }).references(() => assets.assetId),
+  
+  verificationMethod: varchar("verification_method", { length: 50 }).notNull(), // automated, manual
+  verificationStatus: varchar("verification_status", { length: 20 }).notNull(), // passed, failed, warning
+  
+  checksPerformed: text("checks_performed"), // JSON array of checks
+  issuesFound: text("issues_found"), // JSON array of issues
+  healthScore: integer("health_score"), // 0-100
+  
+  complianceTaskId: integer("compliance_task_id").references(() => complianceTasks.id), // Auto-generated task if failed
+  
+  verifiedBy: integer("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at").defaultNow(),
+  nextVerificationDue: timestamp("next_verification_due"),
+});
+
+// 26. COMPLIANCE ASSIGNMENT QUEUE - History of automated assignments
+export const complianceAssignmentQueue = pgTable("compliance_assignment_queue", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  taskId: integer("task_id").notNull().references(() => complianceTasks.id, { onDelete: "cascade" }),
+  
+  assignmentReason: text("assignment_reason"), // AI reasoning for assignment
+  assignedTo: integer("assigned_to").notNull().references(() => users.id),
+  locationId: integer("location_id").references(() => locations.id),
+  
+  workloadScore: integer("workload_score"), // User's current workload
+  skillMatch: integer("skill_match"), // 0-100 match to task requirements
+  priorityScore: integer("priority_score"),
+  
+  automationRunId: integer("automation_run_id").references(() => automationRuns.id),
+  
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  acceptedAt: timestamp("accepted_at"),
+  status: varchar("status", { length: 20 }).notNull().default("assigned"), // assigned, accepted, rejected, reassigned
+});
+
+// Insert Schemas for automation tables
+export const insertComplianceSignalSchema = createInsertSchema(complianceSignals);
+export const insertComplianceRiskScoreSchema = createInsertSchema(complianceRiskScores);
+export const insertAutomationRunSchema = createInsertSchema(automationRuns);
+export const insertAiRecommendationSchema = createInsertSchema(aiRecommendations);
+export const insertBackupVerificationSchema = createInsertSchema(backupVerification);
+export const insertComplianceAssignmentQueueSchema = createInsertSchema(complianceAssignmentQueue);
+
+// TypeScript Types for automation tables
+export type ComplianceSignal = typeof complianceSignals.$inferSelect;
+export type InsertComplianceSignal = z.infer<typeof insertComplianceSignalSchema>;
+
+export type ComplianceRiskScore = typeof complianceRiskScores.$inferSelect;
+export type InsertComplianceRiskScore = z.infer<typeof insertComplianceRiskScoreSchema>;
+
+export type AutomationRun = typeof automationRuns.$inferSelect;
+export type InsertAutomationRun = z.infer<typeof insertAutomationRunSchema>;
+
+export type AiRecommendation = typeof aiRecommendations.$inferSelect;
+export type InsertAiRecommendation = z.infer<typeof insertAiRecommendationSchema>;
+
+export type BackupVerification = typeof backupVerification.$inferSelect;
+export type InsertBackupVerification = z.infer<typeof insertBackupVerificationSchema>;
+
+export type ComplianceAssignmentQueue = typeof complianceAssignmentQueue.$inferSelect;
+export type InsertComplianceAssignmentQueue = z.infer<typeof insertComplianceAssignmentQueueSchema>;
