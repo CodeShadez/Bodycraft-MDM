@@ -357,6 +357,79 @@ export const insertInvoiceSchema = createInsertSchema(invoices);
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 
+// 17. COMPLIANCE TASKS - Compliance and regulatory tracking
+export const complianceTasks = pgTable("compliance_tasks", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  taskName: varchar("task_name", { length: 255 }).notNull(),
+  taskType: varchar("task_type", { length: 50 }).notNull(), // backup, security_audit, policy_review, system_update, data_retention, access_review
+  description: text("description"),
+  category: varchar("category", { length: 50 }).notNull(), // data_backup, security, compliance, maintenance, governance
+  priority: varchar("priority", { length: 20 }).notNull().default("medium"), // low, medium, high, critical
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, in_progress, completed, overdue, exempted
+  
+  assignedTo: integer("assigned_to").references(() => users.id),
+  locationId: integer("location_id").references(() => locations.id),
+  
+  dueDate: date("due_date").notNull(),
+  completionDate: date("completion_date"),
+  
+  evidenceFiles: text("evidence_files").array(), // Array of file URLs
+  complianceScore: integer("compliance_score"), // 0-100
+  riskLevel: varchar("risk_level", { length: 20 }), // low, medium, high, critical
+  regulatoryFramework: varchar("regulatory_framework", { length: 100 }), // GDPR, ISO27001, etc.
+  notes: text("notes"),
+  
+  createdBy: integer("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 18. COMPLIANCE EVIDENCE - File evidence for compliance tasks
+export const complianceEvidence = pgTable("compliance_evidence", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  taskId: integer("task_id").notNull().references(() => complianceTasks.id, { onDelete: "cascade" }),
+  
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  fileUrl: text("file_url").notNull(),
+  fileType: varchar("file_type", { length: 50 }), // pdf, xlsx, jpg, png, etc.
+  fileSize: varchar("file_size", { length: 50 }), // "2.5 MB"
+  
+  uploadedBy: integer("uploaded_by").notNull().references(() => users.id),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+  verificationStatus: varchar("verification_status", { length: 20 }).default("pending"), // pending, verified, rejected
+});
+
+// 19. COMPLIANCE AUDIT TRAIL - Complete audit log for compliance actions
+export const complianceAuditTrail = pgTable("compliance_audit_trail", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  taskId: integer("task_id").references(() => complianceTasks.id, { onDelete: "cascade" }),
+  
+  action: text("action").notNull(), // created, updated, deleted, evidence_uploaded, status_changed, etc.
+  performedBy: integer("performed_by").notNull().references(() => users.id),
+  
+  oldValues: text("old_values"), // JSONB stored as text
+  newValues: text("new_values"), // JSONB stored as text
+  
+  timestamp: timestamp("timestamp").defaultNow(),
+  ipAddress: varchar("ip_address", { length: 45 }), // Support IPv6
+  userAgent: text("user_agent"),
+});
+
+// Insert Schemas for compliance tables
+export const insertComplianceTaskSchema = createInsertSchema(complianceTasks);
+export const insertComplianceEvidenceSchema = createInsertSchema(complianceEvidence);
+export const insertComplianceAuditTrailSchema = createInsertSchema(complianceAuditTrail);
+
+// TypeScript Types for compliance tables
+export type ComplianceTask = typeof complianceTasks.$inferSelect;
+export type InsertComplianceTask = z.infer<typeof insertComplianceTaskSchema>;
+
+export type ComplianceEvidence = typeof complianceEvidence.$inferSelect;
+export type InsertComplianceEvidence = z.infer<typeof insertComplianceEvidenceSchema>;
+
+export type ComplianceAuditTrail = typeof complianceAuditTrail.$inferSelect;
+export type InsertComplianceAuditTrail = z.infer<typeof insertComplianceAuditTrailSchema>;
+
 // Password Reset Schema (Self-service)
 export const passwordResetSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),

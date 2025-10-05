@@ -110,6 +110,16 @@ export interface IStorage {
   // Dashboard Statistics
   getDashboardStats(): Promise<any>;
   getRecentActivities(limit?: number): Promise<any[]>;
+  
+  // Compliance Management
+  getComplianceTasks(filters?: { status?: string; priority?: string; taskType?: string; locationId?: number; overdueOnly?: boolean }): Promise<any[]>;
+  getComplianceTask(id: number): Promise<any | undefined>;
+  createComplianceTask(task: any): Promise<any>;
+  updateComplianceTask(id: number, task: any): Promise<any | undefined>;
+  deleteComplianceTask(id: number): Promise<boolean>;
+  getComplianceDashboardStats(locationId?: number): Promise<any>;
+  uploadComplianceEvidence(evidence: any): Promise<any>;
+  createComplianceAuditTrail(trail: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {

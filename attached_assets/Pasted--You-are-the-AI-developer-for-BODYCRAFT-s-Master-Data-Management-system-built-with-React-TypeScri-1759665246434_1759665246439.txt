@@ -1,0 +1,183 @@
+“You are the AI developer for BODYCRAFT’s Master Data Management system, built with React + TypeScript on the frontend, Node.js + Express on the backend, and PostgreSQL (Neon) as the database. Your work is divided into two phases. Follow each step carefully, confirm completion, and validate with sample data before moving on.
+
+Phase 1: Fix the Compliance Management Module
+Database Schema Creation
+a. Create compliance_tasks table with fields: id, task_name, task_type (enum), description, category, priority (enum), status (enum), assigned_to (user FK), location_id (location FK), due_date, completion_date, evidence_files (array), compliance_score (0–100), risk_level (enum), regulatory_framework, notes, created_by, created_at, updated_at.
+b. Create compliance_evidence table with fields: id, task_id (compliance_tasks FK), file_name, file_url, file_type, file_size, uploaded_by, uploaded_at, verification_status (enum).
+c. Create compliance_audit_trail table with fields: id, task_id (compliance_tasks FK), action (text), performed_by, old_values (JSONB), new_values (JSONB), timestamp, ip_address, user_agent.
+d. Add appropriate indexes on location_id, status, due_date, and task_id for performance.
+
+API Route Implementation
+a. GET /api/compliance/tasks
+
+Fetch tasks with optional filters: status, priority, task_type, location_id (if Admin), overdue_only flag.
+
+Include joined fields: assigned_to name, created_by name, location name, evidence count.
+
+Compute and return: is_overdue boolean, days_until_due integer.
+
+Enforce: Location Users only see their location’s tasks.
+
+Order by created_at DESC.
+b. POST /api/compliance/tasks
+
+Validate required fields: task_name, task_type, due_date.
+
+Determine location_id: take from body for Admin; enforce user.location for Location Users.
+
+Set default values: priority ‘medium’, status ‘pending’.
+
+Insert new record; return created task.
+
+Log audit entry with action ‘created’, new_values, user IP.
+c. PUT /api/compliance/tasks/:id
+
+Load existing task; return 404 if not found.
+
+Enforce Location User cannot update other locations.
+
+Allow updates on fields: task_name, task_type, description, category, priority, assigned_to, due_date, completion_date, status, compliance_score, risk_level, regulatory_framework, notes.
+
+Build dynamic SQL SET clauses; update updated_at.
+
+Log audit entry with action ‘updated’, old_values, new_values, user IP.
+d. DELETE /api/compliance/tasks/:id
+
+Restrict to Admin and Super Admin roles.
+
+Delete task (cascade evidence, trails); log action ‘deleted’ with old_values.
+e. GET /api/compliance/dashboard
+
+Compute and return statistics: total_tasks, pending, in_progress, completed, overdue, high_risk, avg_compliance_score.
+
+Fetch five most recent tasks with same computed fields.
+
+Compute completion_rate = completed/total_tasks*100.
+
+Enforce location filter for Location Users.
+f. POST /api/compliance/tasks/:id/evidence
+
+Validate file_name and file_url.
+
+Verify task exists and user has access.
+
+Insert evidence record; return it.
+
+Log audit entry with action ‘evidence_uploaded’, new_values, user IP.
+
+Storage Layer Updates
+
+In server/storage.ts, implement methods to support above:
+– createTask, updateTask, deleteTask, getTasks, getDashboardStats, uploadEvidence.
+
+Ensure all methods use parameterized SQL and enforce location-based access.
+
+Testing & Validation
+
+Create, update, delete, and list tasks; verify data persistence.
+
+Upload evidence; confirm link to task.
+
+Fetch dashboard stats and recent tasks; check computed fields.
+
+Test Location User cannot access other locations.
+
+Confirm audit trail entries after each create/update/delete.
+
+Phase 2: Build Advanced Enterprise Features
+Proceed only after Phase 1 is fully functional and tested.
+
+Predictive Analytics Dashboard
+a. Endpoint GET /api/analytics/predictive-maintenance
+
+Gather assigned assets with maintenance history: purchase_date, maintenance_count, avg_maintenance_cost, last_maintenance_date, days_since_maintenance.
+
+Apply risk model: assign failure_risk (‘low’/‘medium’/‘high’), predicted_days_to_failure, recommended_action, estimated_cost.
+
+Return array of predictions.
+b. UI Component
+
+Display table or cards for each asset: ID, model, risk, days_to_failure, action, cost.
+
+Allow filters by location, asset type, and risk level.
+
+Enable drill-down to full maintenance history.
+
+Asset Utilization Optimization
+a. Endpoint GET /api/analytics/utilization-optimization
+
+Compute per-location: total_assets, assigned_assets, available_assets, total_employees, utilization_rate.
+
+Calculate assets_per_employee, efficiency_score, and generate AI-driven recommendations with priority levels.
+b. UI Component
+
+Render heatmap of utilization_rate across locations.
+
+List top recommendations per location with priority and expected gains.
+
+Provide export option (CSV/Excel) for recommendations.
+
+Multi-Location Management
+a. Endpoint GET /api/locations/performance-analytics
+
+For each outlet: total_assets, active_assets, total_employees, active_employees, total_maintenance, total_maintenance_cost, total_compliance_tasks, completed_compliance, avg_compliance_score.
+
+Compute metrics: utilization_rate, compliance_rate, asset_per_employee, avg_maintenance_cost, performance_score.
+
+Sort and rank locations by score; include performance_rank.
+b. Endpoint POST /api/locations/transfer-asset
+
+Validate asset exists and is not assigned.
+
+If Location User transferring cross-location, create approval request; return pending status.
+
+If Admin or same-location transfer, update asset.location_id, insert into asset_transfers and audit_logs.
+c. UI Components
+
+Location performance dashboard showing sortable table and charts.
+
+Transfer workflow: select asset, from/to locations, reason; show approval status or immediate transfer result.
+
+Real-Time Business Intelligence Dashboard
+a. Endpoint GET /api/dashboard/real-time-data
+
+Aggregate in one response: asset stats (total, assigned, available, maintenance, retired), financials (total_invoices, paid, pending, count), maintenance stats (total, completed, scheduled, overdue, avg_cost), compliance stats (total, completed, overdue, avg_score), recent_activities (last 10 events with type, entity, date).
+
+Compute rates: utilization_rate, collection_rate, maintenance_completion_rate, compliance_completion_rate.
+
+Include last_updated timestamp.
+b. Endpoint GET /api/dashboard/trends
+
+Accept metric (‘assets’, ‘maintenance’, ‘compliance’) and period (‘daily’, ‘weekly’, ‘monthly’).
+
+Return time-series data grouped by period with counts and relevant aggregates (e.g., cost, avg_score).
+c. UI Component
+
+Auto-refresh every 30 seconds.
+
+Interactive charts: bar/line charts for trends; pie charts for status distributions.
+
+Filter controls for period, location, and metric.
+
+Alerts banner when key rates drop below thresholds.
+
+General Best Practices
+Use parameterized queries to prevent SQL injection.
+
+Enforce role-based access in every route.
+
+Log all create/update/delete actions in audit trails.
+
+Add indexes and materialized views for analytics.
+
+Implement Redis caching for dashboard endpoints.
+
+Monitor API response times; log warnings if >1 second.
+
+Write unit and integration tests for each endpoint.
+
+Validate all user inputs on both frontend and backend.
+
+Provide clear error messages and use proper HTTP status codes.
+
+Proceed methodically: complete each task, test thoroughly, then move to the next. Provide progress updates after finishing each numbered item. Good luck!”

@@ -2225,6 +2225,207 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Compliance Management Routes
+  
+  // GET /api/compliance/tasks - Fetch compliance tasks with filters
+  app.get("/api/compliance/tasks", requireAuth, async (req, res) => {
+    try {
+      const filters: any = {};
+      
+      if (req.query.status) filters.status = req.query.status as string;
+      if (req.query.priority) filters.priority = req.query.priority as string;
+      if (req.query.task_type) filters.taskType = req.query.task_type as string;
+      if (req.query.overdue_only === 'true') filters.overdueOnly = true;
+      
+      // Location-based access control
+      if (req.session.role === 'location_user' && req.session.locationId) {
+        filters.locationId = req.session.locationId;
+      } else if (req.query.location_id) {
+        filters.locationId = parseInt(req.query.location_id as string);
+      }
+      
+      const tasks = await storage.getComplianceTasks(filters);
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching compliance tasks:", error);
+      res.status(500).json({ error: "Failed to fetch compliance tasks" });
+    }
+  });
+  
+  // POST /api/compliance/tasks - Create new compliance task
+  app.post("/api/compliance/tasks", requireAuth, async (req, res) => {
+    try {
+      const taskData = req.body;
+      
+      // Determine location based on role
+      if (req.session.role === 'location_user' && req.session.locationId) {
+        taskData.locationId = req.session.locationId;
+      }
+      
+      // Set created_by to current user
+      taskData.createdBy = req.session.userId;
+      
+      // Validate required fields
+      if (!taskData.taskName || !taskData.taskType || !taskData.dueDate) {
+        return res.status(400).json({ 
+          error: "Missing required fields: taskName, taskType, dueDate" 
+        });
+      }
+      
+      const task = await storage.createComplianceTask(taskData);
+      
+      // Create audit trail
+      await storage.createComplianceAuditTrail({
+        taskId: task.id,
+        action: 'created',
+        performedBy: req.session.userId!,
+        newValues: JSON.stringify(task),
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      });
+      
+      res.status(201).json(task);
+    } catch (error) {
+      console.error("Error creating compliance task:", error);
+      res.status(500).json({ error: "Failed to create compliance task" });
+    }
+  });
+  
+  // PUT /api/compliance/tasks/:id - Update compliance task
+  app.put("/api/compliance/tasks/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Load existing task
+      const existingTask = await storage.getComplianceTask(id);
+      if (!existingTask) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      
+      // Location user access control
+      if (req.session.role === 'location_user' && req.session.locationId !== existingTask.locationId) {
+        return res.status(403).json({ error: "Access denied to this task" });
+      }
+      
+      const updateData = req.body;
+      const updatedTask = await storage.updateComplianceTask(id, updateData);
+      
+      // Create audit trail
+      await storage.createComplianceAuditTrail({
+        taskId: id,
+        action: 'updated',
+        performedBy: req.session.userId!,
+        oldValues: JSON.stringify(existingTask),
+        newValues: JSON.stringify(updatedTask),
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      });
+      
+      res.json(updatedTask);
+    } catch (error) {
+      console.error("Error updating compliance task:", error);
+      res.status(500).json({ error: "Failed to update compliance task" });
+    }
+  });
+  
+  // DELETE /api/compliance/tasks/:id - Delete compliance task (Admin only)
+  app.delete("/api/compliance/tasks/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Get task for audit trail
+      const task = await storage.getComplianceTask(id);
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      
+      const success = await storage.deleteComplianceTask(id);
+      
+      if (success) {
+        // Create audit trail
+        await storage.createComplianceAuditTrail({
+          taskId: null, // Task is deleted
+          action: 'deleted',
+          performedBy: req.session.userId!,
+          oldValues: JSON.stringify(task),
+          ipAddress: req.ip || req.socket.remoteAddress,
+          userAgent: req.headers['user-agent'],
+        });
+        
+        res.json({ message: "Task deleted successfully" });
+      } else {
+        res.status(404).json({ error: "Task not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting compliance task:", error);
+      res.status(500).json({ error: "Failed to delete compliance task" });
+    }
+  });
+  
+  // GET /api/compliance/dashboard - Get compliance dashboard stats
+  app.get("/api/compliance/dashboard", requireAuth, async (req, res) => {
+    try {
+      let locationId: number | undefined;
+      
+      // Location-based access control
+      if (req.session.role === 'location_user' && req.session.locationId) {
+        locationId = req.session.locationId;
+      }
+      
+      const stats = await storage.getComplianceDashboardStats(locationId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching compliance dashboard:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard stats" });
+    }
+  });
+  
+  // POST /api/compliance/tasks/:id/evidence - Upload evidence for task
+  app.post("/api/compliance/tasks/:id/evidence", requireAuth, async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const { fileName, fileUrl, fileType, fileSize } = req.body;
+      
+      if (!fileName || !fileUrl) {
+        return res.status(400).json({ error: "fileName and fileUrl are required" });
+      }
+      
+      // Verify task exists and user has access
+      const task = await storage.getComplianceTask(taskId);
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      
+      if (req.session.role === 'location_user' && req.session.locationId !== task.locationId) {
+        return res.status(403).json({ error: "Access denied to this task" });
+      }
+      
+      const evidence = await storage.uploadComplianceEvidence({
+        taskId,
+        fileName,
+        fileUrl,
+        fileType,
+        fileSize,
+        uploadedBy: req.session.userId!,
+      });
+      
+      // Create audit trail
+      await storage.createComplianceAuditTrail({
+        taskId,
+        action: 'evidence_uploaded',
+        performedBy: req.session.userId!,
+        newValues: JSON.stringify({ fileName, fileUrl }),
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      });
+      
+      res.status(201).json(evidence);
+    } catch (error) {
+      console.error("Error uploading evidence:", error);
+      res.status(500).json({ error: "Failed to upload evidence" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

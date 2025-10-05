@@ -17,9 +17,13 @@ import {
   type ApprovalRequest, type InsertApprovalRequest,
   type ApprovalAction, type InsertApprovalAction,
   type Invoice, type InsertInvoice,
+  type ComplianceTask, type InsertComplianceTask,
+  type ComplianceEvidence, type InsertComplianceEvidence,
+  type ComplianceAuditTrail, type InsertComplianceAuditTrail,
   assets, employees, locations, departments, assetAssignmentHistory, assetMaintenance,
   cctvSystems, biometricSystems, backups, users, companySettings, assetTypes,
-  approvalRequests, approvalActions, invoices
+  approvalRequests, approvalActions, invoices,
+  complianceTasks, complianceEvidence, complianceAuditTrail
 } from "@shared/schema";
 import { IStorage } from "./storage";
 
@@ -556,5 +560,181 @@ export class DatabaseStorage implements IStorage {
   async deleteInvoice(id: number): Promise<boolean> {
     const result = await db.delete(invoices).where(eq(invoices.id, id));
     return result.rowCount > 0;
+  }
+
+  // Compliance Management
+  async getComplianceTasks(filters?: { status?: string; priority?: string; taskType?: string; locationId?: number; overdueOnly?: boolean }): Promise<any[]> {
+    let query = db.select({
+      task: complianceTasks,
+      assignedToUser: users,
+      createdByUser: users,
+      location: locations,
+    }).from(complianceTasks)
+      .leftJoin(users, eq(complianceTasks.assignedTo, users.id))
+      .leftJoin(users, eq(complianceTasks.createdBy, users.id))
+      .leftJoin(locations, eq(complianceTasks.locationId, locations.id));
+
+    const conditions = [];
+    
+    if (filters?.status) {
+      conditions.push(eq(complianceTasks.status, filters.status));
+    }
+    
+    if (filters?.priority) {
+      conditions.push(eq(complianceTasks.priority, filters.priority));
+    }
+    
+    if (filters?.taskType) {
+      conditions.push(eq(complianceTasks.taskType, filters.taskType));
+    }
+    
+    if (filters?.locationId) {
+      conditions.push(eq(complianceTasks.locationId, filters.locationId));
+    }
+    
+    if (filters?.overdueOnly) {
+      // Filter for overdue tasks will be done in the map function after fetching
+      conditions.push(eq(complianceTasks.status, 'pending'));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+
+    const results = await query.orderBy(desc(complianceTasks.createdAt));
+    
+    // Compute is_overdue and days_until_due
+    return results.map((row: any) => {
+      const dueDate = new Date(row.task.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      const diffTime = dueDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      return {
+        ...row.task,
+        assignedToName: row.assignedToUser ? `${row.assignedToUser.firstName} ${row.assignedToUser.lastName}` : null,
+        createdByName: row.createdByUser ? `${row.createdByUser.firstName} ${row.createdByUser.lastName}` : null,
+        locationName: row.location?.outletName || null,
+        isOverdue: row.task.status === 'pending' && diffDays < 0,
+        daysUntilDue: diffDays,
+      };
+    });
+  }
+
+  async getComplianceTask(id: number): Promise<any | undefined> {
+    const result = await db.select({
+      task: complianceTasks,
+      assignedToUser: users,
+      createdByUser: users,
+      location: locations,
+    }).from(complianceTasks)
+      .leftJoin(users, eq(complianceTasks.assignedTo, users.id))
+      .leftJoin(users, eq(complianceTasks.createdBy, users.id))
+      .leftJoin(locations, eq(complianceTasks.locationId, locations.id))
+      .where(eq(complianceTasks.id, id));
+    
+    if (result.length === 0) return undefined;
+    
+    const row = result[0];
+    return {
+      ...row.task,
+      assignedToName: row.assignedToUser ? `${row.assignedToUser.firstName} ${row.assignedToUser.lastName}` : null,
+      createdByName: row.createdByUser ? `${row.createdByUser.firstName} ${row.createdByUser.lastName}` : null,
+      locationName: row.location?.outletName || null,
+    };
+  }
+
+  async createComplianceTask(task: InsertComplianceTask): Promise<ComplianceTask> {
+    const result = await db.insert(complianceTasks).values({
+      ...task,
+      priority: task.priority || 'medium',
+      status: task.status || 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    return result[0];
+  }
+
+  async updateComplianceTask(id: number, task: Partial<InsertComplianceTask>): Promise<ComplianceTask | undefined> {
+    const result = await db.update(complianceTasks)
+      .set({
+        ...task,
+        updatedAt: new Date(),
+      })
+      .where(eq(complianceTasks.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteComplianceTask(id: number): Promise<boolean> {
+    const result = await db.delete(complianceTasks).where(eq(complianceTasks.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getComplianceDashboardStats(locationId?: number): Promise<any> {
+    let tasksQuery = db.select().from(complianceTasks);
+    
+    if (locationId) {
+      tasksQuery = tasksQuery.where(eq(complianceTasks.locationId, locationId)) as any;
+    }
+    
+    const tasks = await tasksQuery;
+    
+    const stats = {
+      totalTasks: tasks.length,
+      pending: tasks.filter(t => t.status === 'pending').length,
+      inProgress: tasks.filter(t => t.status === 'in_progress').length,
+      completed: tasks.filter(t => t.status === 'completed').length,
+      overdue: tasks.filter(t => {
+        if (t.status !== 'pending') return false;
+        const dueDate = new Date(t.dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return dueDate < today;
+      }).length,
+      highRisk: tasks.filter(t => t.riskLevel === 'high' || t.riskLevel === 'critical').length,
+      avgComplianceScore: tasks.reduce((sum, t) => sum + (t.complianceScore || 0), 0) / (tasks.length || 1),
+      completionRate: tasks.length > 0 ? (tasks.filter(t => t.status === 'completed').length / tasks.length) * 100 : 0,
+    };
+    
+    // Get recent tasks
+    const recentTasks = await db.select({
+      task: complianceTasks,
+      assignedToUser: users,
+      location: locations,
+    }).from(complianceTasks)
+      .leftJoin(users, eq(complianceTasks.assignedTo, users.id))
+      .leftJoin(locations, eq(complianceTasks.locationId, locations.id))
+      .orderBy(desc(complianceTasks.createdAt))
+      .limit(5);
+    
+    return {
+      ...stats,
+      recentTasks: recentTasks.map(row => ({
+        ...row.task,
+        assignedToName: row.assignedToUser ? `${row.assignedToUser.firstName} ${row.assignedToUser.lastName}` : null,
+        locationName: row.location?.outletName || null,
+      })),
+    };
+  }
+
+  async uploadComplianceEvidence(evidence: InsertComplianceEvidence): Promise<ComplianceEvidence> {
+    const result = await db.insert(complianceEvidence).values({
+      ...evidence,
+      uploadedAt: new Date(),
+      verificationStatus: evidence.verificationStatus || 'pending',
+    }).returning();
+    return result[0];
+  }
+
+  async createComplianceAuditTrail(trail: InsertComplianceAuditTrail): Promise<ComplianceAuditTrail> {
+    const result = await db.insert(complianceAuditTrail).values({
+      ...trail,
+      timestamp: new Date(),
+    }).returning();
+    return result[0];
   }
 }
