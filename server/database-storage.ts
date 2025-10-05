@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { eq, desc, and, or, like, isNull } from "drizzle-orm";
+import { eq, desc, and, or, like, isNull, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { 
   type Asset, type InsertAsset,
@@ -22,10 +22,18 @@ import {
   type ComplianceEvidence, type InsertComplianceEvidence,
   type ComplianceAuditTrail, type InsertComplianceAuditTrail,
   type AssetTransfer, type InsertAssetTransfer,
+  type ComplianceSignal, type InsertComplianceSignal,
+  type ComplianceRiskScore, type InsertComplianceRiskScore,
+  type AutomationRun, type InsertAutomationRun,
+  type AiRecommendation, type InsertAiRecommendation,
+  type BackupVerification, type InsertBackupVerification,
+  type ComplianceAssignmentQueue, type InsertComplianceAssignmentQueue,
   assets, employees, locations, departments, assetAssignmentHistory, assetMaintenance,
   cctvSystems, biometricSystems, backups, users, companySettings, assetTypes,
   approvalRequests, approvalActions, invoices,
-  complianceTasks, complianceEvidence, complianceAuditTrail, assetTransfers
+  complianceTasks, complianceEvidence, complianceAuditTrail, assetTransfers,
+  complianceSignals, complianceRiskScores, automationRuns, aiRecommendations,
+  backupVerification, complianceAssignmentQueue
 } from "@shared/schema";
 import { IStorage } from "./storage";
 
@@ -1127,5 +1135,247 @@ export class DatabaseStorage implements IStorage {
     }
 
     return trends;
+  }
+
+  // ==================== AI COMPLIANCE AUTOMATION METHODS ====================
+
+  async createComplianceSignal(signal: InsertComplianceSignal): Promise<ComplianceSignal> {
+    const result = await db.insert(complianceSignals).values(signal).returning();
+    return result[0];
+  }
+
+  async getActiveComplianceSignals(filters?: { locationId?: number; severity?: string }): Promise<ComplianceSignal[]> {
+    const conditions: SQL<unknown>[] = [eq(complianceSignals.status, 'active')];
+    
+    if (filters?.locationId) {
+      conditions.push(eq(complianceSignals.locationId, filters.locationId));
+    }
+    if (filters?.severity) {
+      conditions.push(eq(complianceSignals.severity, filters.severity));
+    }
+    
+    return await db
+      .select()
+      .from(complianceSignals)
+      .where(and(...conditions))
+      .orderBy(desc(complianceSignals.detectedAt));
+  }
+
+  async resolveComplianceSignal(signalId: number): Promise<ComplianceSignal> {
+    const result = await db
+      .update(complianceSignals)
+      .set({ status: 'resolved', resolvedAt: new Date() })
+      .where(eq(complianceSignals.id, signalId))
+      .returning();
+    return result[0];
+  }
+
+  async createComplianceRiskScore(score: InsertComplianceRiskScore): Promise<ComplianceRiskScore> {
+    const result = await db.insert(complianceRiskScores).values(score).returning();
+    return result[0];
+  }
+
+  async getLatestRiskScores(filters?: { locationId?: number; assetId?: string }): Promise<ComplianceRiskScore[]> {
+    if (!filters || (!filters.locationId && !filters.assetId)) {
+      return await db
+        .select()
+        .from(complianceRiskScores)
+        .orderBy(desc(complianceRiskScores.calculatedAt))
+        .limit(100);
+    }
+    
+    const conditions: SQL<unknown>[] = [];
+    if (filters.locationId) {
+      conditions.push(eq(complianceRiskScores.locationId, filters.locationId));
+    }
+    if (filters.assetId) {
+      conditions.push(eq(complianceRiskScores.assetId, filters.assetId));
+    }
+    
+    return await db
+      .select()
+      .from(complianceRiskScores)
+      .where(and(...conditions))
+      .orderBy(desc(complianceRiskScores.calculatedAt))
+      .limit(100);
+  }
+
+  async createAutomationRun(run: InsertAutomationRun): Promise<AutomationRun> {
+    const result = await db.insert(automationRuns).values(run).returning();
+    return result[0];
+  }
+
+  async updateAutomationRun(id: number, run: Partial<InsertAutomationRun>): Promise<AutomationRun> {
+    const result = await db
+      .update(automationRuns)
+      .set(run)
+      .where(eq(automationRuns.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getAutomationRun(id: number): Promise<AutomationRun | undefined> {
+    const result = await db
+      .select()
+      .from(automationRuns)
+      .where(eq(automationRuns.id, id));
+    return result[0];
+  }
+
+  async getAutomationRuns(limit: number = 10): Promise<AutomationRun[]> {
+    return await db
+      .select()
+      .from(automationRuns)
+      .orderBy(desc(automationRuns.startedAt))
+      .limit(limit);
+  }
+
+  async getAutomationRunSummary(): Promise<{
+    total: number;
+    successful: number;
+    failed: number;
+    successRate: number;
+    totalTasksGenerated: number;
+    totalRisksDetected: number;
+    avgExecutionTime: number;
+    lastRun: AutomationRun | null;
+  }> {
+    // Get counts and stats with SQL aggregation
+    const [stats] = await db.execute(sql`
+      SELECT 
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE status = 'completed')::int AS successful,
+        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,
+        COALESCE(SUM(tasks_generated), 0)::int AS total_tasks_generated,
+        COALESCE(SUM(risks_detected), 0)::int AS total_risks_detected,
+        COALESCE(ROUND(AVG(execution_time_ms)), 0)::int AS avg_execution_time
+      FROM automation_runs
+      WHERE started_at >= NOW() - INTERVAL '30 days'
+    `);
+    
+    const lastRun = await this.getAutomationRuns(1);
+    
+    const total = Number(stats.total) || 0;
+    const successful = Number(stats.successful) || 0;
+
+    return {
+      total,
+      successful,
+      failed: Number(stats.failed) || 0,
+      successRate: total > 0 ? Math.round((successful / total) * 100) : 0,
+      totalTasksGenerated: Number(stats.total_tasks_generated) || 0,
+      totalRisksDetected: Number(stats.total_risks_detected) || 0,
+      avgExecutionTime: Number(stats.avg_execution_time) || 0,
+      lastRun: lastRun[0] || null,
+    };
+  }
+
+  async createAiRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation> {
+    const result = await db.insert(aiRecommendations).values(recommendation).returning();
+    return result[0];
+  }
+
+  async getAiRecommendations(filters?: { targetType?: string; status?: string; locationId?: number }): Promise<AiRecommendation[]> {
+    if (!filters || (!filters.targetType && !filters.status)) {
+      return await db
+        .select()
+        .from(aiRecommendations)
+        .orderBy(desc(aiRecommendations.createdAt))
+        .limit(50);
+    }
+    
+    const conditions: SQL<unknown>[] = [];
+    if (filters.targetType) {
+      conditions.push(eq(aiRecommendations.targetType, filters.targetType));
+    }
+    if (filters.status) {
+      conditions.push(eq(aiRecommendations.status, filters.status));
+    }
+    
+    return await db
+      .select()
+      .from(aiRecommendations)
+      .where(and(...conditions))
+      .orderBy(desc(aiRecommendations.createdAt))
+      .limit(50);
+  }
+
+  async updateAiRecommendation(id: number, recommendation: Partial<InsertAiRecommendation>): Promise<AiRecommendation> {
+    const result = await db
+      .update(aiRecommendations)
+      .set(recommendation)
+      .where(eq(aiRecommendations.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async createBackupVerification(verification: InsertBackupVerification): Promise<BackupVerification> {
+    const result = await db.insert(backupVerification).values(verification).returning();
+    return result[0];
+  }
+
+  async getBackupVerifications(filters?: { assetId?: string; status?: string }): Promise<BackupVerification[]> {
+    if (!filters || (!filters.assetId && !filters.status)) {
+      return await db
+        .select()
+        .from(backupVerification)
+        .orderBy(desc(backupVerification.verifiedAt));
+    }
+    
+    const conditions: SQL<unknown>[] = [];
+    if (filters.assetId) {
+      conditions.push(eq(backupVerification.assetId, filters.assetId));
+    }
+    if (filters.status) {
+      conditions.push(eq(backupVerification.verificationStatus, filters.status));
+    }
+    
+    return await db
+      .select()
+      .from(backupVerification)
+      .where(and(...conditions))
+      .orderBy(desc(backupVerification.verifiedAt));
+  }
+
+  async getDueBackupVerifications(): Promise<BackupVerification[]> {
+    const now = new Date().toISOString();
+    return await db
+      .select()
+      .from(backupVerification)
+      .where(
+        and(
+          eq(backupVerification.verificationStatus, 'passed'),
+          sql`${backupVerification.nextVerificationDue} <= ${now}`
+        )
+      )
+      .orderBy(backupVerification.nextVerificationDue);
+  }
+
+  async createComplianceAssignment(assignment: InsertComplianceAssignmentQueue): Promise<ComplianceAssignmentQueue> {
+    const result = await db.insert(complianceAssignmentQueue).values(assignment).returning();
+    return result[0];
+  }
+
+  async getComplianceAssignments(filters?: { userId?: number; status?: string }): Promise<ComplianceAssignmentQueue[]> {
+    if (!filters || (!filters.userId && !filters.status)) {
+      return await db
+        .select()
+        .from(complianceAssignmentQueue)
+        .orderBy(desc(complianceAssignmentQueue.assignedAt));
+    }
+    
+    const conditions: SQL<unknown>[] = [];
+    if (filters.userId) {
+      conditions.push(eq(complianceAssignmentQueue.assignedTo, filters.userId));
+    }
+    if (filters.status) {
+      conditions.push(eq(complianceAssignmentQueue.status, filters.status));
+    }
+    
+    return await db
+      .select()
+      .from(complianceAssignmentQueue)
+      .where(and(...conditions))
+      .orderBy(desc(complianceAssignmentQueue.assignedAt));
   }
 }

@@ -13,7 +13,13 @@ import {
   type AssetType, type InsertAssetType,
   type ApprovalRequest, type InsertApprovalRequest,
   type ApprovalAction, type InsertApprovalAction,
-  type Invoice, type InsertInvoice
+  type Invoice, type InsertInvoice,
+  type ComplianceSignal, type InsertComplianceSignal,
+  type ComplianceRiskScore, type InsertComplianceRiskScore,
+  type AutomationRun, type InsertAutomationRun,
+  type AiRecommendation, type InsertAiRecommendation,
+  type BackupVerification, type InsertBackupVerification,
+  type ComplianceAssignmentQueue, type InsertComplianceAssignmentQueue
 } from "@shared/schema";
 
 // BODYCRAFT MDM Storage Interface
@@ -129,6 +135,40 @@ export interface IStorage {
   createAssetTransfer(transfer: any): Promise<any>;
   getRealTimeDashboardData(): Promise<any>;
   getDashboardTrends(metric: string, period: string): Promise<any[]>;
+  
+  // AI Compliance Automation
+  createComplianceSignal(signal: InsertComplianceSignal): Promise<ComplianceSignal>;
+  getActiveComplianceSignals(filters?: { locationId?: number; severity?: string }): Promise<ComplianceSignal[]>;
+  resolveComplianceSignal(signalId: number): Promise<ComplianceSignal>;
+  
+  createComplianceRiskScore(score: InsertComplianceRiskScore): Promise<ComplianceRiskScore>;
+  getLatestRiskScores(filters?: { locationId?: number; assetId?: string }): Promise<ComplianceRiskScore[]>;
+  
+  createAutomationRun(run: InsertAutomationRun): Promise<AutomationRun>;
+  updateAutomationRun(id: number, run: Partial<InsertAutomationRun>): Promise<AutomationRun>;
+  getAutomationRun(id: number): Promise<AutomationRun | undefined>;
+  getAutomationRuns(limit?: number): Promise<AutomationRun[]>;
+  getAutomationRunSummary(): Promise<{
+    total: number;
+    successful: number;
+    failed: number;
+    successRate: number;
+    totalTasksGenerated: number;
+    totalRisksDetected: number;
+    avgExecutionTime: number;
+    lastRun: AutomationRun | null;
+  }>;
+  
+  createAiRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation>;
+  getAiRecommendations(filters?: { targetType?: string; status?: string; locationId?: number }): Promise<AiRecommendation[]>;
+  updateAiRecommendation(id: number, recommendation: Partial<InsertAiRecommendation>): Promise<AiRecommendation>;
+  
+  createBackupVerification(verification: InsertBackupVerification): Promise<BackupVerification>;
+  getBackupVerifications(filters?: { assetId?: string; status?: string }): Promise<BackupVerification[]>;
+  getDueBackupVerifications(): Promise<BackupVerification[]>;
+  
+  createComplianceAssignment(assignment: InsertComplianceAssignmentQueue): Promise<ComplianceAssignmentQueue>;
+  getComplianceAssignments(filters?: { userId?: number; status?: string }): Promise<ComplianceAssignmentQueue[]>;
 }
 
 export class MemStorage implements IStorage {
