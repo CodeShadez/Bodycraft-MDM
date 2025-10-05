@@ -131,13 +131,20 @@ export default function Dashboard() {
   
   // Assignment statistics
   const activeAssignments = assignments.filter(a => !a.returnedDate).length
-  const availableAssets = totalAssets - activeAssignments
-  const assignmentRate = totalAssets > 0 ? Math.round((activeAssignments / totalAssets) * 100) : 0
+  const availableAssets = assets.filter(a => a.status === 'available').length
+  const assignedAssets = assets.filter(a => a.status === 'assigned').length
+  const assignmentRate = totalAssets > 0 ? Math.round((assignedAssets / totalAssets) * 100) : 0
   
   // Maintenance statistics  
-  const maintenanceDue = maintenance.filter(m => !m.completedDate && m.status !== "cancelled").length
+  const maintenanceDue = maintenance.filter(m => !m.completedDate).length
   const maintenanceCompleted = maintenance.filter(m => m.completedDate).length
-  const maintenanceInProgress = maintenance.filter(m => !m.completedDate && m.status === "in_progress").length
+  const maintenanceInProgress = maintenance.filter(m => {
+    if (m.completedDate) return false
+    const scheduledDate = new Date(m.scheduledDate)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return scheduledDate.toDateString() === today.toDateString()
+  }).length
   
   // Asset condition analysis
   const assetConditions = assets.reduce((acc, asset) => {
@@ -286,7 +293,7 @@ export default function Dashboard() {
                   navigateWithParams("/assets", { status: "assigned" })
                 }}
               >
-                {activeAssignments} assigned
+                {assignedAssets} assigned
               </span>
               •
               <span 
@@ -532,10 +539,10 @@ export default function Dashboard() {
                 data-testid="resource-deployed"
               >
                 <Laptop className="h-6 w-6 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
-                <div className="text-2xl font-bold text-white">{activeAssignments}</div>
+                <div className="text-2xl font-bold text-white">{assignedAssets}</div>
                 <div className="text-xs text-white/70">Deployed Assets</div>
                 <div className="text-xs text-purple-300 mt-1 flex items-center justify-between">
-                  <span>{((activeAssignments / totalAssets) * 100).toFixed(0)}% utilization</span>
+                  <span>{((assignedAssets / totalAssets) * 100).toFixed(0)}% utilization</span>
                   <span className="text-white/50 group-hover:text-white/90 transition-colors">→</span>
                 </div>
               </div>
