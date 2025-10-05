@@ -217,8 +217,9 @@ export default function CompliancePage() {
       }
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks', variables.id, 'audit-trail'] })
       toast({ title: "Success", description: "Task updated successfully" })
       setIsEditDialogOpen(false)
       setIsCompleteDialogOpen(false)
@@ -273,8 +274,9 @@ export default function CompliancePage() {
       }
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks', variables.taskId, 'audit-trail'] })
       toast({ title: "Success", description: "Evidence uploaded successfully" })
     },
     onError: (error: Error) => {
@@ -284,6 +286,12 @@ export default function CompliancePage() {
         variant: "destructive" 
       })
     }
+  })
+
+  // Fetch audit trail for selected task
+  const { data: auditTrail } = useQuery<any[]>({
+    queryKey: ['/api/compliance/tasks', selectedRecord?.id, 'audit-trail'],
+    enabled: !!selectedRecord?.id && isViewDialogOpen,
   })
 
   // Function to get upload parameters for object storage
@@ -976,6 +984,50 @@ export default function CompliancePage() {
                   </div>
                 </div>
               )}
+
+              <div className="space-y-2 border-t pt-4">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Audit Trail
+                </Label>
+                <div className="border rounded-md p-3 bg-muted/50 max-h-60 overflow-y-auto">
+                  {auditTrail && auditTrail.length > 0 ? (
+                    <div className="space-y-3">
+                      {auditTrail.map((entry, index) => (
+                        <div key={index} className="text-sm border-l-2 border-primary/30 pl-3 pb-2" data-testid={`audit-trail-entry-${index}`}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium capitalize text-primary">
+                              {entry.action.replace('_', ' ')}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(entry.timestamp).toLocaleString('en-IN', { 
+                                day: '2-digit',
+                                month: 'short', 
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                              })}
+                            </span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            by {entry.performedByName}
+                          </div>
+                          {entry.ipAddress && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              IP: {entry.ipAddress}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground text-center py-2">
+                      No audit trail available
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
           <DialogFooter>

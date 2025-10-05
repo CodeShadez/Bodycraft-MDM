@@ -760,4 +760,19 @@ export class DatabaseStorage implements IStorage {
     }).returning();
     return result[0];
   }
+
+  async getComplianceAuditTrail(taskId: number): Promise<any[]> {
+    const results = await db.select({
+      trail: complianceAuditTrail,
+      user: users,
+    }).from(complianceAuditTrail)
+      .leftJoin(users, eq(complianceAuditTrail.performedBy, users.id))
+      .where(eq(complianceAuditTrail.taskId, taskId))
+      .orderBy(desc(complianceAuditTrail.timestamp));
+    
+    return results.map((row: any) => ({
+      ...row.trail,
+      performedByName: row.user ? `${row.user.firstName} ${row.user.lastName}` : 'Unknown User',
+    }));
+  }
 }

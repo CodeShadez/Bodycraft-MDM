@@ -2426,6 +2426,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get audit trail for a compliance task
+  app.get("/api/compliance/tasks/:id/audit-trail", requireAuth, async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      
+      const task = await storage.getComplianceTask(taskId);
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      
+      // Check access permission
+      if (req.session.role === 'location_user' && req.session.locationId !== task.locationId) {
+        return res.status(403).json({ error: "Access denied to this task" });
+      }
+      
+      const auditTrail = await storage.getComplianceAuditTrail(taskId);
+      res.json(auditTrail);
+    } catch (error) {
+      console.error("Error fetching audit trail:", error);
+      res.status(500).json({ error: "Failed to fetch audit trail" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

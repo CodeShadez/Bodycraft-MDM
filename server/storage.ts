@@ -120,6 +120,7 @@ export interface IStorage {
   getComplianceDashboardStats(locationId?: number): Promise<any>;
   uploadComplianceEvidence(evidence: any): Promise<any>;
   createComplianceAuditTrail(trail: any): Promise<any>;
+  getComplianceAuditTrail(taskId: number): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
