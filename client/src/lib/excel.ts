@@ -364,6 +364,166 @@ export class ExcelImporter {
     this.exportToExcel(templateData, 'Employee_Import_Template', 'Employees')
   }
 
+  static downloadAssignmentTemplate() {
+    const templateData = [
+      {
+        'Asset ID': 'BFC001',
+        'Employee ID': '1',
+        'Assigned Date': '2024-01-15',
+        'Assignment Condition': 'excellent',
+        'Assignment Reason': 'New hire onboarding',
+        'Backup Details': 'Data backed up to NAS'
+      }
+    ]
+    this.exportToExcel(templateData, 'Assignment_Import_Template', 'Assignments')
+  }
+
+  static downloadMaintenanceTemplate() {
+    const templateData = [
+      {
+        'Asset ID': 'BFC001',
+        'Maintenance Type': 'preventive',
+        'Description': 'Regular maintenance check',
+        'Scheduled Date': '2024-01-15',
+        'Cost': '500',
+        'Technician Name': 'John Doe',
+        'Expected Parts': 'Thermal paste, cleaning materials'
+      }
+    ]
+    this.exportToExcel(templateData, 'Maintenance_Import_Template', 'Maintenance')
+  }
+
+  static downloadLocationTemplate() {
+    const templateData = [
+      {
+        'Outlet Name': 'BODYCRAFT Indiranagar',
+        'City': 'Bangalore',
+        'State': 'Karnataka',
+        'Address': '100 Feet Road, Indiranagar',
+        'Manager Name': 'John Doe',
+        'Contact Details': '+91 9876543210'
+      }
+    ]
+    this.exportToExcel(templateData, 'Location_Import_Template', 'Locations')
+  }
+
+  // Validate and transform assignment data
+  static validateAssignmentData(data: any[]): { valid: any[], errors: string[] } {
+    const valid: any[] = []
+    const errors: string[] = []
+
+    data.forEach((row, index) => {
+      const rowNumber = index + 2
+
+      if (!row['Asset ID']) {
+        errors.push(`Row ${rowNumber}: Asset ID is required`)
+        return
+      }
+      if (!row['Employee ID']) {
+        errors.push(`Row ${rowNumber}: Employee ID is required`)
+        return
+      }
+      if (!row['Assigned Date']) {
+        errors.push(`Row ${rowNumber}: Assigned Date is required`)
+        return
+      }
+
+      const transformedRow = {
+        assetId: row['Asset ID'].toString().trim(),
+        employeeId: parseInt(row['Employee ID']),
+        assignedDate: new Date(row['Assigned Date']).toISOString(),
+        assignmentCondition: row['Assignment Condition'] || 'good',
+        assignmentReason: row['Assignment Reason'] || '',
+        backupDetails: row['Backup Details'] || ''
+      }
+
+      valid.push(transformedRow)
+    })
+
+    return { valid, errors }
+  }
+
+  // Validate and transform maintenance data
+  static validateMaintenanceData(data: any[]): { valid: any[], errors: string[] } {
+    const valid: any[] = []
+    const errors: string[] = []
+
+    data.forEach((row, index) => {
+      const rowNumber = index + 2
+
+      if (!row['Asset ID']) {
+        errors.push(`Row ${rowNumber}: Asset ID is required`)
+        return
+      }
+      if (!row['Maintenance Type']) {
+        errors.push(`Row ${rowNumber}: Maintenance Type is required`)
+        return
+      }
+      if (!row['Description']) {
+        errors.push(`Row ${rowNumber}: Description is required`)
+        return
+      }
+      if (!row['Scheduled Date']) {
+        errors.push(`Row ${rowNumber}: Scheduled Date is required`)
+        return
+      }
+
+      const transformedRow = {
+        assetId: row['Asset ID'].toString().trim(),
+        maintenanceType: row['Maintenance Type'].toLowerCase(),
+        description: row['Description'],
+        scheduledDate: new Date(row['Scheduled Date']).toISOString().split('T')[0],
+        cost: row['Cost'] ? parseFloat(row['Cost']) : null,
+        technicianName: row['Technician Name'] || null,
+        expectedParts: row['Expected Parts'] || null
+      }
+
+      valid.push(transformedRow)
+    })
+
+    return { valid, errors }
+  }
+
+  // Validate and transform location data
+  static validateLocationData(data: any[]): { valid: any[], errors: string[] } {
+    const valid: any[] = []
+    const errors: string[] = []
+
+    data.forEach((row, index) => {
+      const rowNumber = index + 2
+
+      if (!row['Outlet Name']) {
+        errors.push(`Row ${rowNumber}: Outlet Name is required`)
+        return
+      }
+      if (!row['City']) {
+        errors.push(`Row ${rowNumber}: City is required`)
+        return
+      }
+      if (!row['State']) {
+        errors.push(`Row ${rowNumber}: State is required`)
+        return
+      }
+      if (!row['Manager Name']) {
+        errors.push(`Row ${rowNumber}: Manager Name is required`)
+        return
+      }
+
+      const transformedRow = {
+        outletName: row['Outlet Name'],
+        city: row['City'],
+        state: row['State'],
+        address: row['Address'] || '',
+        managerName: row['Manager Name'],
+        contactDetails: row['Contact Details'] || ''
+      }
+
+      valid.push(transformedRow)
+    })
+
+    return { valid, errors }
+  }
+
   private static exportToExcel(data: any[], filename: string, worksheetName: string) {
     const worksheet = XLSX.utils.json_to_sheet(data)
     const workbook = XLSX.utils.book_new()
