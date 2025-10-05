@@ -8,20 +8,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertInvoiceSchema, type Invoice, type InsertInvoice } from "@shared/schema";
-import { Search, Plus, Download, Trash2, DollarSign, FileText, Clock, CheckCircle, X, Upload, ChevronDown, ChevronUp, MoreHorizontal, Edit, XCircle } from "lucide-react";
+import { Search, Plus, Download, Trash2, DollarSign, FileText, Clock, CheckCircle, X, Upload, ChevronDown, ChevronUp, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
@@ -452,88 +444,95 @@ export default function FinancialOverview() {
                           </div>
 
                           {/* Actions Section */}
-                          <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button variant="outline" size="sm" data-testid={`button-actions-${invoice.id}`}>
-                                  <MoreHorizontal className="mr-2 h-4 w-4" />
-                                  Actions
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="start">
-                                <DropdownMenuLabel>Payment Status</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateStatusMutation.mutate({
-                                      id: invoice.id,
-                                      status: "paid"
-                                    });
-                                  }}
-                                  data-testid={`menu-mark-paid-${invoice.id}`}
-                                >
-                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                                  Mark as Paid
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateStatusMutation.mutate({
-                                      id: invoice.id,
-                                      status: "pending"
-                                    });
-                                  }}
-                                  data-testid={`menu-mark-pending-${invoice.id}`}
-                                >
-                                  <Clock className="mr-2 h-4 w-4 text-yellow-500" />
-                                  Mark as Pending
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateStatusMutation.mutate({
-                                      id: invoice.id,
-                                      status: "unpaid"
-                                    });
-                                  }}
-                                  data-testid={`menu-mark-unpaid-${invoice.id}`}
-                                >
-                                  <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                                  Mark as Unpaid
-                                </DropdownMenuItem>
-                                {invoice.fileUrl && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuLabel>File Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        window.open(invoice.fileUrl!, '_blank');
-                                      }}
-                                      data-testid={`menu-download-${invoice.id}`}
-                                    >
-                                      <Download className="mr-2 h-4 w-4" />
-                                      Download File
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                                <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Danger Zone</DropdownMenuLabel>
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedInvoice(invoice);
-                                    setDeleteDialogOpen(true);
-                                  }}
-                                  className="text-destructive focus:text-destructive"
-                                  data-testid={`menu-delete-${invoice.id}`}
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete Invoice
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                          <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-border/50">
+                            {/* Status Change Buttons - Only show relevant options based on current status */}
+                            {invoice.paymentStatus !== "paid" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateStatusMutation.mutate({
+                                    id: invoice.id,
+                                    status: "paid"
+                                  });
+                                }}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                data-testid={`button-mark-paid-${invoice.id}`}
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Mark as Paid
+                              </Button>
+                            )}
+                            
+                            {invoice.paymentStatus !== "pending" && invoice.paymentStatus !== "paid" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateStatusMutation.mutate({
+                                    id: invoice.id,
+                                    status: "pending"
+                                  });
+                                }}
+                                className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                                data-testid={`button-mark-pending-${invoice.id}`}
+                              >
+                                <Clock className="mr-2 h-4 w-4" />
+                                Mark as Pending
+                              </Button>
+                            )}
+                            
+                            {invoice.paymentStatus !== "unpaid" && invoice.paymentStatus !== "paid" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateStatusMutation.mutate({
+                                    id: invoice.id,
+                                    status: "unpaid"
+                                  });
+                                }}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                data-testid={`button-mark-unpaid-${invoice.id}`}
+                              >
+                                <XCircle className="mr-2 h-4 w-4" />
+                                Mark as Unpaid
+                              </Button>
+                            )}
+
+                            {/* Download File Button */}
+                            {invoice.fileUrl && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(invoice.fileUrl!, '_blank');
+                                }}
+                                data-testid={`button-download-${invoice.id}`}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                Download File
+                              </Button>
+                            )}
+
+                            {/* Delete Button */}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedInvoice(invoice);
+                                setDeleteDialogOpen(true);
+                              }}
+                              data-testid={`button-delete-${invoice.id}`}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Invoice
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
