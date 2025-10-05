@@ -351,11 +351,7 @@ export const invoices = pgTable("invoices", {
 });
 
 // Insert Schema
-export const insertInvoiceSchema = createInsertSchema(invoices).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export const insertInvoiceSchema = createInsertSchema(invoices);
 
 // TypeScript Types
 export type Invoice = typeof invoices.$inferSelect;
