@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Building2, 
   Users, 
@@ -100,7 +101,7 @@ export default function SettingsPage() {
     description: "",
   });
 
-  // Password reset state
+  // Password reset state (self-service)
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -109,6 +110,14 @@ export default function SettingsPage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Admin password reset state
+  const [adminResetDialog, setAdminResetDialog] = useState<{ open: boolean; user: User | null }>({
+    open: false,
+    user: null,
+  });
+  const [adminResetPassword, setAdminResetPassword] = useState("");
+  const [showAdminResetPassword, setShowAdminResetPassword] = useState(false);
 
   // Update company settings mutation
   const updateCompanySettingsMutation = useMutation({
@@ -205,7 +214,7 @@ export default function SettingsPage() {
     },
   });
 
-  // Password reset mutation
+  // Password reset mutation (self-service)
   const passwordResetMutation = useMutation({
     mutationFn: async (data: typeof passwordData) => {
       return await apiRequest("POST", "/api/auth/reset-password", data);
@@ -225,6 +234,28 @@ export default function SettingsPage() {
       toast({
         title: "Error",
         description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Admin password reset mutation
+  const adminPasswordResetMutation = useMutation({
+    mutationFn: async ({ userId, newPassword }: { userId: number; newPassword: string }) => {
+      return await apiRequest("POST", `/api/users/${userId}/reset-password`, { newPassword });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: `Password reset successfully for ${adminResetDialog.user?.username}`,
+      });
+      setAdminResetDialog({ open: false, user: null });
+      setAdminResetPassword("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset password",
         variant: "destructive",
       });
     },
@@ -318,6 +349,54 @@ export default function SettingsPage() {
     }
 
     passwordResetMutation.mutate(passwordData);
+  };
+
+  const handleAdminPasswordReset = () => {
+    if (!adminResetPassword) {
+      toast({
+        title: "Validation Error",
+        description: "Password is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (adminResetPassword.length < 8) {
+      toast({
+        title: "Validation Error",
+        description: "Password must be at least 8 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!adminResetDialog.user) {
+      return;
+    }
+
+    adminPasswordResetMutation.mutate({
+      userId: adminResetDialog.user.id,
+      newPassword: adminResetPassword,
+    });
+  };
+
+  const canResetUserPassword = (targetUser: User) => {
+    // Cannot reset own password via admin endpoint
+    if (targetUser.id === currentUser?.user?.id) {
+      return false;
+    }
+
+    // Super admin can reset anyone's password (except their own)
+    if (currentUser?.user?.role === 'super_admin') {
+      return true;
+    }
+
+    // Admin cannot reset super admin passwords
+    if (currentUser?.user?.role === 'admin' && targetUser.role !== 'super_admin') {
+      return true;
+    }
+
+    return false;
   };
 
   const isSuperAdmin = currentUser?.user?.role === 'super_admin';
@@ -630,17 +709,33 @@ export default function SettingsPage() {
                               </div>
                             </div>
                             
-                            {isSuperAdmin && user.id !== currentUser?.user?.id && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleToggleUserStatus(user.id, user.status)}
-                                disabled={updateUserMutation.isPending}
-                                data-testid={`button-toggle-status-${user.id}`}
-                              >
-                                {user.status === 'active' ? 'Deactivate' : 'Activate'}
-                              </Button>
-                            )}
+                            <div className="flex gap-2">
+                              {/* Reset Password Button - Available to admins and super admins */}
+                              {isAdmin && user.id !== currentUser?.user?.id && canResetUserPassword(user) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setAdminResetDialog({ open: true, user })}
+                                  data-testid={`button-reset-password-${user.id}`}
+                                >
+                                  <Key className="h-4 w-4 mr-2" />
+                                  Reset Password
+                                </Button>
+                              )}
+                              
+                              {/* Activate/Deactivate Button - Super Admin Only */}
+                              {isSuperAdmin && user.id !== currentUser?.user?.id && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleToggleUserStatus(user.id, user.status)}
+                                  disabled={updateUserMutation.isPending}
+                                  data-testid={`button-toggle-status-${user.id}`}
+                                >
+                                  {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -976,6 +1071,83 @@ export default function SettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Admin Password Reset Dialog */}
+      <Dialog open={adminResetDialog.open} onOpenChange={(open) => {
+        if (!open) {
+          setAdminResetDialog({ open: false, user: null });
+          setAdminResetPassword("");
+          setShowAdminResetPassword(false);
+        }
+      }}>
+        <DialogContent className="glass-card border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white/90 flex items-center gap-2">
+              <Key className="h-5 w-5 text-purple-400" />
+              Reset Password for {adminResetDialog.user?.username}
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              Set a new password for this user. The user will be able to use this password immediately.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin-reset-password" className="text-white/80">
+                New Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="admin-reset-password"
+                  type={showAdminResetPassword ? "text" : "password"}
+                  value={adminResetPassword}
+                  onChange={(e) => setAdminResetPassword(e.target.value)}
+                  placeholder="Enter new password (min. 8 characters)"
+                  className="glass-input pr-10"
+                  data-testid="input-admin-reset-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminResetPassword(!showAdminResetPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                  data-testid="button-toggle-admin-reset-password"
+                >
+                  {showAdminResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-sm text-blue-300/90">
+                <strong>Note:</strong> The password must be at least 8 characters long.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setAdminResetDialog({ open: false, user: null });
+                setAdminResetPassword("");
+                setShowAdminResetPassword(false);
+              }}
+              data-testid="button-cancel-admin-reset"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAdminPasswordReset}
+              disabled={adminPasswordResetMutation.isPending}
+              className="bg-gradient-to-r from-purple-500 to-blue-500"
+              data-testid="button-confirm-admin-reset"
+            >
+              <Lock className="h-4 w-4 mr-2" />
+              {adminPasswordResetMutation.isPending ? "Resetting..." : "Reset Password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
