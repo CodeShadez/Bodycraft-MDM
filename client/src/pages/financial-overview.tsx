@@ -292,20 +292,19 @@ export default function FinancialOverview() {
                 <TableHead>Vendor</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
                     <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
                     <p className="text-lg font-medium">Loading invoices...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredInvoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
                     <FileText className="mx-auto h-12 w-12 mb-4 opacity-40" />
                     <p className="text-lg font-medium mb-1">No invoices found</p>
                     <p className="text-sm">
@@ -371,95 +370,13 @@ export default function FinancialOverview() {
                           ₹{parseFloat(invoice.amount).toLocaleString('en-IN')}
                         </span>
                       </TableCell>
-
-                      {/* Actions */}
-                      <TableCell className="py-3 px-3">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="sm" data-testid={`button-actions-${invoice.id}`}>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateStatusMutation.mutate({
-                                  id: invoice.id,
-                                  status: "paid"
-                                });
-                              }}
-                              data-testid={`menu-mark-paid-${invoice.id}`}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                              Mark as Paid
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateStatusMutation.mutate({
-                                  id: invoice.id,
-                                  status: "pending"
-                                });
-                              }}
-                              data-testid={`menu-mark-pending-${invoice.id}`}
-                            >
-                              <Clock className="mr-2 h-4 w-4 text-yellow-500" />
-                              Mark as Pending
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateStatusMutation.mutate({
-                                  id: invoice.id,
-                                  status: "unpaid"
-                                });
-                              }}
-                              data-testid={`menu-mark-unpaid-${invoice.id}`}
-                            >
-                              <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                              Mark as Unpaid
-                            </DropdownMenuItem>
-                            {invoice.fileUrl && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(invoice.fileUrl!, '_blank');
-                                  }}
-                                  data-testid={`menu-download-${invoice.id}`}
-                                >
-                                  <Download className="mr-2 h-4 w-4" />
-                                  Download File
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedInvoice(invoice);
-                                setDeleteDialogOpen(true);
-                              }}
-                              className="text-destructive focus:text-destructive"
-                              data-testid={`menu-delete-${invoice.id}`}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Invoice
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
                     </TableRow>
                   ];
 
                   if (isExpanded) {
                     rows.push(
                       <TableRow key={`expanded-${invoice.id}`} className="bg-muted/10 hover:bg-muted/10">
-                        <TableCell colSpan={5} className="p-6">
+                        <TableCell colSpan={4} className="p-6">
                           <div className="grid grid-cols-3 gap-6">
                             {/* Column 1 - Invoice Information */}
                             <div className="space-y-4">
@@ -532,6 +449,91 @@ export default function FinancialOverview() {
                                 <p className="text-sm mt-1">{invoice.updatedAt ? format(new Date(invoice.updatedAt), "MMM dd, yyyy HH:mm") : "—"}</p>
                               </div>
                             </div>
+                          </div>
+
+                          {/* Actions Section */}
+                          <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button variant="outline" size="sm" data-testid={`button-actions-${invoice.id}`}>
+                                  <MoreHorizontal className="mr-2 h-4 w-4" />
+                                  Actions
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start">
+                                <DropdownMenuLabel>Payment Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateStatusMutation.mutate({
+                                      id: invoice.id,
+                                      status: "paid"
+                                    });
+                                  }}
+                                  data-testid={`menu-mark-paid-${invoice.id}`}
+                                >
+                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                  Mark as Paid
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateStatusMutation.mutate({
+                                      id: invoice.id,
+                                      status: "pending"
+                                    });
+                                  }}
+                                  data-testid={`menu-mark-pending-${invoice.id}`}
+                                >
+                                  <Clock className="mr-2 h-4 w-4 text-yellow-500" />
+                                  Mark as Pending
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateStatusMutation.mutate({
+                                      id: invoice.id,
+                                      status: "unpaid"
+                                    });
+                                  }}
+                                  data-testid={`menu-mark-unpaid-${invoice.id}`}
+                                >
+                                  <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                                  Mark as Unpaid
+                                </DropdownMenuItem>
+                                {invoice.fileUrl && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel>File Actions</DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.open(invoice.fileUrl!, '_blank');
+                                      }}
+                                      data-testid={`menu-download-${invoice.id}`}
+                                    >
+                                      <Download className="mr-2 h-4 w-4" />
+                                      Download File
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Danger Zone</DropdownMenuLabel>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedInvoice(invoice);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                  className="text-destructive focus:text-destructive"
+                                  data-testid={`menu-delete-${invoice.id}`}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Invoice
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </TableCell>
                       </TableRow>
