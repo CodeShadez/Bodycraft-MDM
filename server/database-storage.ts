@@ -1234,42 +1234,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAutomationRunSummary(): Promise<{
-    total: number;
-    successful: number;
-    failed: number;
-    successRate: number;
-    totalTasksGenerated: number;
-    totalRisksDetected: number;
-    avgExecutionTime: number;
-    lastRun: AutomationRun | null;
+    totalRuns: number;
+    tasksGenerated: number;
+    signalsRaised: number;
+    recommendationsGenerated: number;
+    period: string;
   }> {
-    // Get counts and stats with SQL aggregation
-    const [stats] = await db.execute(sql`
-      SELECT 
-        COUNT(*)::int AS total,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS successful,
-        COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,
-        COALESCE(SUM(tasks_generated), 0)::int AS total_tasks_generated,
-        COALESCE(SUM(risks_detected), 0)::int AS total_risks_detected,
-        COALESCE(ROUND(AVG(execution_time_ms)), 0)::int AS avg_execution_time
-      FROM automation_runs
-      WHERE started_at >= NOW() - INTERVAL '30 days'
-    `);
+    // Get automation runs in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    const lastRun = await this.getAutomationRuns(1);
+    const runs = await db
+      .select()
+      .from(automationRuns)
+      .where(gte(automationRuns.startedAt, thirtyDaysAgo));
     
-    const total = Number(stats.total) || 0;
-    const successful = Number(stats.successful) || 0;
+    const signals = await db
+      .select()
+      .from(complianceSignals)
+      .where(gte(complianceSignals.detectedAt, thirtyDaysAgo));
+    
+    const recommendations = await db
+      .select()
+      .from(aiRecommendations)
+      .where(gte(aiRecommendations.createdAt, thirtyDaysAgo));
+    
+    const totalTasksGenerated = runs.reduce((sum, run) => sum + (run.tasksGenerated || 0), 0);
 
     return {
-      total,
-      successful,
-      failed: Number(stats.failed) || 0,
-      successRate: total > 0 ? Math.round((successful / total) * 100) : 0,
-      totalTasksGenerated: Number(stats.total_tasks_generated) || 0,
-      totalRisksDetected: Number(stats.total_risks_detected) || 0,
-      avgExecutionTime: Number(stats.avg_execution_time) || 0,
-      lastRun: lastRun[0] || null,
+      totalRuns: runs.length,
+      tasksGenerated: totalTasksGenerated,
+      signalsRaised: signals.length,
+      recommendationsGenerated: recommendations.length,
+      period: '30_days',
     };
   }
 

@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
@@ -10,7 +11,8 @@ import {
 import {
   TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock, 
   BarChart3, PieChartIcon, Activity, Brain, Zap, Play, Shield,
-  AlertTriangle, TrendingDown as TrendingDownIcon, Sparkles
+  AlertTriangle, TrendingDown as TrendingDownIcon, Sparkles, HardDrive,
+  CheckCircle2, XCircle, RefreshCw
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { apiRequest, queryClient } from "@/lib/queryClient"
@@ -85,6 +87,23 @@ interface AIRecommendation {
   createdAt: string
 }
 
+interface BackupVerification {
+  id: number
+  assetId: string
+  verificationDate: string
+  status: string
+  details: string
+  lastBackupDate: string | null
+}
+
+interface BackupHealth {
+  totalAssets: number
+  passed: number
+  failed: number
+  warning: number
+  healthScore: number
+}
+
 export default function ComplianceAnalyticsPage() {
   const { toast } = useToast()
   
@@ -106,6 +125,14 @@ export default function ComplianceAnalyticsPage() {
 
   const { data: aiRecommendations } = useQuery<AIRecommendation[]>({
     queryKey: ["/api/ai/recommendations"],
+  })
+
+  const { data: backupVerifications } = useQuery<BackupVerification[]>({
+    queryKey: ["/api/backups/verification"],
+  })
+
+  const { data: backupHealth } = useQuery<BackupHealth>({
+    queryKey: ["/api/backups/health"],
   })
 
   const triggerAutomation = useMutation({
@@ -131,6 +158,27 @@ export default function ComplianceAnalyticsPage() {
     },
     onError: () => {
       toast({ title: "Failed to trigger automation", variant: "destructive" })
+    },
+  })
+
+  const triggerBackupVerification = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/backups/verification/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      })
+      if (!response.ok) throw new Error("Failed to trigger backup verification")
+      return response.json()
+    },
+    onSuccess: () => {
+      toast({ title: "Backup verification triggered successfully" })
+      queryClient.invalidateQueries({ queryKey: ["/api/backups/verification"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/backups/health"] })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/tasks"] })
+    },
+    onError: () => {
+      toast({ title: "Failed to trigger backup verification", variant: "destructive" })
     },
   })
 
@@ -180,6 +228,10 @@ export default function ComplianceAnalyticsPage() {
           <TabsTrigger value="automation" data-testid="tab-automation">
             <Brain className="h-4 w-4 mr-2" />
             AI Automation
+          </TabsTrigger>
+          <TabsTrigger value="backups" data-testid="tab-backups">
+            <HardDrive className="h-4 w-4 mr-2" />
+            Backup Verification
           </TabsTrigger>
         </TabsList>
 
@@ -512,32 +564,322 @@ export default function ComplianceAnalyticsPage() {
             </Card>
           )}
 
-          {/* Predictive Alerts */}
+          {/* Predictive Alerts Timeline */}
           {predictiveAlerts && predictiveAlerts.length > 0 && (
-            <Card data-testid="card-predictive-alerts">
+            <Card data-testid="card-predictive-alerts-timeline">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingDownIcon className="h-5 w-5" />
-                  Predictive Alerts
+                  Predictive Alerts Timeline
                 </CardTitle>
-                <CardDescription>AI predictions for upcoming compliance issues</CardDescription>
+                <CardDescription>Chronological view of AI-predicted compliance issues</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  {/* Timeline vertical line */}
+                  <div className="absolute left-5 top-8 bottom-8 w-0.5 bg-border" />
+                  
+                  <div className="space-y-6">
+                    {predictiveAlerts.slice(0, 8).map((alert, index) => (
+                      <div 
+                        key={index} 
+                        className="relative pl-14"
+                        data-testid={`predictive-alert-timeline-${index}`}
+                      >
+                        {/* Timeline dot */}
+                        <div className={`absolute left-3 top-3 w-5 h-5 rounded-full border-4 ${
+                          alert.severity === 'high' 
+                            ? 'bg-red-500 border-red-200' 
+                            : alert.severity === 'medium'
+                            ? 'bg-amber-500 border-amber-200'
+                            : 'bg-blue-500 border-blue-200'
+                        }`} />
+                        
+                        {/* Timeline content */}
+                        <div className="flex items-start justify-between gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{alert.alertType}</p>
+                              <Badge variant={alert.severity === 'high' ? 'destructive' : alert.severity === 'medium' ? 'default' : 'secondary'} className="text-xs">
+                                {alert.severity}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Asset: {alert.assetId}</p>
+                            <p className="text-sm mt-2">{alert.prediction}</p>
+                            <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <CheckCircle className="h-3 w-3" />
+                                Confidence: {alert.confidence}%
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {new Date(alert.createdAt).toLocaleDateString('en-IN', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* AI Recommendations Drawer */}
+          {aiRecommendations && aiRecommendations.length > 0 && (
+            <Card data-testid="card-ai-recommendations-drawer">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      AI Recommendations
+                    </CardTitle>
+                    <CardDescription>Intelligent suggestions for compliance improvement</CardDescription>
+                  </div>
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="gap-2" data-testid="button-open-recommendations">
+                        <Brain className="h-4 w-4" />
+                        View All ({aiRecommendations.length})
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5" />
+                          AI Recommendations
+                        </SheetTitle>
+                        <SheetDescription>
+                          Detailed AI-generated recommendations for compliance optimization
+                        </SheetDescription>
+                      </SheetHeader>
+                      <div className="mt-6 space-y-4">
+                        {aiRecommendations.map((rec, index) => (
+                          <div 
+                            key={index} 
+                            className="p-4 rounded-lg border bg-card space-y-3"
+                            data-testid={`drawer-recommendation-${index}`}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-semibold">{rec.recommendation}</h4>
+                                  <Badge variant={rec.status === 'applied' ? 'default' : rec.status === 'pending' ? 'secondary' : 'outline'}>
+                                    {rec.status}
+                                  </Badge>
+                                </div>
+                                <div className="space-y-1 text-sm text-muted-foreground">
+                                  <p><span className="font-medium">Target:</span> {rec.targetType} - {rec.targetId}</p>
+                                  <p><span className="font-medium">Reasoning:</span> {rec.reasoning}</p>
+                                </div>
+                                <div className="flex items-center gap-4 pt-2">
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <div className="flex items-center gap-1">
+                                      <CheckCircle className="h-4 w-4 text-green-500" />
+                                      <span className="text-muted-foreground">Confidence:</span>
+                                      <span className="font-medium">{rec.confidenceScore}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <div className="flex items-center gap-1">
+                                      <TrendingUp className="h-4 w-4 text-blue-500" />
+                                      <span className="text-muted-foreground">Impact:</span>
+                                      <span className="font-medium">{rec.impactScore}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                                    <Clock className="h-3 w-3" />
+                                    {new Date(rec.createdAt).toLocaleDateString('en-IN', {
+                                      day: '2-digit',
+                                      month: 'short'
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            {rec.status === 'pending' && (
+                              <div className="flex gap-2 pt-2 border-t">
+                                <Button size="sm" variant="default" className="flex-1" data-testid={`apply-recommendation-${index}`}>
+                                  Apply Recommendation
+                                </Button>
+                                <Button size="sm" variant="outline" className="flex-1" data-testid={`dismiss-recommendation-${index}`}>
+                                  Dismiss
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {predictiveAlerts.slice(0, 5).map((alert, index) => (
+                  {aiRecommendations.slice(0, 3).map((rec, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-3 rounded-lg border bg-muted/50"
+                      data-testid={`ai-recommendation-preview-${index}`}
+                    >
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{rec.recommendation}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {rec.targetType}: {rec.targetId}
+                        </p>
+                      </div>
+                      <Badge variant={rec.status === 'applied' ? 'default' : 'secondary'} className="text-xs">
+                        {rec.status}
+                      </Badge>
+                    </div>
+                  ))}
+                  {aiRecommendations.length > 3 && (
+                    <p className="text-xs text-center text-muted-foreground pt-2">
+                      +{aiRecommendations.length - 3} more recommendations
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="backups" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Automated backup verification for all assets with compliance task creation
+            </p>
+            <Button 
+              onClick={() => triggerBackupVerification.mutate()} 
+              disabled={triggerBackupVerification.isPending}
+              data-testid="button-trigger-backup-verification"
+              className="gap-2"
+            >
+              {triggerBackupVerification.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Verifying...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  Trigger Verification
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Backup Health Summary */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card data-testid="card-total-assets">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
+                <HardDrive className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{backupHealth?.totalAssets || 0}</div>
+                <p className="text-xs text-muted-foreground">With backup requirements</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-backup-passed">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Passed</CardTitle>
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{backupHealth?.passed || 0}</div>
+                <p className="text-xs text-muted-foreground">Healthy backups</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-backup-failed">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Failed</CardTitle>
+                <XCircle className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{backupHealth?.failed || 0}</div>
+                <p className="text-xs text-muted-foreground">Critical issues</p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-backup-warning">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Warning</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600">{backupHealth?.warning || 0}</div>
+                <p className="text-xs text-muted-foreground">Missing backups</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Verification History */}
+          {backupVerifications && backupVerifications.length > 0 && (
+            <Card data-testid="card-verification-history">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Recent Verification History
+                </CardTitle>
+                <CardDescription>Latest automated backup checks and results</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {backupVerifications.slice(0, 10).map((verification, index) => (
                     <div 
                       key={index} 
                       className="flex items-center justify-between p-4 rounded-lg border bg-card"
-                      data-testid={`predictive-alert-${index}`}
+                      data-testid={`verification-${index}`}
                     >
                       <div className="flex-1">
-                        <p className="font-medium">{alert.alertType}: {alert.assetId}</p>
-                        <p className="text-sm text-muted-foreground">{alert.prediction}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Confidence: {alert.confidence}%</p>
+                        <p className="font-medium">Asset: {verification.assetId}</p>
+                        <p className="text-sm text-muted-foreground">{verification.details}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Last Backup: {verification.lastBackupDate 
+                            ? new Date(verification.lastBackupDate).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })
+                            : 'Never'}
+                        </p>
                       </div>
-                      <Badge variant={alert.severity === 'high' ? 'destructive' : 'default'}>
-                        {alert.severity}
-                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge variant={
+                          verification.status === 'passed' ? 'default' :
+                          verification.status === 'failed' ? 'destructive' :
+                          'secondary'
+                        }>
+                          {verification.status === 'passed' ? (
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                          ) : verification.status === 'failed' ? (
+                            <XCircle className="h-3 w-3 mr-1" />
+                          ) : (
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                          )}
+                          {verification.status}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(verification.verificationDate).toLocaleDateString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -545,38 +887,15 @@ export default function ComplianceAnalyticsPage() {
             </Card>
           )}
 
-          {/* AI Recommendations */}
-          {aiRecommendations && aiRecommendations.length > 0 && (
-            <Card data-testid="card-ai-recommendations-list">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
-                  AI Recommendations
-                </CardTitle>
-                <CardDescription>Intelligent suggestions for compliance improvement</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {aiRecommendations.slice(0, 5).map((rec, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-center justify-between p-4 rounded-lg border bg-card"
-                      data-testid={`ai-recommendation-${index}`}
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium">{rec.recommendation}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {rec.targetType}: {rec.targetId} | {rec.reasoning}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Confidence: {rec.confidenceScore}% | Impact: {rec.impactScore}
-                        </p>
-                      </div>
-                      <Badge variant={rec.status === 'applied' ? 'default' : 'secondary'}>
-                        {rec.status}
-                      </Badge>
-                    </div>
-                  ))}
+          {(!backupVerifications || backupVerifications.length === 0) && (
+            <Card>
+              <CardContent className="py-12">
+                <div className="text-center">
+                  <HardDrive className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No backup verifications found</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Click "Trigger Verification" to start automated backup checks
+                  </p>
                 </div>
               </CardContent>
             </Card>
