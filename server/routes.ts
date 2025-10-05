@@ -14,6 +14,7 @@ import {
   insertBiometricSystemSchema,
   insertBackupSchema,
   insertInvoiceSchema,
+  passwordResetSchema,
   type InsertInvoice
 } from "@shared/schema";
 
@@ -125,6 +126,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ user: userResponse });
     } catch (error) {
       console.error("Session check error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Password reset endpoint
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      // Check authentication
+      if (!req.session.userId || !req.session.username) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Validate request body
+      const validation = passwordResetSchema.safeParse(req.body);
+      if (!validation.success) {
+        const errors = validation.error.errors.map(e => e.message).join(", ");
+        return res.status(400).json({ message: errors });
+      }
+
+      const { currentPassword, newPassword } = validation.data;
+
+      // Get current user
+      const user = await storage.getUserByUsername(req.session.username);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      // Verify current password
+      const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      // Check if new password is same as current
+      const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash);
+      if (isSamePassword) {
+        return res.status(400).json({ message: "New password must be different from current password" });
+      }
+
+      // Hash new password
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await storage.updateUser(user.id, { passwordHash: newPasswordHash, updatedAt: new Date() });
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Password reset error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
