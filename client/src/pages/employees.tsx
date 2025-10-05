@@ -127,6 +127,19 @@ export default function EmployeesPage() {
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
 
+  // Form state for create dialog
+  const [createEmployee, setCreateEmployee] = useState({
+    employeeCode: '',
+    firstName: '',
+    lastName: '',
+    department: '',
+    designation: '',
+    email: '',
+    phone: '',
+    status: 'active',
+    locationId: ''
+  })
+
   // Form state for edit dialog
   const [editEmployee, setEditEmployee] = useState({
     firstName: '',
@@ -141,6 +154,23 @@ export default function EmployeesPage() {
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Reset create form when dialog opens
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      setCreateEmployee({
+        employeeCode: '',
+        firstName: '',
+        lastName: '',
+        department: '',
+        designation: '',
+        email: '',
+        phone: '',
+        status: 'active',
+        locationId: ''
+      })
+    }
+  }, [isCreateDialogOpen])
 
   // Populate editEmployee when selectedEmployee changes
   useEffect(() => {
@@ -342,18 +372,27 @@ export default function EmployeesPage() {
 
   const handleCreateEmployee = (event: React.FormEvent) => {
     event.preventDefault()
-    const formData = new FormData(event.target as HTMLFormElement)
+
+    // Validate required fields
+    if (!createEmployee.employeeCode?.trim() || !createEmployee.firstName?.trim() || !createEmployee.lastName?.trim() || !createEmployee.department || !createEmployee.designation?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (Employee Code, First Name, Last Name, Department, Designation)",
+        variant: "destructive",
+      })
+      return
+    }
     
     const employeeData = {
-      employeeCode: formData.get('employeeCode'),
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
-      department: formData.get('department'),
-      designation: formData.get('designation'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      status: formData.get('status'),
-      locationId: formData.get('locationId') ? parseInt(formData.get('locationId') as string) : null,
+      employeeCode: createEmployee.employeeCode.trim(),
+      firstName: createEmployee.firstName.trim(),
+      lastName: createEmployee.lastName.trim(),
+      department: createEmployee.department,
+      designation: createEmployee.designation.trim(),
+      email: createEmployee.email?.trim() || null,
+      phone: createEmployee.phone?.trim() || null,
+      status: createEmployee.status,
+      locationId: createEmployee.locationId ? parseInt(createEmployee.locationId) : null,
     }
 
     createEmployeeMutation.mutate(employeeData)
@@ -479,7 +518,8 @@ export default function EmployeesPage() {
                   <Label htmlFor="employeeCode">Employee Code *</Label>
                   <Input
                     id="employeeCode"
-                    name="employeeCode"
+                    value={createEmployee.employeeCode}
+                    onChange={(e) => setCreateEmployee({ ...createEmployee, employeeCode: e.target.value })}
                     placeholder="BFC2024001"
                     required
                   />
@@ -490,7 +530,8 @@ export default function EmployeesPage() {
                     <Label htmlFor="firstName">First Name *</Label>
                     <Input
                       id="firstName"
-                      name="firstName"
+                      value={createEmployee.firstName}
+                      onChange={(e) => setCreateEmployee({ ...createEmployee, firstName: e.target.value })}
                       placeholder="John"
                       required
                     />
@@ -499,7 +540,8 @@ export default function EmployeesPage() {
                     <Label htmlFor="lastName">Last Name *</Label>
                     <Input
                       id="lastName"
-                      name="lastName"
+                      value={createEmployee.lastName}
+                      onChange={(e) => setCreateEmployee({ ...createEmployee, lastName: e.target.value })}
                       placeholder="Doe"
                       required
                     />
@@ -509,7 +551,7 @@ export default function EmployeesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="department">Department *</Label>
-                    <Select name="department" required>
+                    <Select value={createEmployee.department} onValueChange={(value) => setCreateEmployee({ ...createEmployee, department: value })} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select department" />
                       </SelectTrigger>
@@ -528,7 +570,8 @@ export default function EmployeesPage() {
                     <Label htmlFor="designation">Designation *</Label>
                     <Input
                       id="designation"
-                      name="designation"
+                      value={createEmployee.designation}
+                      onChange={(e) => setCreateEmployee({ ...createEmployee, designation: e.target.value })}
                       placeholder="Software Engineer, Sales Manager..."
                       required
                     />
@@ -540,8 +583,9 @@ export default function EmployeesPage() {
                     <Label htmlFor="email">Email Address *</Label>
                     <Input
                       id="email"
-                      name="email"
                       type="email"
+                      value={createEmployee.email}
+                      onChange={(e) => setCreateEmployee({ ...createEmployee, email: e.target.value })}
                       placeholder="john.doe@bodycraft.com"
                       required
                     />
@@ -550,7 +594,8 @@ export default function EmployeesPage() {
                     <Label htmlFor="phone">Phone Number *</Label>
                     <Input
                       id="phone"
-                      name="phone"
+                      value={createEmployee.phone}
+                      onChange={(e) => setCreateEmployee({ ...createEmployee, phone: e.target.value })}
                       placeholder="+91 9876543210"
                       required
                     />
@@ -560,7 +605,7 @@ export default function EmployeesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="locationId">Location</Label>
-                    <Select name="locationId">
+                    <Select value={createEmployee.locationId} onValueChange={(value) => setCreateEmployee({ ...createEmployee, locationId: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
@@ -575,7 +620,7 @@ export default function EmployeesPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select name="status" defaultValue="active">
+                    <Select value={createEmployee.status} onValueChange={(value: any) => setCreateEmployee({ ...createEmployee, status: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
