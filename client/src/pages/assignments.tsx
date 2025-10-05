@@ -68,6 +68,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useUser } from "@/hooks/use-user"
+import { ExcelExporter, ExcelImporter } from "@/lib/excel"
 
 interface Assignment {
   assetId: string
@@ -126,6 +127,9 @@ export default function AssignmentsPage() {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -260,6 +264,65 @@ export default function AssignmentsPage() {
     }
   })
 
+  // Excel Export Handler
+  const handleExport = () => {
+    if (!assignments || !employees || !assets || !locations) {
+      toast({ title: "Error", description: "Data not loaded yet", variant: "destructive" })
+      return
+    }
+    
+    try {
+      ExcelExporter.exportAssignments(assignments, employees, assets, locations)
+      toast({ title: "Success", description: "Assignments exported successfully" })
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to export assignments", variant: "destructive" })
+    }
+  }
+
+  // Excel Import Handler
+  const handleImport = async () => {
+    if (!importFile) {
+      toast({ title: "Error", description: "Please select a file", variant: "destructive" })
+      return
+    }
+
+    setIsImporting(true)
+
+    try {
+      const data = await ExcelImporter.parseExcelFile(importFile)
+      const { valid, errors } = ExcelImporter.validateAssignmentData(data)
+
+      if (errors.length > 0) {
+        toast({ 
+          title: "Validation Errors", 
+          description: `${errors.length} errors found. First error: ${errors[0]}`,
+          variant: "destructive" 
+        })
+        setIsImporting(false)
+        return
+      }
+
+      for (const assignmentData of valid) {
+        await assignAssetMutation.mutateAsync(assignmentData)
+      }
+
+      toast({ 
+        title: "Success", 
+        description: `Successfully imported ${valid.length} assignments` 
+      })
+      setIsImportDialogOpen(false)
+      setImportFile(null)
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: "Failed to import assignments", 
+        variant: "destructive" 
+      })
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   // Transfer asset mutation (return + new assignment in one operation)
   const transferAssetMutation = useMutation({
     mutationFn: async (transferData: any) => {
@@ -392,11 +455,50 @@ export default function AssignmentsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Upload className="h-4 w-4" />
-            Import Excel
-          </Button>
-          <Button variant="outline" className="gap-2">
+          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2" data-testid="button-import-excel">
+                <Upload className="h-4 w-4" />
+                Import Excel
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import Assignments from Excel</DialogTitle>
+                <DialogDescription>
+                  Upload an Excel file to import assignments. Download the template for the correct format.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="import-file">Excel File</Label>
+                  <Input
+                    id="import-file"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                    data-testid="input-import-file"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => ExcelImporter.downloadAssignmentTemplate()}
+                  data-testid="button-download-template"
+                >
+                  Download Template
+                </Button>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsImportDialogOpen(false)} data-testid="button-cancel-import">
+                  Cancel
+                </Button>
+                <Button onClick={handleImport} disabled={!importFile || isImporting} data-testid="button-confirm-import">
+                  {isImporting ? "Importing..." : "Import"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button variant="outline" className="gap-2" onClick={handleExport} data-testid="button-export">
             <Download className="h-4 w-4" />
             Export
           </Button>
