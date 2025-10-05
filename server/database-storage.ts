@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { eq, desc, and, or, like, isNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { 
   type Asset, type InsertAsset,
   type Employee, type InsertEmployee, 
@@ -564,14 +565,17 @@ export class DatabaseStorage implements IStorage {
 
   // Compliance Management
   async getComplianceTasks(filters?: { status?: string; priority?: string; taskType?: string; locationId?: number; overdueOnly?: boolean }): Promise<any[]> {
+    const assignedToUser = alias(users, 'assignedToUser');
+    const createdByUser = alias(users, 'createdByUser');
+    
     let query = db.select({
       task: complianceTasks,
-      assignedToUser: users,
-      createdByUser: users,
+      assignedToUser: assignedToUser,
+      createdByUser: createdByUser,
       location: locations,
     }).from(complianceTasks)
-      .leftJoin(users, eq(complianceTasks.assignedTo, users.id))
-      .leftJoin(users, eq(complianceTasks.createdBy, users.id))
+      .leftJoin(assignedToUser, eq(complianceTasks.assignedTo, assignedToUser.id))
+      .leftJoin(createdByUser, eq(complianceTasks.createdBy, createdByUser.id))
       .leftJoin(locations, eq(complianceTasks.locationId, locations.id));
 
     const conditions = [];
