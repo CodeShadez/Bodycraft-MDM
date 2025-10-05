@@ -1924,28 +1924,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Object Storage upload URL route
-  app.post("/api/object-storage/upload-url", async (req, res) => {
+  // Object Storage upload URL route (requires authentication and admin role)
+  app.post("/api/object-storage/upload-url", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
-      const { fileName } = req.body;
+      const { ObjectStorageService } = await import("./objectStorage");
+      const objectStorage = new ObjectStorageService();
       
-      if (!fileName) {
-        return res.status(400).json({ error: "File name is required" });
-      }
-
-      // Import object storage functions
-      const { getSignedUploadUrl } = await import("./objectStorage");
-      
-      const signedUrl = await getSignedUploadUrl(fileName);
-      res.json({ url: signedUrl });
+      const uploadUrl = await objectStorage.getObjectEntityUploadURL();
+      res.json({ url: uploadUrl });
     } catch (error) {
       console.error("Error getting upload URL:", error);
       res.status(500).json({ error: "Failed to get upload URL" });
     }
   });
 
-  // Invoice routes
-  app.get("/api/invoices", async (req, res) => {
+  // Invoice routes (all require authentication)
+  app.get("/api/invoices", requireAuth, async (req, res) => {
     try {
       const invoices = await storage.getAllInvoices();
       res.json(invoices);
@@ -1955,7 +1949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/invoices/:id", async (req, res) => {
+  app.get("/api/invoices/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const invoice = await storage.getInvoice(id);
@@ -1971,7 +1965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/invoices", async (req, res) => {
+  app.post("/api/invoices", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const validatedData = insertInvoiceSchema.parse(req.body);
       const invoice = await storage.createInvoice(validatedData);
@@ -1985,7 +1979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/invoices/:id", async (req, res) => {
+  app.patch("/api/invoices/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertInvoiceSchema.partial().parse(req.body);
@@ -2005,7 +1999,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/invoices/:id", async (req, res) => {
+  app.delete("/api/invoices/:id", requireAuth, requireRole(['super_admin', 'admin']), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteInvoice(id);
