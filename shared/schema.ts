@@ -317,3 +317,46 @@ export type InsertApprovalRequest = z.infer<typeof insertApprovalRequestSchema>;
 
 export type ApprovalAction = typeof approvalActions.$inferSelect;
 export type InsertApprovalAction = z.infer<typeof insertApprovalActionSchema>;
+
+// 16. INVOICES - Financial tracking for all expenses and purchases
+export const invoices = pgTable("invoices", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  invoiceNumber: varchar("invoice_number", { length: 100 }).notNull().unique(),
+  invoiceDate: date("invoice_date").notNull(),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  
+  category: varchar("category", { length: 50 }).notNull(), // repair, asset_purchase, maintenance, expense, other
+  description: text("description").notNull(),
+  vendorName: varchar("vendor_name", { length: 255 }),
+  
+  // Optional relationships
+  relatedAssetId: varchar("related_asset_id", { length: 20 }).references(() => assets.assetId),
+  relatedMaintenanceId: integer("related_maintenance_id").references(() => assetMaintenance.id),
+  
+  // File upload
+  fileUrl: text("file_url"), // Path to uploaded invoice document
+  fileName: varchar("file_name", { length: 255 }), // Original file name
+  fileSize: varchar("file_size", { length: 50 }), // File size for display
+  
+  // Payment tracking
+  paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("unpaid"), // paid, unpaid, partial, overdue
+  paymentDate: date("payment_date"),
+  paymentMethod: varchar("payment_method", { length: 50 }), // bank_transfer, cash, card, cheque
+  
+  locationId: integer("location_id").references(() => locations.id),
+  uploadedBy: integer("uploaded_by").references(() => users.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert Schema
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// TypeScript Types
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
