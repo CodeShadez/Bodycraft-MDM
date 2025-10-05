@@ -1100,7 +1100,7 @@ export default function SettingsPage() {
           setShowAdminResetConfirmPassword(false);
         }
       }}>
-        <DialogContent className="glass-card border-white/10">
+        <DialogContent className="glass-card border-white/10 sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-white/90 flex items-center gap-2">
               <Key className="h-5 w-5 text-purple-400" />
@@ -1129,7 +1129,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdminResetPassword(!showAdminResetPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90 transition-colors w-4 h-4 flex items-center justify-center"
                   data-testid="button-toggle-admin-reset-password"
                 >
                   {showAdminResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -1154,7 +1154,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdminResetConfirmPassword(!showAdminResetConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90 transition-colors w-4 h-4 flex items-center justify-center"
                   data-testid="button-toggle-admin-reset-confirm-password"
                 >
                   {showAdminResetConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
