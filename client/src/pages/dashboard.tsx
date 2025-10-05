@@ -659,7 +659,7 @@ export default function Dashboard() {
             <Button 
               variant="outline" 
               className="h-auto p-4 flex flex-col items-center gap-2 glass-card glass-card-hover border-white/20 text-white"
-              onClick={() => setLocation("/assets")}
+              onClick={() => setLocation("/assets?action=create")}
               data-testid="button-add-asset"
             >
               <Laptop className="h-5 w-5 text-purple-400" />
@@ -672,7 +672,7 @@ export default function Dashboard() {
             <Button 
               variant="outline" 
               className="h-auto p-4 flex flex-col items-center gap-2 glass-card glass-card-hover border-white/20 text-white"
-              onClick={() => setLocation("/assignments")}
+              onClick={() => setLocation("/assignments?action=create")}
               data-testid="button-assign-asset"
             >
               <Users className="h-5 w-5 text-blue-400" />
@@ -685,7 +685,7 @@ export default function Dashboard() {
             <Button 
               variant="outline" 
               className="h-auto p-4 flex flex-col items-center gap-2 glass-card glass-card-hover border-white/20 text-white"
-              onClick={() => setLocation("/maintenance")}
+              onClick={() => setLocation("/maintenance?action=create")}
               data-testid="button-schedule-maintenance"
             >
               <Wrench className="h-5 w-5 text-orange-400" />
