@@ -15,6 +15,7 @@ import Locations from "@/pages/locations";
 import Maintenance from "@/pages/maintenance";
 import Warranty from "@/pages/warranty";
 import Compliance from "@/pages/compliance";
+import ComplianceAnalytics from "@/pages/compliance-analytics";
 import CCTV from "@/pages/cctv";
 import Biometric from "@/pages/biometric";
 import Reports from "@/pages/reports";
@@ -71,6 +72,9 @@ function Router() {
       </Route>
       <Route path="/compliance">
         {(params) => <ProtectedRoute component={Compliance} {...params} />}
+      </Route>
+      <Route path="/compliance-analytics">
+        {(params) => <ProtectedRoute component={ComplianceAnalytics} {...params} />}
       </Route>
       <Route path="/cctv">
         {(params) => <ProtectedRoute component={CCTV} {...params} />}

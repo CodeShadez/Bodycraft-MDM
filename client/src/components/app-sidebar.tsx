@@ -1,4 +1,4 @@
-import { Building2, Users, Laptop, MapPin, BarChart3, Cable, Fingerprint, Calendar, Settings, Wrench, Shield, LogOut, DollarSign } from "lucide-react"
+import { Building2, Users, Laptop, MapPin, BarChart3, Cable, Fingerprint, Calendar, Settings, Wrench, Shield, LogOut, DollarSign, FileCheck, TrendingUp } from "lucide-react"
 import { Link, useLocation } from "wouter"
 import { apiRequest, queryClient } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
@@ -51,6 +51,11 @@ const navigationItems = [
     url: "/warranty",
     icon: Shield,
   },
+  {
+    title: "Compliance",
+    url: "/compliance",
+    icon: FileCheck,
+  },
 ]
 
 // Integration management items
@@ -73,6 +78,11 @@ const systemItems = [
     title: "Reports",
     url: "/reports",
     icon: BarChart3,
+  },
+  {
+    title: "Compliance Analytics",
+    url: "/compliance-analytics",
+    icon: TrendingUp,
   },
   {
     title: "Financial Overview",

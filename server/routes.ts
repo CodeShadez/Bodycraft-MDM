@@ -2449,6 +2449,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get compliance analytics
+  app.get("/api/compliance/analytics", requireAuth, async (req, res) => {
+    try {
+      const locationId = req.session.role === 'location_user' ? (req.session.locationId ?? undefined) : undefined;
+      const tasks = await storage.getComplianceTasks({ locationId });
+      
+      // Calculate analytics
+      const totalTasks = tasks.length;
+      const completedTasks = tasks.filter(t => t.status === 'completed').length;
+      const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+      const overdueTasks = tasks.filter(t => t.isOverdue).length;
+      
+      const complianceRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      
+      // Status distribution
+      const statusDistribution = {
+        completed: completedTasks,
+        pending: pendingTasks,
+        overdue: overdueTasks,
+      };
+      
+      // Priority distribution
+      const priorityDistribution = tasks.reduce((acc: any, task) => {
+        acc[task.priority] = (acc[task.priority] || 0) + 1;
+        return acc;
+      }, {});
+      
+      // Task type distribution
+      const typeDistribution = tasks.reduce((acc: any, task) => {
+        acc[task.taskType] = (acc[task.taskType] || 0) + 1;
+        return acc;
+      }, {});
+      
+      // Upcoming tasks (next 7 days)
+      const today = new Date();
+      const next7Days = new Date(today);
+      next7Days.setDate(today.getDate() + 7);
+      
+      const upcomingTasks = tasks
+        .filter(t => {
+          const dueDate = new Date(t.dueDate);
+          return t.status === 'pending' && dueDate >= today && dueDate <= next7Days;
+        })
+        .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+        .slice(0, 5);
+      
+      // Compliance trends (last 30 days)
+      const trends: any[] = [];
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        date.setHours(0, 0, 0, 0);
+        
+        const tasksCompletedOnDay = tasks.filter(t => {
+          if (!t.completionDate) return false;
+          const completionDate = new Date(t.completionDate);
+          completionDate.setHours(0, 0, 0, 0);
+          return completionDate.getTime() === date.getTime();
+        }).length;
+        
+        trends.push({
+          date: date.toISOString().split('T')[0],
+          completed: tasksCompletedOnDay,
+        });
+      }
+      
+      res.json({
+        summary: {
+          totalTasks,
+          completedTasks,
+          pendingTasks,
+          overdueTasks,
+          complianceRate,
+        },
+        statusDistribution,
+        priorityDistribution,
+        typeDistribution,
+        upcomingTasks,
+        trends,
+      });
+    } catch (error) {
+      console.error("Error fetching compliance analytics:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
