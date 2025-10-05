@@ -169,6 +169,16 @@ export default function AssignmentsPage() {
     }
   }, [isAssignDialogOpen])
 
+  // Check URL params to auto-open create dialog
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('action') === 'create') {
+      setIsAssignDialogOpen(true)
+      // Clean up URL without reloading
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [])
+
   // Populate return form when selectedAssignment changes
   useEffect(() => {
     if (selectedAssignment && isReturnDialogOpen) {
