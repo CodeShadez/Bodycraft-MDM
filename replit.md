@@ -11,6 +11,7 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### Phase 2: AI-Powered Compliance Automation (October 2025)
+
 - **AI Orchestrator Service**: OpenAI GPT-4o-mini integration for automated compliance task generation, risk scoring, and intelligent assignment optimization
 - **Backup Verification Engine**: Automated backup health monitoring with signal generation for failures
 - **Automation Dashboard**: Three-tab analytics interface (Overview, AI Automation, Backup Verification) with real-time statistics
@@ -26,6 +27,7 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend
+
 - **React 18** with TypeScript
 - **Vite** for building
 - **Wouter** for routing
@@ -34,6 +36,7 @@ Preferred communication style: Simple, everyday language.
 - **Tailwind CSS** for styling
 
 ### Backend
+
 - **Node.js** with Express.js for RESTful APIs
 - **TypeScript** for type safety
 - **Zod** for runtime schema validation
@@ -41,12 +44,14 @@ Preferred communication style: Simple, everyday language.
 - **Session-based architecture** with PostgreSQL session store
 
 ### Data Storage
+
 - **PostgreSQL** (Neon serverless hosting)
 - **Drizzle ORM** for type-safe queries
 - **Historical data preservation** and **comprehensive audit trails**
 - **Multi-tenant data isolation** for 32 locations
 
 ### Authentication and Authorization
+
 - **Session-based authentication** using `connect-pg-simple`
 - **Role-based access control (RBAC)** with location-based isolation
 - **Three-tier permission model**: Super Admin, Admin, Location User
@@ -54,13 +59,16 @@ Preferred communication style: Simple, everyday language.
 - **Pre-update authorization** to prevent unauthorized cross-location changes
 
 ### Design System
+
 - Modern design inspired by Canva and Figma
 - **Dual theme support** (light/dark) with purple branding
 - **Responsive design** for all devices
 - **Accessibility-first** component library
 
 ### Database Schema
+
 Relational model with core entities:
+
 - **Locations**: 32 BODYCRAFT outlets
 - **Employees**: Staff with department/designation
 - **Assets**: IT equipment with lifecycle management
@@ -69,12 +77,14 @@ Relational model with core entities:
 - **Integration Tables**: CCTV, biometric devices, backups
 
 ### API Architecture
+
 - **RESTful endpoints**
 - **Consistent error handling**
 - **Input validation** using Zod
 - **Structured logging**
 
 ### RBAC Roles
+
 - **Super Admin (Global)**: Full access to all locations and operations.
 - **Admin (Global)**: Full access to all locations and most operations, similar to Super Admin for daily tasks.
 - **Location User (Location-Restricted)**: Access only to their assigned location; can manage local assets/employees, but cannot transfer assets/employees cross-location or modify CCTV/biometric systems.
@@ -82,29 +92,35 @@ Relational model with core entities:
 ## External Dependencies
 
 ### Database Services
+
 - **Neon Database**: Serverless PostgreSQL hosting.
 - **Drizzle Kit**: Database migration and schema management.
 
 ### UI Framework
+
 - **Radix UI**: Headless components.
 - **Lucide React**: Icon library.
 - **Embla Carousel**: Touch-friendly carousel.
 - **Class Variance Authority**: Type-safe component variants.
 
 ### Development Tools
+
 - **Vite Plugins**: Development enhancements.
 - **PostCSS with Autoprefixer**: CSS processing.
 - **TypeScript**: Static type checking.
 
 ### Google Fonts
+
 - **Inter**: Primary interface font.
 - **Plus Jakarta Sans**: Display font.
 
 ### Form Management
+
 - **React Hook Form**: Performance-optimized form handling.
 - **Hookform Resolvers**: Zod integration for validation.
 
 ### Utilities
+
 - **Date-fns**: Date manipulation.
 - **clsx and tailwind-merge**: Conditional CSS class management.
 - **nanoid**: Unique ID generation.

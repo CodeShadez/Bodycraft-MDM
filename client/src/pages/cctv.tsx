@@ -1,12 +1,12 @@
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { 
-  Camera, 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Camera,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
   Download,
   Upload,
   MoreHorizontal,
@@ -20,28 +20,28 @@ import {
   Settings,
   Power,
   Shield,
-  Video
-} from "lucide-react"
+  Video,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +50,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,42 +58,47 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Progress } from "@/components/ui/progress"
-import { useToast } from "@/hooks/use-toast"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface CCTVSystem {
-  id: number
-  systemName: string
-  systemType: "nvr" | "dvr" | "ip_camera" | "analog_camera" | "monitoring_station"
-  brand: string
-  model: string
-  serialNumber: string | null
-  ipAddress: string | null
-  macAddress: string | null
-  locationId: number
-  installationDate: string
-  warrantyUntil: string | null
-  status: "active" | "inactive" | "maintenance" | "fault"
-  cameraCount: number | null
-  storageCapacity: string | null
-  recordingQuality: string | null
-  remoteAccess: boolean
-  maintenanceContract: string | null
-  lastMaintenanceDate: string | null
-  notes: string | null
-  createdAt: string
-  updatedAt: string
+  id: number;
+  systemName: string;
+  systemType:
+    | "nvr"
+    | "dvr"
+    | "ip_camera"
+    | "analog_camera"
+    | "monitoring_station";
+  brand: string;
+  model: string;
+  serialNumber: string | null;
+  ipAddress: string | null;
+  macAddress: string | null;
+  locationId: number;
+  installationDate: string;
+  warrantyUntil: string | null;
+  status: "active" | "inactive" | "maintenance" | "fault";
+  cameraCount: number | null;
+  storageCapacity: string | null;
+  recordingQuality: string | null;
+  remoteAccess: boolean;
+  maintenanceContract: string | null;
+  lastMaintenanceDate: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Location {
-  id: number
-  outletName: string
-  city: string
-  state: string
+  id: number;
+  outletName: string;
+  city: string;
+  state: string;
 }
 
 // Status color mapping
@@ -101,8 +106,8 @@ const statusColors: Record<string, string> = {
   active: "bg-green-400",
   inactive: "bg-gray-500",
   maintenance: "bg-yellow-400",
-  fault: "bg-red-400"
-}
+  fault: "bg-red-400",
+};
 
 // System type icons
 const systemTypeIcons: Record<string, any> = {
@@ -110,21 +115,21 @@ const systemTypeIcons: Record<string, any> = {
   dvr: HardDrive,
   ip_camera: Camera,
   analog_camera: Video,
-  monitoring_station: Monitor
-}
+  monitoring_station: Monitor,
+};
 
 export default function CCTVPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [locationFilter, setLocationFilter] = useState<string>("all")
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [selectedSystem, setSelectedSystem] = useState<CCTVSystem | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedSystem, setSelectedSystem] = useState<CCTVSystem | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Mock CCTV data - In real app, this would come from API
   const mockCCTVData: CCTVSystem[] = [
@@ -147,9 +152,10 @@ export default function CCTVPage() {
       remoteAccess: true,
       maintenanceContract: "SecureTech Solutions",
       lastMaintenanceDate: "2024-01-10",
-      notes: "Main surveillance system for store entrance, cash counter, and storage areas",
+      notes:
+        "Main surveillance system for store entrance, cash counter, and storage areas",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-10T10:30:00Z"
+      updatedAt: "2024-01-10T10:30:00Z",
     },
     {
       id: 2,
@@ -172,11 +178,11 @@ export default function CCTVPage() {
       lastMaintenanceDate: "2024-01-10",
       notes: "Covers main entrance, customer parking, and loading dock",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-10T10:30:00Z"
+      updatedAt: "2024-01-10T10:30:00Z",
     },
     {
       id: 3,
-      systemName: "Koramangala DVR System", 
+      systemName: "Koramangala DVR System",
       systemType: "dvr",
       brand: "CP Plus",
       model: "CP-UVR-0801E1-CS",
@@ -193,9 +199,10 @@ export default function CCTVPage() {
       remoteAccess: false,
       maintenanceContract: "Local Security Services",
       lastMaintenanceDate: "2024-01-05",
-      notes: "Scheduled for upgrade to IP system. Current analog cameras need replacement",
+      notes:
+        "Scheduled for upgrade to IP system. Current analog cameras need replacement",
       createdAt: "2023-12-01T00:00:00Z",
-      updatedAt: "2024-01-05T14:20:00Z"
+      updatedAt: "2024-01-05T14:20:00Z",
     },
     {
       id: 4,
@@ -218,92 +225,118 @@ export default function CCTVPage() {
       lastMaintenanceDate: null,
       notes: "Central monitoring workstation for security personnel",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
-    }
-  ]
+      updatedAt: "2024-01-01T00:00:00Z",
+    },
+  ];
 
   // Fetch data
   const { data: locations } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
-  })
+  });
 
   // Use mock data for CCTV systems
-  const cctvSystems = mockCCTVData
+  const cctvSystems = mockCCTVData;
 
   // Filter CCTV systems
-  const filteredSystems = cctvSystems?.filter(system => {
-    const location = locations?.find(l => l.id === system.locationId)
-    
-    const matchesSearch = 
-      system.systemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.ipAddress?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === "all" || system.status === statusFilter
-    const matchesType = typeFilter === "all" || system.systemType === typeFilter
-    const matchesLocation = locationFilter === "all" || system.locationId.toString() === locationFilter
-    
-    return matchesSearch && matchesStatus && matchesType && matchesLocation
-  }) || []
+  const filteredSystems =
+    cctvSystems?.filter((system) => {
+      const location = locations?.find((l) => l.id === system.locationId);
+
+      const matchesSearch =
+        system.systemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.ipAddress?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "all" || system.status === statusFilter;
+      const matchesType =
+        typeFilter === "all" || system.systemType === typeFilter;
+      const matchesLocation =
+        locationFilter === "all" ||
+        system.locationId.toString() === locationFilter;
+
+      return matchesSearch && matchesStatus && matchesType && matchesLocation;
+    }) || [];
 
   // Helper functions
   const getLocationName = (locationId: number) => {
-    const location = locations?.find(loc => loc.id === locationId)
-    return location ? `${location.outletName}, ${location.city}` : "Unknown"
-  }
+    const location = locations?.find((loc) => loc.id === locationId);
+    return location ? `${location.outletName}, ${location.city}` : "Unknown";
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-green-100 text-green-800"
-      case "inactive": return "bg-gray-100 text-gray-800"
-      case "maintenance": return "bg-yellow-100 text-yellow-800"
-      case "fault": return "bg-red-100 text-red-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "inactive":
+        return "bg-gray-100 text-gray-800";
+      case "maintenance":
+        return "bg-yellow-100 text-yellow-800";
+      case "fault":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getSystemTypeIcon = (type: string) => {
-    return systemTypeIcons[type] || Settings
-  }
+    return systemTypeIcons[type] || Settings;
+  };
 
   const getSystemTypeLabel = (type: string) => {
     switch (type) {
-      case "nvr": return "Network Video Recorder"
-      case "dvr": return "Digital Video Recorder"
-      case "ip_camera": return "IP Camera"
-      case "analog_camera": return "Analog Camera"
-      case "monitoring_station": return "Monitoring Station"
-      default: return type.charAt(0).toUpperCase() + type.slice(1)
+      case "nvr":
+        return "Network Video Recorder";
+      case "dvr":
+        return "Digital Video Recorder";
+      case "ip_camera":
+        return "IP Camera";
+      case "analog_camera":
+        return "Analog Camera";
+      case "monitoring_station":
+        return "Monitoring Station";
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
     }
-  }
+  };
 
   // Calculate system metrics
-  const totalSystems = cctvSystems.length
-  const activeSystems = cctvSystems.filter(s => s.status === "active").length
-  const faultySystems = cctvSystems.filter(s => s.status === "fault").length
-  const totalCameras = cctvSystems.reduce((sum, s) => sum + (s.cameraCount || 0), 0)
-  const systemHealth = totalSystems > 0 ? Math.round((activeSystems / totalSystems) * 100) : 0
+  const totalSystems = cctvSystems.length;
+  const activeSystems = cctvSystems.filter((s) => s.status === "active").length;
+  const faultySystems = cctvSystems.filter((s) => s.status === "fault").length;
+  const totalCameras = cctvSystems.reduce(
+    (sum, s) => sum + (s.cameraCount || 0),
+    0,
+  );
+  const systemHealth =
+    totalSystems > 0 ? Math.round((activeSystems / totalSystems) * 100) : 0;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
-      
+      <SidebarTrigger
+        data-testid="button-sidebar-toggle"
+        className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">CCTV Systems</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            CCTV Systems
+          </h1>
           <p className="text-white/70">
-            Monitor and manage surveillance systems across all BODYCRAFT locations
+            Monitor and manage surveillance systems across all BODYCRAFT
+            locations
           </p>
         </div>
         <div className="flex gap-2">
@@ -315,7 +348,10 @@ export default function CCTVPage() {
             <Download className="h-4 w-4" />
             Export Report
           </Button>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -326,7 +362,8 @@ export default function CCTVPage() {
               <DialogHeader>
                 <DialogTitle>Add CCTV System</DialogTitle>
                 <DialogDescription>
-                  Configure new surveillance infrastructure with network settings, capacity details, and security parameters
+                  Configure new surveillance infrastructure with network
+                  settings, capacity details, and security parameters
                 </DialogDescription>
               </DialogHeader>
               <form className="space-y-4">
@@ -347,11 +384,19 @@ export default function CCTVPage() {
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="nvr">Network Video Recorder</SelectItem>
-                        <SelectItem value="dvr">Digital Video Recorder</SelectItem>
+                        <SelectItem value="nvr">
+                          Network Video Recorder
+                        </SelectItem>
+                        <SelectItem value="dvr">
+                          Digital Video Recorder
+                        </SelectItem>
                         <SelectItem value="ip_camera">IP Camera</SelectItem>
-                        <SelectItem value="analog_camera">Analog Camera</SelectItem>
-                        <SelectItem value="monitoring_station">Monitoring Station</SelectItem>
+                        <SelectItem value="analog_camera">
+                          Analog Camera
+                        </SelectItem>
+                        <SelectItem value="monitoring_station">
+                          Monitoring Station
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -394,8 +439,11 @@ export default function CCTVPage() {
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                       <SelectContent>
-                        {locations?.map(location => (
-                          <SelectItem key={location.id} value={location.id.toString()}>
+                        {locations?.map((location) => (
+                          <SelectItem
+                            key={location.id}
+                            value={location.id.toString()}
+                          >
                             {location.outletName}, {location.city}
                           </SelectItem>
                         ))}
@@ -425,7 +473,9 @@ export default function CCTVPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="installationDate">Installation Date *</Label>
+                    <Label htmlFor="installationDate">
+                      Installation Date *
+                    </Label>
                     <Input
                       id="installationDate"
                       name="installationDate"
@@ -474,16 +524,14 @@ export default function CCTVPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setIsCreateDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">
-                    Add CCTV System
-                  </Button>
+                  <Button type="submit">Add CCTV System</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -499,7 +547,9 @@ export default function CCTVPage() {
             <Camera className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{totalSystems}</div>
+            <div className="text-2xl font-bold text-white/90">
+              {totalSystems}
+            </div>
             <p className="text-xs text-muted-foreground">
               All surveillance systems
             </p>
@@ -508,14 +558,16 @@ export default function CCTVPage() {
 
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Systems</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Systems
+            </CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{activeSystems}</div>
-            <p className="text-xs text-muted-foreground">
-              Operational systems
-            </p>
+            <div className="text-2xl font-bold text-white/90">
+              {activeSystems}
+            </div>
+            <p className="text-xs text-muted-foreground">Operational systems</p>
           </CardContent>
         </Card>
 
@@ -525,10 +577,10 @@ export default function CCTVPage() {
             <Video className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{totalCameras}</div>
-            <p className="text-xs text-muted-foreground">
-              Across all systems
-            </p>
+            <div className="text-2xl font-bold text-white/90">
+              {totalCameras}
+            </div>
+            <p className="text-xs text-muted-foreground">Across all systems</p>
           </CardContent>
         </Card>
 
@@ -538,7 +590,9 @@ export default function CCTVPage() {
             <Shield className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{systemHealth}%</div>
+            <div className="text-2xl font-bold text-white/90">
+              {systemHealth}%
+            </div>
             <div className="mt-2">
               <Progress value={systemHealth} className="h-2" />
             </div>
@@ -588,7 +642,9 @@ export default function CCTVPage() {
                   <SelectItem value="dvr">DVR Systems</SelectItem>
                   <SelectItem value="ip_camera">IP Cameras</SelectItem>
                   <SelectItem value="analog_camera">Analog Cameras</SelectItem>
-                  <SelectItem value="monitoring_station">Monitoring Stations</SelectItem>
+                  <SelectItem value="monitoring_station">
+                    Monitoring Stations
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -598,8 +654,11 @@ export default function CCTVPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Locations</SelectItem>
-                  {locations?.map(location => (
-                    <SelectItem key={location.id} value={location.id.toString()}>
+                  {locations?.map((location) => (
+                    <SelectItem
+                      key={location.id}
+                      value={location.id.toString()}
+                    >
                       {location.outletName}
                     </SelectItem>
                   ))}
@@ -607,9 +666,10 @@ export default function CCTVPage() {
               </Select>
             </div>
           </div>
-          
+
           <div className="text-sm text-muted-foreground">
-            Showing {filteredSystems.length} of {cctvSystems?.length || 0} CCTV systems
+            Showing {filteredSystems.length} of {cctvSystems?.length || 0} CCTV
+            systems
           </div>
         </CardContent>
       </Card>
@@ -632,8 +692,8 @@ export default function CCTVPage() {
             </TableHeader>
             <TableBody>
               {filteredSystems.map((system) => {
-                const SystemIcon = getSystemTypeIcon(system.systemType)
-                
+                const SystemIcon = getSystemTypeIcon(system.systemType);
+
                 return (
                   <TableRow key={system.id}>
                     <TableCell>
@@ -684,8 +744,8 @@ export default function CCTVPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={getStatusBadgeColor(system.status)}
                       >
                         {system.status}
@@ -714,8 +774,8 @@ export default function CCTVPage() {
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem
                             onClick={() => {
-                              setSelectedSystem(system)
-                              setIsViewDialogOpen(true)
+                              setSelectedSystem(system);
+                              setIsViewDialogOpen(true);
                             }}
                           >
                             <Eye className="mr-2 h-4 w-4" />
@@ -738,7 +798,7 @@ export default function CCTVPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })}
             </TableBody>
           </Table>
@@ -751,7 +811,8 @@ export default function CCTVPage() {
           <DialogHeader>
             <DialogTitle>CCTV System Details</DialogTitle>
             <DialogDescription>
-              View surveillance system specifications, network configuration, storage capacity, and operational status
+              View surveillance system specifications, network configuration,
+              storage capacity, and operational status
             </DialogDescription>
           </DialogHeader>
           {selectedSystem && (
@@ -770,7 +831,7 @@ export default function CCTVPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Brand</Label>
@@ -830,7 +891,9 @@ export default function CCTVPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Recording Quality</Label>
+                  <Label className="text-sm font-medium">
+                    Recording Quality
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {selectedSystem.recordingQuality || "N/A"}
                   </div>
@@ -839,7 +902,9 @@ export default function CCTVPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Installation Date</Label>
+                  <Label className="text-sm font-medium">
+                    Installation Date
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {formatDate(selectedSystem.installationDate)}
                   </div>
@@ -847,7 +912,9 @@ export default function CCTVPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Warranty Until</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {selectedSystem.warrantyUntil ? formatDate(selectedSystem.warrantyUntil) : "No warranty"}
+                    {selectedSystem.warrantyUntil
+                      ? formatDate(selectedSystem.warrantyUntil)
+                      : "No warranty"}
                   </div>
                 </div>
               </div>
@@ -856,7 +923,9 @@ export default function CCTVPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Status</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    <Badge className={getStatusBadgeColor(selectedSystem.status)}>
+                    <Badge
+                      className={getStatusBadgeColor(selectedSystem.status)}
+                    >
                       {selectedSystem.status}
                     </Badge>
                   </div>
@@ -880,12 +949,15 @@ export default function CCTVPage() {
 
               {selectedSystem.maintenanceContract && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Maintenance Contract</Label>
+                  <Label className="text-sm font-medium">
+                    Maintenance Contract
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {selectedSystem.maintenanceContract}
                     {selectedSystem.lastMaintenanceDate && (
                       <div className="text-xs text-muted-foreground mt-1">
-                        Last maintenance: {formatDate(selectedSystem.lastMaintenanceDate)}
+                        Last maintenance:{" "}
+                        {formatDate(selectedSystem.lastMaintenanceDate)}
                       </div>
                     )}
                   </div>
@@ -903,12 +975,15 @@ export default function CCTVPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewDialogOpen(false)}
+            >
               Close
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

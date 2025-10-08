@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { 
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
   Calendar,
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Eye, 
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
   Download,
   Upload,
   MoreHorizontal,
@@ -24,28 +24,28 @@ import {
   ChevronUp,
   X,
   SlidersHorizontal,
-  Filter
-} from "lucide-react"
+  Filter,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -54,7 +54,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,406 +62,487 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { useUser } from "@/hooks/use-user"
-import { ExcelExporter, ExcelImporter } from "@/lib/excel"
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useUser } from "@/hooks/use-user";
+import { ExcelExporter, ExcelImporter } from "@/lib/excel";
 
 interface Assignment {
-  assetId: string
-  employeeId: number
-  assignedDate: string
-  returnedDate: string | null
-  assignmentReason: string
-  returnReason: string | null
-  conditionOnAssignment: "excellent" | "good" | "fair" | "poor"
-  conditionOnReturn: "excellent" | "good" | "fair" | "poor" | null
-  backupDetails: string | null
-  createdBy: number
-  createdAt: string
-  updatedAt: string
+  assetId: string;
+  employeeId: number;
+  assignedDate: string;
+  returnedDate: string | null;
+  assignmentReason: string;
+  returnReason: string | null;
+  conditionOnAssignment: "excellent" | "good" | "fair" | "poor";
+  conditionOnReturn: "excellent" | "good" | "fair" | "poor" | null;
+  backupDetails: string | null;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Asset {
-  assetId: string
-  modelName: string
-  brand: string
-  assetType: string
-  status: "available" | "assigned" | "maintenance" | "retired"
-  condition: "excellent" | "good" | "fair" | "poor"
-  locationId: number | null
-  currentUserId: number | null
+  assetId: string;
+  modelName: string;
+  brand: string;
+  assetType: string;
+  status: "available" | "assigned" | "maintenance" | "retired";
+  condition: "excellent" | "good" | "fair" | "poor";
+  locationId: number | null;
+  currentUserId: number | null;
 }
 
 interface Employee {
-  id: number
-  employeeCode: string
-  firstName: string
-  lastName: string
-  department: string
-  designation: string
-  status: "active" | "inactive" | "on_leave"
-  locationId: number | null
+  id: number;
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  department: string;
+  designation: string;
+  status: "active" | "inactive" | "on_leave";
+  locationId: number | null;
 }
 
 interface Location {
-  id: number
-  outletName: string
-  city: string
-  state: string
+  id: number;
+  outletName: string;
+  city: string;
+  state: string;
 }
 
 export default function AssignmentsPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [locationFilter, setLocationFilter] = useState<string>("all")
-  const [assetTypeFilter, setAssetTypeFilter] = useState<string>("all")
-  const [departmentFilter, setDepartmentFilter] = useState<string>("all")
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
-  const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false)
-  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false)
-  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null)
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
-  const [importFile, setImportFile] = useState<File | null>(null)
-  const [isImporting, setIsImporting] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [assetTypeFilter, setAssetTypeFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] =
+    useState<Assignment | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [expandedAssignmentId, setExpandedAssignmentId] = useState<
+    string | null
+  >(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   // Form state for Assign Asset dialog
   const [assignForm, setAssignForm] = useState({
-    assetId: '',
-    employeeId: '',
-    assignmentReason: '',
-    conditionOnAssignment: ''
-  })
+    assetId: "",
+    employeeId: "",
+    assignmentReason: "",
+    conditionOnAssignment: "",
+  });
 
   // Form state for Return Asset dialog
   const [returnForm, setReturnForm] = useState({
-    returnReason: '',
-    conditionOnReturn: ''
-  })
+    returnReason: "",
+    conditionOnReturn: "",
+  });
 
   // Form state for Transfer Asset dialog
   const [transferForm, setTransferForm] = useState({
-    toEmployeeId: '',
-    returnReason: '',
-    conditionOnReturn: '',
-    newAssignmentReason: '',
-    conditionOnNewAssignment: ''
-  })
-  
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+    toEmployeeId: "",
+    returnReason: "",
+    conditionOnReturn: "",
+    newAssignmentReason: "",
+    conditionOnNewAssignment: "",
+  });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Reset assign form when dialog opens
   useEffect(() => {
     if (isAssignDialogOpen) {
       setAssignForm({
-        assetId: '',
-        employeeId: '',
-        assignmentReason: '',
-        conditionOnAssignment: ''
-      })
+        assetId: "",
+        employeeId: "",
+        assignmentReason: "",
+        conditionOnAssignment: "",
+      });
     }
-  }, [isAssignDialogOpen])
+  }, [isAssignDialogOpen]);
 
   // Check URL params to auto-open create dialog
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('action') === 'create') {
-      setIsAssignDialogOpen(true)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "create") {
+      setIsAssignDialogOpen(true);
       // Clean up URL without reloading, preserving other params
-      params.delete('action')
-      const newUrl = params.toString() 
+      params.delete("action");
+      const newUrl = params.toString()
         ? `${window.location.pathname}?${params.toString()}`
-        : window.location.pathname
-      window.history.replaceState({}, '', newUrl)
+        : window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
     }
-  }, [])
+  }, []);
 
   // Populate return form when selectedAssignment changes
   useEffect(() => {
     if (selectedAssignment && isReturnDialogOpen) {
       setReturnForm({
-        returnReason: '',
-        conditionOnReturn: ''
-      })
+        returnReason: "",
+        conditionOnReturn: "",
+      });
     }
-  }, [selectedAssignment, isReturnDialogOpen])
+  }, [selectedAssignment, isReturnDialogOpen]);
 
   // Populate transfer form when selectedAssignment changes
   useEffect(() => {
     if (selectedAssignment && isTransferDialogOpen) {
       setTransferForm({
-        toEmployeeId: '',
-        returnReason: '',
-        conditionOnReturn: '',
-        newAssignmentReason: '',
-        conditionOnNewAssignment: ''
-      })
+        toEmployeeId: "",
+        returnReason: "",
+        conditionOnReturn: "",
+        newAssignmentReason: "",
+        conditionOnNewAssignment: "",
+      });
     }
-  }, [selectedAssignment, isTransferDialogOpen])
-  const { data: currentUser } = useUser()
+  }, [selectedAssignment, isTransferDialogOpen]);
+  const { data: currentUser } = useUser();
 
   // Fetch data
-  const { data: assignments, isLoading: assignmentsLoading } = useQuery<Assignment[]>({
+  const { data: assignments, isLoading: assignmentsLoading } = useQuery<
+    Assignment[]
+  >({
     queryKey: ["/api/assignments"],
-  })
+  });
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ["/api/assets"],
-  })
+  });
 
   const { data: employees } = useQuery<Employee[]>({
     queryKey: ["/api/employees"],
-  })
+  });
 
   const { data: locations } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
-  })
+  });
 
   // Get unique asset types and departments for filters
-  const assetTypes = Array.from(new Set(assets?.map(a => a.assetType) || []))
-  const departments = Array.from(new Set(employees?.map(e => e.department) || []))
+  const assetTypes = Array.from(new Set(assets?.map((a) => a.assetType) || []));
+  const departments = Array.from(
+    new Set(employees?.map((e) => e.department) || []),
+  );
 
   // Filter assignments
-  const filteredAssignments = assignments?.filter(assignment => {
-    const asset = assets?.find(a => a.assetId === assignment.assetId)
-    const employee = employees?.find(e => e.id === assignment.employeeId)
-    
-    const matchesSearch = 
-      assignment.assetId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee?.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee?.employeeCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset?.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset?.modelName.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const isActive = !assignment.returnedDate
-    const isReturned = assignment.returnedDate !== null
-    
-    const matchesStatus = 
-      statusFilter === "all" || 
-      (statusFilter === "active" && isActive) ||
-      (statusFilter === "returned" && isReturned)
-      
-    const matchesLocation = locationFilter === "all" || employee?.locationId?.toString() === locationFilter
-    const matchesAssetType = assetTypeFilter === "all" || asset?.assetType === assetTypeFilter
-    const matchesDepartment = departmentFilter === "all" || employee?.department === departmentFilter
-    
-    return matchesSearch && matchesStatus && matchesLocation && matchesAssetType && matchesDepartment
-  }) || []
+  const filteredAssignments =
+    assignments?.filter((assignment) => {
+      const asset = assets?.find((a) => a.assetId === assignment.assetId);
+      const employee = employees?.find((e) => e.id === assignment.employeeId);
+
+      const matchesSearch =
+        assignment.assetId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee?.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee?.employeeCode
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        asset?.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset?.modelName.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const isActive = !assignment.returnedDate;
+      const isReturned = assignment.returnedDate !== null;
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && isActive) ||
+        (statusFilter === "returned" && isReturned);
+
+      const matchesLocation =
+        locationFilter === "all" ||
+        employee?.locationId?.toString() === locationFilter;
+      const matchesAssetType =
+        assetTypeFilter === "all" || asset?.assetType === assetTypeFilter;
+      const matchesDepartment =
+        departmentFilter === "all" || employee?.department === departmentFilter;
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesLocation &&
+        matchesAssetType &&
+        matchesDepartment
+      );
+    }) || [];
 
   // Count active filters
   const activeFiltersCount = [
     locationFilter !== "all",
     assetTypeFilter !== "all",
-    departmentFilter !== "all"
-  ].filter(Boolean).length
+    departmentFilter !== "all",
+  ].filter(Boolean).length;
 
   // Available assets for assignment (not currently assigned)
-  const availableAssets = assets?.filter(asset => 
-    asset.status === "available" && 
-    !assignments?.some(assignment => 
-      assignment.assetId === asset.assetId && !assignment.returnedDate
-    )
-  ) || []
+  const availableAssets =
+    assets?.filter(
+      (asset) =>
+        asset.status === "available" &&
+        !assignments?.some(
+          (assignment) =>
+            assignment.assetId === asset.assetId && !assignment.returnedDate,
+        ),
+    ) || [];
 
   // Active employees for assignment
-  const activeEmployees = employees?.filter(emp => emp.status === "active") || []
+  const activeEmployees =
+    employees?.filter((emp) => emp.status === "active") || [];
 
   // Assign asset mutation
   const assignAssetMutation = useMutation({
     mutationFn: async (assignmentData: any) => {
-      const response = await fetch('/api/assignments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(assignmentData),
-      })
-      if (!response.ok) throw new Error('Failed to assign asset')
-      return response.json()
+      });
+      if (!response.ok) throw new Error("Failed to assign asset");
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/assignments'] })
-      queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
-      toast({ title: "Success", description: "Asset assigned successfully" })
-      setIsAssignDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["/api/assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+      toast({ title: "Success", description: "Asset assigned successfully" });
+      setIsAssignDialogOpen(false);
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to assign asset", variant: "destructive" })
-    }
-  })
+      toast({
+        title: "Error",
+        description: "Failed to assign asset",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Return asset mutation
   const returnAssetMutation = useMutation({
     mutationFn: async (returnData: any) => {
-      const response = await fetch(`/api/assignments/${returnData.assetId}/${returnData.employeeId}/return`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(returnData),
-      })
-      if (!response.ok) throw new Error('Failed to return asset')
-      return response.json()
+      const response = await fetch(
+        `/api/assignments/${returnData.assetId}/${returnData.employeeId}/return`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(returnData),
+        },
+      );
+      if (!response.ok) throw new Error("Failed to return asset");
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/assignments'] })
-      queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
-      toast({ title: "Success", description: "Asset returned successfully" })
-      setIsReturnDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["/api/assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+      toast({ title: "Success", description: "Asset returned successfully" });
+      setIsReturnDialogOpen(false);
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to return asset", variant: "destructive" })
-    }
-  })
+      toast({
+        title: "Error",
+        description: "Failed to return asset",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Delete assignment mutation
   const deleteAssignmentMutation = useMutation({
-    mutationFn: async (data: { assetId: string, employeeId: number }) => {
-      const response = await fetch(`/api/assignments/${data.assetId}/${data.employeeId}`, {
-        method: 'DELETE',
-      })
-      if (!response.ok) throw new Error('Failed to delete assignment')
+    mutationFn: async (data: { assetId: string; employeeId: number }) => {
+      const response = await fetch(
+        `/api/assignments/${data.assetId}/${data.employeeId}`,
+        {
+          method: "DELETE",
+        },
+      );
+      if (!response.ok) throw new Error("Failed to delete assignment");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/assignments"] })
-      queryClient.invalidateQueries({ queryKey: ["/api/assets"] })
-      toast({ title: "Success", description: "Assignment deleted successfully" })
+      queryClient.invalidateQueries({ queryKey: ["/api/assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+      toast({
+        title: "Success",
+        description: "Assignment deleted successfully",
+      });
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to delete assignment", variant: "destructive" })
-    }
-  })
+      toast({
+        title: "Error",
+        description: "Failed to delete assignment",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Excel Export Handler
   const handleExport = () => {
     if (!assignments || !employees || !assets || !locations) {
-      toast({ title: "Error", description: "Data not loaded yet", variant: "destructive" })
-      return
+      toast({
+        title: "Error",
+        description: "Data not loaded yet",
+        variant: "destructive",
+      });
+      return;
     }
-    
+
     try {
-      ExcelExporter.exportAssignments(assignments, employees, assets, locations)
-      toast({ title: "Success", description: "Assignments exported successfully" })
+      ExcelExporter.exportAssignments(
+        assignments,
+        employees,
+        assets,
+        locations,
+      );
+      toast({
+        title: "Success",
+        description: "Assignments exported successfully",
+      });
     } catch (error) {
-      toast({ title: "Error", description: "Failed to export assignments", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to export assignments",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   // Excel Import Handler
   const handleImport = async () => {
     if (!importFile) {
-      toast({ title: "Error", description: "Please select a file", variant: "destructive" })
-      return
+      toast({
+        title: "Error",
+        description: "Please select a file",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setIsImporting(true)
+    setIsImporting(true);
 
     try {
-      const data = await ExcelImporter.parseExcelFile(importFile)
-      const { valid, errors } = ExcelImporter.validateAssignmentData(data)
+      const data = await ExcelImporter.parseExcelFile(importFile);
+      const { valid, errors } = ExcelImporter.validateAssignmentData(data);
 
       if (errors.length > 0) {
-        toast({ 
-          title: "Validation Errors", 
+        toast({
+          title: "Validation Errors",
           description: `${errors.length} errors found. First error: ${errors[0]}`,
-          variant: "destructive" 
-        })
-        setIsImporting(false)
-        return
+          variant: "destructive",
+        });
+        setIsImporting(false);
+        return;
       }
 
       for (const assignmentData of valid) {
-        await assignAssetMutation.mutateAsync(assignmentData)
+        await assignAssetMutation.mutateAsync(assignmentData);
       }
 
-      toast({ 
-        title: "Success", 
-        description: `Successfully imported ${valid.length} assignments` 
-      })
-      setIsImportDialogOpen(false)
-      setImportFile(null)
+      toast({
+        title: "Success",
+        description: `Successfully imported ${valid.length} assignments`,
+      });
+      setIsImportDialogOpen(false);
+      setImportFile(null);
     } catch (error) {
-      toast({ 
-        title: "Error", 
-        description: "Failed to import assignments", 
-        variant: "destructive" 
-      })
+      toast({
+        title: "Error",
+        description: "Failed to import assignments",
+        variant: "destructive",
+      });
     } finally {
-      setIsImporting(false)
+      setIsImporting(false);
     }
-  }
+  };
 
   // Transfer asset mutation (return + new assignment in one operation)
   const transferAssetMutation = useMutation({
     mutationFn: async (transferData: any) => {
-      const response = await fetch(`/api/assignments/${transferData.assetId}/transfer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(transferData),
-      })
-      if (!response.ok) throw new Error('Failed to transfer asset')
-      return response.json()
+      const response = await fetch(
+        `/api/assignments/${transferData.assetId}/transfer`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(transferData),
+        },
+      );
+      if (!response.ok) throw new Error("Failed to transfer asset");
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/assignments'] })
-      queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
-      toast({ title: "Success", description: "Asset transferred successfully" })
-      setIsTransferDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["/api/assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+      toast({
+        title: "Success",
+        description: "Asset transferred successfully",
+      });
+      setIsTransferDialogOpen(false);
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to transfer asset", variant: "destructive" })
-    }
-  })
+      toast({
+        title: "Error",
+        description: "Failed to transfer asset",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Helper functions
   const getAssetInfo = (assetId: string) => {
-    return assets?.find(asset => asset.assetId === assetId)
-  }
+    return assets?.find((asset) => asset.assetId === assetId);
+  };
 
   const getEmployeeInfo = (employeeId: number) => {
-    return employees?.find(employee => employee.id === employeeId)
-  }
+    return employees?.find((employee) => employee.id === employeeId);
+  };
 
   const getLocationName = (locationId: number | null) => {
-    if (!locationId) return "No location"
-    const location = locations?.find(loc => loc.id === locationId)
-    return location ? `${location.outletName}, ${location.city}` : "Unknown"
-  }
+    if (!locationId) return "No location";
+    const location = locations?.find((loc) => loc.id === locationId);
+    return location ? `${location.outletName}, ${location.city}` : "Unknown";
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const handleAssignAsset = (event: React.FormEvent) => {
-    event.preventDefault()
-    
+    event.preventDefault();
+
     if (!currentUser?.user?.id) {
       toast({
         title: "Authentication Error",
-        description: "User not authenticated. Please refresh the page and try again.",
+        description:
+          "User not authenticated. Please refresh the page and try again.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Validate required fields
-    if (!assignForm.assetId || !assignForm.employeeId || !assignForm.conditionOnAssignment) {
+    if (
+      !assignForm.assetId ||
+      !assignForm.employeeId ||
+      !assignForm.conditionOnAssignment
+    ) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields (Asset, Employee, Condition)",
+        description:
+          "Please fill in all required fields (Asset, Employee, Condition)",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    
+
     const assignmentData = {
       assetId: assignForm.assetId,
       employeeId: parseInt(assignForm.employeeId),
@@ -469,14 +550,14 @@ export default function AssignmentsPage() {
       conditionOnAssignment: assignForm.conditionOnAssignment,
       backupDetails: null,
       createdBy: currentUser.user.id,
-    }
+    };
 
-    assignAssetMutation.mutate(assignmentData)
-  }
+    assignAssetMutation.mutate(assignmentData);
+  };
 
   const handleReturnAsset = (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!selectedAssignment) return
+    event.preventDefault();
+    if (!selectedAssignment) return;
 
     // Validate required fields
     if (!returnForm.conditionOnReturn) {
@@ -484,34 +565,38 @@ export default function AssignmentsPage() {
         title: "Validation Error",
         description: "Please select the condition on return",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    
+
     const returnData = {
       assetId: selectedAssignment.assetId,
       employeeId: selectedAssignment.employeeId,
       returnReason: returnForm.returnReason?.trim() || null,
       conditionOnReturn: returnForm.conditionOnReturn,
-    }
+    };
 
-    returnAssetMutation.mutate(returnData)
-  }
+    returnAssetMutation.mutate(returnData);
+  };
 
   const handleTransferAsset = (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!selectedAssignment) return
+    event.preventDefault();
+    if (!selectedAssignment) return;
 
     // Validate required fields
-    if (!transferForm.toEmployeeId || !transferForm.conditionOnReturn || !transferForm.conditionOnNewAssignment) {
+    if (
+      !transferForm.toEmployeeId ||
+      !transferForm.conditionOnReturn ||
+      !transferForm.conditionOnNewAssignment
+    ) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    
+
     const transferData = {
       assetId: selectedAssignment.assetId,
       fromEmployeeId: selectedAssignment.employeeId,
@@ -520,10 +605,10 @@ export default function AssignmentsPage() {
       conditionOnReturn: transferForm.conditionOnReturn,
       newAssignmentReason: transferForm.newAssignmentReason?.trim() || null,
       conditionOnNewAssignment: transferForm.conditionOnNewAssignment,
-    }
+    };
 
-    transferAssetMutation.mutate(transferData)
-  }
+    transferAssetMutation.mutate(transferData);
+  };
 
   if (assignmentsLoading) {
     return (
@@ -537,25 +622,37 @@ export default function AssignmentsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
-      
+      <SidebarTrigger
+        data-testid="button-sidebar-toggle"
+        className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Assignments</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Assignments
+          </h1>
           <p className="text-white/70">
             Manage asset assignments with complete history preservation
           </p>
         </div>
         <div className="flex gap-2">
-          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <Dialog
+            open={isImportDialogOpen}
+            onOpenChange={setIsImportDialogOpen}
+          >
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2" data-testid="button-import-excel">
+              <Button
+                variant="outline"
+                className="gap-2"
+                data-testid="button-import-excel"
+              >
                 <Upload className="h-4 w-4" />
                 Import Excel
               </Button>
@@ -564,7 +661,8 @@ export default function AssignmentsPage() {
               <DialogHeader>
                 <DialogTitle>Import Assignments from Excel</DialogTitle>
                 <DialogDescription>
-                  Upload an Excel file to import assignments. Download the template for the correct format.
+                  Upload an Excel file to import assignments. Download the
+                  template for the correct format.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -587,20 +685,36 @@ export default function AssignmentsPage() {
                 </Button>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsImportDialogOpen(false)} data-testid="button-cancel-import">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsImportDialogOpen(false)}
+                  data-testid="button-cancel-import"
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleImport} disabled={!importFile || isImporting} data-testid="button-confirm-import">
+                <Button
+                  onClick={handleImport}
+                  disabled={!importFile || isImporting}
+                  data-testid="button-confirm-import"
+                >
                   {isImporting ? "Importing..." : "Import"}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button variant="outline" className="gap-2" onClick={handleExport} data-testid="button-export">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={handleExport}
+            data-testid="button-export"
+          >
             <Download className="h-4 w-4" />
             Export
           </Button>
-          <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+          <Dialog
+            open={isAssignDialogOpen}
+            onOpenChange={setIsAssignDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -611,19 +725,26 @@ export default function AssignmentsPage() {
               <DialogHeader>
                 <DialogTitle>Assign Asset to Employee</DialogTitle>
                 <DialogDescription>
-                  Allocate enterprise resources to personnel with full accountability, condition tracking, and audit trail
+                  Allocate enterprise resources to personnel with full
+                  accountability, condition tracking, and audit trail
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAssignAsset} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="assetId">Asset *</Label>
-                    <Select value={assignForm.assetId} onValueChange={(value) => setAssignForm({ ...assignForm, assetId: value })} required>
+                    <Select
+                      value={assignForm.assetId}
+                      onValueChange={(value) =>
+                        setAssignForm({ ...assignForm, assetId: value })
+                      }
+                      required
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select asset" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableAssets.map(asset => (
+                        {availableAssets.map((asset) => (
                           <SelectItem key={asset.assetId} value={asset.assetId}>
                             {asset.assetId} - {asset.brand} {asset.modelName}
                           </SelectItem>
@@ -633,14 +754,24 @@ export default function AssignmentsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="employeeId">Employee *</Label>
-                    <Select value={assignForm.employeeId} onValueChange={(value) => setAssignForm({ ...assignForm, employeeId: value })} required>
+                    <Select
+                      value={assignForm.employeeId}
+                      onValueChange={(value) =>
+                        setAssignForm({ ...assignForm, employeeId: value })
+                      }
+                      required
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select employee" />
                       </SelectTrigger>
                       <SelectContent>
-                        {activeEmployees.map(employee => (
-                          <SelectItem key={employee.id} value={employee.id.toString()}>
-                            {employee.firstName} {employee.lastName} ({employee.employeeCode})
+                        {activeEmployees.map((employee) => (
+                          <SelectItem
+                            key={employee.id}
+                            value={employee.id.toString()}
+                          >
+                            {employee.firstName} {employee.lastName} (
+                            {employee.employeeCode})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -653,14 +784,30 @@ export default function AssignmentsPage() {
                   <Input
                     id="assignmentReason"
                     value={assignForm.assignmentReason}
-                    onChange={(e) => setAssignForm({ ...assignForm, assignmentReason: e.target.value })}
+                    onChange={(e) =>
+                      setAssignForm({
+                        ...assignForm,
+                        assignmentReason: e.target.value,
+                      })
+                    }
                     placeholder="Enter assignment reason"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="conditionOnAssignment">Condition on Assignment *</Label>
-                  <Select value={assignForm.conditionOnAssignment} onValueChange={(value) => setAssignForm({ ...assignForm, conditionOnAssignment: value })} required>
+                  <Label htmlFor="conditionOnAssignment">
+                    Condition on Assignment *
+                  </Label>
+                  <Select
+                    value={assignForm.conditionOnAssignment}
+                    onValueChange={(value) =>
+                      setAssignForm({
+                        ...assignForm,
+                        conditionOnAssignment: value,
+                      })
+                    }
+                    required
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select condition" />
                     </SelectTrigger>
@@ -684,15 +831,20 @@ export default function AssignmentsPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setIsAssignDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={assignAssetMutation.isPending}>
-                    {assignAssetMutation.isPending ? "Assigning..." : "Assign Asset"}
+                  <Button
+                    type="submit"
+                    disabled={assignAssetMutation.isPending}
+                  >
+                    {assignAssetMutation.isPending
+                      ? "Assigning..."
+                      : "Assign Asset"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -705,11 +857,15 @@ export default function AssignmentsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assignments</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Assignments
+            </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{assignments?.length || 0}</div>
+            <div className="text-2xl font-bold text-white/90">
+              {assignments?.length || 0}
+            </div>
             <p className="text-xs text-muted-foreground">
               Complete history preserved
             </p>
@@ -718,27 +874,29 @@ export default function AssignmentsPage() {
 
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Assignments</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Assignments
+            </CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white/90">
-              {assignments?.filter(a => !a.returnedDate).length || 0}
+              {assignments?.filter((a) => !a.returnedDate).length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Currently assigned
-            </p>
+            <p className="text-xs text-muted-foreground">Currently assigned</p>
           </CardContent>
         </Card>
 
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Returned Assets</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Returned Assets
+            </CardTitle>
             <Undo className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white/90">
-              {assignments?.filter(a => a.returnedDate).length || 0}
+              {assignments?.filter((a) => a.returnedDate).length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
               Successfully returned
@@ -748,14 +906,16 @@ export default function AssignmentsPage() {
 
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available for Assignment</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Available for Assignment
+            </CardTitle>
             <Package className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{availableAssets.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Ready to assign
-            </p>
+            <div className="text-2xl font-bold text-white/90">
+              {availableAssets.length}
+            </div>
+            <p className="text-xs text-muted-foreground">Ready to assign</p>
           </CardContent>
         </Card>
       </div>
@@ -786,7 +946,7 @@ export default function AssignmentsPage() {
                 </button>
               )}
             </div>
-            
+
             <Button
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               variant="outline"
@@ -806,7 +966,10 @@ export default function AssignmentsPage() {
           {/* Quick Filters */}
           <div className="flex flex-wrap gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px] backdrop-blur-sm border-border/40" data-testid="select-filter-status">
+              <SelectTrigger
+                className="w-[140px] backdrop-blur-sm border-border/40"
+                data-testid="select-filter-status"
+              >
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -816,12 +979,14 @@ export default function AssignmentsPage() {
               </SelectContent>
             </Select>
 
-            {(locationFilter !== "all" || assetTypeFilter !== "all" || departmentFilter !== "all") && (
+            {(locationFilter !== "all" ||
+              assetTypeFilter !== "all" ||
+              departmentFilter !== "all") && (
               <Button
                 onClick={() => {
-                  setLocationFilter("all")
-                  setAssetTypeFilter("all")
-                  setDepartmentFilter("all")
+                  setLocationFilter("all");
+                  setAssetTypeFilter("all");
+                  setDepartmentFilter("all");
                 }}
                 variant="ghost"
                 className="gap-2 text-muted-foreground hover:text-foreground backdrop-blur-sm"
@@ -841,14 +1006,22 @@ export default function AssignmentsPage() {
                   <Filter className="h-4 w-4 text-primary" />
                   Asset Type
                 </label>
-                <Select value={assetTypeFilter} onValueChange={setAssetTypeFilter}>
-                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-asset-type">
+                <Select
+                  value={assetTypeFilter}
+                  onValueChange={setAssetTypeFilter}
+                >
+                  <SelectTrigger
+                    className="backdrop-blur-sm border-border/40"
+                    data-testid="select-filter-asset-type"
+                  >
                     <SelectValue placeholder="All Asset Types" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Asset Types</SelectItem>
-                    {assetTypes.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    {assetTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -859,14 +1032,23 @@ export default function AssignmentsPage() {
                   <Filter className="h-4 w-4 text-primary" />
                   Location
                 </label>
-                <Select value={locationFilter} onValueChange={setLocationFilter}>
-                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-location">
+                <Select
+                  value={locationFilter}
+                  onValueChange={setLocationFilter}
+                >
+                  <SelectTrigger
+                    className="backdrop-blur-sm border-border/40"
+                    data-testid="select-filter-location"
+                  >
                     <SelectValue placeholder="All Locations" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Locations</SelectItem>
-                    {locations?.map(location => (
-                      <SelectItem key={location.id} value={location.id.toString()}>
+                    {locations?.map((location) => (
+                      <SelectItem
+                        key={location.id}
+                        value={location.id.toString()}
+                      >
                         {location.outletName}
                       </SelectItem>
                     ))}
@@ -879,23 +1061,32 @@ export default function AssignmentsPage() {
                   <Filter className="h-4 w-4 text-primary" />
                   Department
                 </label>
-                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-department">
+                <Select
+                  value={departmentFilter}
+                  onValueChange={setDepartmentFilter}
+                >
+                  <SelectTrigger
+                    className="backdrop-blur-sm border-border/40"
+                    data-testid="select-filter-department"
+                  >
                     <SelectValue placeholder="All Departments" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Departments</SelectItem>
-                    {departments.map(dept => (
-                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept} value={dept}>
+                        {dept}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
           )}
-          
+
           <div className="text-sm text-muted-foreground">
-            Showing {filteredAssignments.length} of {assignments?.length || 0} assignments
+            Showing {filteredAssignments.length} of {assignments?.length || 0}{" "}
+            assignments
           </div>
         </CardContent>
       </Card>
@@ -917,15 +1108,17 @@ export default function AssignmentsPage() {
             </TableHeader>
             <TableBody>
               {filteredAssignments.flatMap((assignment, index) => {
-                const asset = getAssetInfo(assignment.assetId)
-                const employee = getEmployeeInfo(assignment.employeeId)
-                const isActive = !assignment.returnedDate
-                const assignmentId = `${assignment.assetId}-${assignment.employeeId}-${assignment.assignedDate}`
-                const isExpanded = expandedAssignmentId === assignmentId
+                const asset = getAssetInfo(assignment.assetId);
+                const employee = getEmployeeInfo(assignment.employeeId);
+                const isActive = !assignment.returnedDate;
+                const assignmentId = `${assignment.assetId}-${assignment.employeeId}-${assignment.assignedDate}`;
+                const isExpanded = expandedAssignmentId === assignmentId;
                 const rows = [
-                  <TableRow 
+                  <TableRow
                     key={`main-${assignmentId}`}
-                    onClick={() => setExpandedAssignmentId(isExpanded ? null : assignmentId)}
+                    onClick={() =>
+                      setExpandedAssignmentId(isExpanded ? null : assignmentId)
+                    }
                     className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
                     data-testid={`row-assignment-${assignmentId}`}
                   >
@@ -940,7 +1133,9 @@ export default function AssignmentsPage() {
                         </div>
                         <Laptop className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <div className="font-medium">{assignment.assetId}</div>
+                          <div className="font-medium">
+                            {assignment.assetId}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             {asset?.brand} {asset?.modelName}
                           </div>
@@ -986,21 +1181,37 @@ export default function AssignmentsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          assignment.conditionOnAssignment === 'excellent' ? 'bg-green-400' :
-                          assignment.conditionOnAssignment === 'good' ? 'bg-blue-400' :
-                          assignment.conditionOnAssignment === 'fair' ? 'bg-yellow-400' : 'bg-red-400'
-                        }`} />
-                        <span className="capitalize">{assignment.conditionOnAssignment}</span>
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            assignment.conditionOnAssignment === "excellent"
+                              ? "bg-green-400"
+                              : assignment.conditionOnAssignment === "good"
+                                ? "bg-blue-400"
+                                : assignment.conditionOnAssignment === "fair"
+                                  ? "bg-yellow-400"
+                                  : "bg-red-400"
+                          }`}
+                        />
+                        <span className="capitalize">
+                          {assignment.conditionOnAssignment}
+                        </span>
                         {assignment.conditionOnReturn && (
                           <>
                             <span className="text-white/70">→</span>
-                            <div className={`w-2 h-2 rounded-full ${
-                              assignment.conditionOnReturn === 'excellent' ? 'bg-green-400' :
-                              assignment.conditionOnReturn === 'good' ? 'bg-blue-400' :
-                              assignment.conditionOnReturn === 'fair' ? 'bg-yellow-400' : 'bg-red-400'
-                            }`} />
-                            <span className="capitalize text-sm">{assignment.conditionOnReturn}</span>
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                assignment.conditionOnReturn === "excellent"
+                                  ? "bg-green-400"
+                                  : assignment.conditionOnReturn === "good"
+                                    ? "bg-blue-400"
+                                    : assignment.conditionOnReturn === "fair"
+                                      ? "bg-yellow-400"
+                                      : "bg-red-400"
+                              }`}
+                            />
+                            <span className="capitalize text-sm">
+                              {assignment.conditionOnReturn}
+                            </span>
                           </>
                         )}
                       </div>
@@ -1016,108 +1227,176 @@ export default function AssignmentsPage() {
                         {assignment.assignmentReason}
                       </Badge>
                     </TableCell>
-                  </TableRow>
-                ]
+                  </TableRow>,
+                ];
 
                 if (isExpanded) {
                   rows.push(
-                    <TableRow key={`expanded-${assignmentId}`} className="bg-muted/10 hover:bg-muted/10">
+                    <TableRow
+                      key={`expanded-${assignmentId}`}
+                      className="bg-muted/10 hover:bg-muted/10"
+                    >
                       <TableCell colSpan={7} className="p-6">
                         <div className="grid grid-cols-3 gap-6">
                           <div className="space-y-4">
-                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Assignment Timeline</h4>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                              Assignment Timeline
+                            </h4>
                             <div className="space-y-3">
                               <div>
-                                <div className="text-xs text-muted-foreground">Assigned Date</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Assigned Date
+                                </div>
                                 <div className="text-sm mt-1 flex items-center gap-2">
                                   <Calendar className="h-3 w-3" />
                                   {formatDate(assignment.assignedDate)}
                                 </div>
                               </div>
                               <div>
-                                <div className="text-xs text-muted-foreground">Return Date</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Return Date
+                                </div>
                                 <div className="text-sm mt-1 flex items-center gap-2">
                                   <Calendar className="h-3 w-3" />
-                                  {assignment.returnedDate ? formatDate(assignment.returnedDate) : 'Still Active'}
+                                  {assignment.returnedDate
+                                    ? formatDate(assignment.returnedDate)
+                                    : "Still Active"}
                                 </div>
                               </div>
                               <div>
-                                <div className="text-xs text-muted-foreground">Assignment Status</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Assignment Status
+                                </div>
                                 <div className="text-sm mt-1 flex items-center gap-2">
-                                  <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-400' : 'bg-blue-400'}`} />
-                                  {isActive ? 'Active' : 'Returned'}
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${isActive ? "bg-green-400" : "bg-blue-400"}`}
+                                  />
+                                  {isActive ? "Active" : "Returned"}
                                 </div>
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-4">
-                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Asset & Employee</h4>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                              Asset & Employee
+                            </h4>
                             <div className="space-y-3">
                               <div>
-                                <div className="text-xs text-muted-foreground">Asset ID</div>
-                                <div className="text-sm mt-1 font-mono">{assignment.assetId}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Asset ID
+                                </div>
+                                <div className="text-sm mt-1 font-mono">
+                                  {assignment.assetId}
+                                </div>
                                 <div className="text-xs text-muted-foreground mt-1">
-                                  {asset?.brand} {asset?.modelName} ({asset?.assetType})
+                                  {asset?.brand} {asset?.modelName} (
+                                  {asset?.assetType})
                                 </div>
                               </div>
                               <div>
-                                <div className="text-xs text-muted-foreground">Employee</div>
-                                <div className="text-sm mt-1">{employee?.firstName} {employee?.lastName}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Employee
+                                </div>
+                                <div className="text-sm mt-1">
+                                  {employee?.firstName} {employee?.lastName}
+                                </div>
                                 <div className="text-xs text-muted-foreground font-mono mt-1">
                                   {employee?.employeeCode}
                                 </div>
                               </div>
                               <div>
-                                <div className="text-xs text-muted-foreground">Location</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Location
+                                </div>
                                 <div className="text-sm mt-1 flex items-center gap-2">
                                   <MapPin className="h-3 w-3" />
-                                  {getLocationName(employee?.locationId ?? null)}
+                                  {getLocationName(
+                                    employee?.locationId ?? null,
+                                  )}
                                 </div>
                               </div>
                             </div>
                           </div>
 
                           <div className="space-y-4">
-                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Condition & Notes</h4>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                              Condition & Notes
+                            </h4>
                             <div className="space-y-3">
                               <div>
-                                <div className="text-xs text-muted-foreground">Condition on Assignment</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Condition on Assignment
+                                </div>
                                 <div className="text-sm mt-1 flex items-center gap-2">
-                                  <div className={`w-2 h-2 rounded-full ${
-                                    assignment.conditionOnAssignment === 'excellent' ? 'bg-green-400' :
-                                    assignment.conditionOnAssignment === 'good' ? 'bg-blue-400' :
-                                    assignment.conditionOnAssignment === 'fair' ? 'bg-yellow-400' : 'bg-red-400'
-                                  }`} />
-                                  <span className="capitalize">{assignment.conditionOnAssignment}</span>
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${
+                                      assignment.conditionOnAssignment ===
+                                      "excellent"
+                                        ? "bg-green-400"
+                                        : assignment.conditionOnAssignment ===
+                                            "good"
+                                          ? "bg-blue-400"
+                                          : assignment.conditionOnAssignment ===
+                                              "fair"
+                                            ? "bg-yellow-400"
+                                            : "bg-red-400"
+                                    }`}
+                                  />
+                                  <span className="capitalize">
+                                    {assignment.conditionOnAssignment}
+                                  </span>
                                 </div>
                               </div>
                               {assignment.conditionOnReturn && (
                                 <div>
-                                  <div className="text-xs text-muted-foreground">Condition on Return</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Condition on Return
+                                  </div>
                                   <div className="text-sm mt-1 flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${
-                                      assignment.conditionOnReturn === 'excellent' ? 'bg-green-400' :
-                                      assignment.conditionOnReturn === 'good' ? 'bg-blue-400' :
-                                      assignment.conditionOnReturn === 'fair' ? 'bg-yellow-400' : 'bg-red-400'
-                                    }`} />
-                                    <span className="capitalize">{assignment.conditionOnReturn}</span>
+                                    <div
+                                      className={`w-2 h-2 rounded-full ${
+                                        assignment.conditionOnReturn ===
+                                        "excellent"
+                                          ? "bg-green-400"
+                                          : assignment.conditionOnReturn ===
+                                              "good"
+                                            ? "bg-blue-400"
+                                            : assignment.conditionOnReturn ===
+                                                "fair"
+                                              ? "bg-yellow-400"
+                                              : "bg-red-400"
+                                      }`}
+                                    />
+                                    <span className="capitalize">
+                                      {assignment.conditionOnReturn}
+                                    </span>
                                   </div>
                                 </div>
                               )}
                               <div>
-                                <div className="text-xs text-muted-foreground">Assignment Reason</div>
-                                <div className="text-sm mt-1">{assignment.assignmentReason}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Assignment Reason
+                                </div>
+                                <div className="text-sm mt-1">
+                                  {assignment.assignmentReason}
+                                </div>
                               </div>
                               {assignment.returnReason && (
                                 <div>
-                                  <div className="text-xs text-muted-foreground">Return Reason</div>
-                                  <div className="text-sm mt-1">{assignment.returnReason}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Return Reason
+                                  </div>
+                                  <div className="text-sm mt-1">
+                                    {assignment.returnReason}
+                                  </div>
                                 </div>
                               )}
                               {assignment.backupDetails && (
                                 <div>
-                                  <div className="text-xs text-muted-foreground">Backup Details</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Backup Details
+                                  </div>
                                   <div className="text-sm mt-1 p-2 bg-muted/30 rounded">
                                     {assignment.backupDetails}
                                   </div>
@@ -1132,9 +1411,9 @@ export default function AssignmentsPage() {
                             variant="outline"
                             size="sm"
                             onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedAssignment(assignment)
-                              setIsViewDialogOpen(true)
+                              e.stopPropagation();
+                              setSelectedAssignment(assignment);
+                              setIsViewDialogOpen(true);
                             }}
                             data-testid={`button-view-details-${assignmentId}`}
                           >
@@ -1147,9 +1426,9 @@ export default function AssignmentsPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedAssignment(assignment)
-                                  setIsReturnDialogOpen(true)
+                                  e.stopPropagation();
+                                  setSelectedAssignment(assignment);
+                                  setIsReturnDialogOpen(true);
                                 }}
                                 data-testid={`button-return-${assignmentId}`}
                               >
@@ -1160,9 +1439,9 @@ export default function AssignmentsPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedAssignment(assignment)
-                                  setIsTransferDialogOpen(true)
+                                  e.stopPropagation();
+                                  setSelectedAssignment(assignment);
+                                  setIsTransferDialogOpen(true);
                                 }}
                                 data-testid={`button-transfer-${assignmentId}`}
                               >
@@ -1175,9 +1454,16 @@ export default function AssignmentsPage() {
                             variant="destructive"
                             size="sm"
                             onClick={(e) => {
-                              e.stopPropagation()
-                              if (window.confirm(`Are you sure you want to delete this assignment record? This action cannot be undone.`)) {
-                                deleteAssignmentMutation.mutate({ assetId: assignment.assetId, employeeId: assignment.employeeId })
+                              e.stopPropagation();
+                              if (
+                                window.confirm(
+                                  `Are you sure you want to delete this assignment record? This action cannot be undone.`,
+                                )
+                              ) {
+                                deleteAssignmentMutation.mutate({
+                                  assetId: assignment.assetId,
+                                  employeeId: assignment.employeeId,
+                                });
                               }
                             }}
                             data-testid={`button-delete-assignment-${assignmentId}`}
@@ -1187,11 +1473,11 @@ export default function AssignmentsPage() {
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  )
+                    </TableRow>,
+                  );
                 }
 
-                return rows
+                return rows;
               })}
             </TableBody>
           </Table>
@@ -1204,7 +1490,8 @@ export default function AssignmentsPage() {
           <DialogHeader>
             <DialogTitle>Assignment Details</DialogTitle>
             <DialogDescription>
-              View assignment timeline, condition reports, backup records, and complete responsibility chain
+              View assignment timeline, condition reports, backup records, and
+              complete responsibility chain
             </DialogDescription>
           </DialogHeader>
           {selectedAssignment && (
@@ -1215,21 +1502,26 @@ export default function AssignmentsPage() {
                   <div className="text-sm p-2 bg-muted rounded">
                     {selectedAssignment.assetId}
                     <div className="text-xs text-muted-foreground">
-                      {getAssetInfo(selectedAssignment.assetId)?.brand} {getAssetInfo(selectedAssignment.assetId)?.modelName}
+                      {getAssetInfo(selectedAssignment.assetId)?.brand}{" "}
+                      {getAssetInfo(selectedAssignment.assetId)?.modelName}
                     </div>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Employee</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {getEmployeeInfo(selectedAssignment.employeeId)?.firstName} {getEmployeeInfo(selectedAssignment.employeeId)?.lastName}
+                    {getEmployeeInfo(selectedAssignment.employeeId)?.firstName}{" "}
+                    {getEmployeeInfo(selectedAssignment.employeeId)?.lastName}
                     <div className="text-xs text-muted-foreground font-mono">
-                      {getEmployeeInfo(selectedAssignment.employeeId)?.employeeCode}
+                      {
+                        getEmployeeInfo(selectedAssignment.employeeId)
+                          ?.employeeCode
+                      }
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Assigned Date</Label>
@@ -1240,14 +1532,18 @@ export default function AssignmentsPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Return Date</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {selectedAssignment.returnedDate ? formatDate(selectedAssignment.returnedDate) : "Not returned"}
+                    {selectedAssignment.returnedDate
+                      ? formatDate(selectedAssignment.returnedDate)
+                      : "Not returned"}
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Assignment Reason</Label>
+                  <Label className="text-sm font-medium">
+                    Assignment Reason
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {selectedAssignment.assignmentReason}
                   </div>
@@ -1262,13 +1558,17 @@ export default function AssignmentsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Condition on Assignment</Label>
+                  <Label className="text-sm font-medium">
+                    Condition on Assignment
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded capitalize">
                     {selectedAssignment.conditionOnAssignment}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Condition on Return</Label>
+                  <Label className="text-sm font-medium">
+                    Condition on Return
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded capitalize">
                     {selectedAssignment.conditionOnReturn || "Not applicable"}
                   </div>
@@ -1286,7 +1586,10 @@ export default function AssignmentsPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewDialogOpen(false)}
+            >
               Close
             </Button>
           </DialogFooter>
@@ -1299,7 +1602,8 @@ export default function AssignmentsPage() {
           <DialogHeader>
             <DialogTitle>Return Asset</DialogTitle>
             <DialogDescription>
-              Process asset return with condition assessment and closure documentation for {selectedAssignment?.assetId}
+              Process asset return with condition assessment and closure
+              documentation for {selectedAssignment?.assetId}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleReturnAsset} className="space-y-4">
@@ -1308,14 +1612,22 @@ export default function AssignmentsPage() {
               <Input
                 id="returnReason"
                 value={returnForm.returnReason}
-                onChange={(e) => setReturnForm({ ...returnForm, returnReason: e.target.value })}
+                onChange={(e) =>
+                  setReturnForm({ ...returnForm, returnReason: e.target.value })
+                }
                 placeholder="Enter return reason (optional)"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="conditionOnReturn">Condition on Return *</Label>
-              <Select value={returnForm.conditionOnReturn} onValueChange={(value) => setReturnForm({ ...returnForm, conditionOnReturn: value })} required>
+              <Select
+                value={returnForm.conditionOnReturn}
+                onValueChange={(value) =>
+                  setReturnForm({ ...returnForm, conditionOnReturn: value })
+                }
+                required
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select condition" />
                 </SelectTrigger>
@@ -1329,15 +1641,17 @@ export default function AssignmentsPage() {
             </div>
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setIsReturnDialogOpen(false)}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={returnAssetMutation.isPending}>
-                {returnAssetMutation.isPending ? "Processing..." : "Return Asset"}
+                {returnAssetMutation.isPending
+                  ? "Processing..."
+                  : "Return Asset"}
               </Button>
             </DialogFooter>
           </form>
@@ -1345,27 +1659,43 @@ export default function AssignmentsPage() {
       </Dialog>
 
       {/* Transfer Asset Dialog */}
-      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
+      <Dialog
+        open={isTransferDialogOpen}
+        onOpenChange={setIsTransferDialogOpen}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Transfer Asset</DialogTitle>
             <DialogDescription>
-              Reassign resource ownership with seamless handover documentation and continuous tracking for {selectedAssignment?.assetId}
+              Reassign resource ownership with seamless handover documentation
+              and continuous tracking for {selectedAssignment?.assetId}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleTransferAsset} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="toEmployeeId">Transfer to Employee *</Label>
-              <Select value={transferForm.toEmployeeId} onValueChange={(value) => setTransferForm({ ...transferForm, toEmployeeId: value })} required>
+              <Select
+                value={transferForm.toEmployeeId}
+                onValueChange={(value) =>
+                  setTransferForm({ ...transferForm, toEmployeeId: value })
+                }
+                required
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select new assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  {activeEmployees.filter(emp => emp.id !== selectedAssignment?.employeeId).map(employee => (
-                    <SelectItem key={employee.id} value={employee.id.toString()}>
-                      {employee.firstName} {employee.lastName} ({employee.employeeCode})
-                    </SelectItem>
-                  ))}
+                  {activeEmployees
+                    .filter((emp) => emp.id !== selectedAssignment?.employeeId)
+                    .map((employee) => (
+                      <SelectItem
+                        key={employee.id}
+                        value={employee.id.toString()}
+                      >
+                        {employee.firstName} {employee.lastName} (
+                        {employee.employeeCode})
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -1376,13 +1706,27 @@ export default function AssignmentsPage() {
                 <Input
                   id="returnReason"
                   value={transferForm.returnReason}
-                  onChange={(e) => setTransferForm({ ...transferForm, returnReason: e.target.value })}
+                  onChange={(e) =>
+                    setTransferForm({
+                      ...transferForm,
+                      returnReason: e.target.value,
+                    })
+                  }
                   placeholder="Transfer reason (optional)"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="conditionOnReturn">Condition on Return *</Label>
-                <Select value={transferForm.conditionOnReturn} onValueChange={(value) => setTransferForm({ ...transferForm, conditionOnReturn: value })} required>
+                <Select
+                  value={transferForm.conditionOnReturn}
+                  onValueChange={(value) =>
+                    setTransferForm({
+                      ...transferForm,
+                      conditionOnReturn: value,
+                    })
+                  }
+                  required
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Condition" />
                   </SelectTrigger>
@@ -1398,17 +1742,35 @@ export default function AssignmentsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="newAssignmentReason">New Assignment Reason</Label>
+                <Label htmlFor="newAssignmentReason">
+                  New Assignment Reason
+                </Label>
                 <Input
                   id="newAssignmentReason"
                   value={transferForm.newAssignmentReason}
-                  onChange={(e) => setTransferForm({ ...transferForm, newAssignmentReason: e.target.value })}
+                  onChange={(e) =>
+                    setTransferForm({
+                      ...transferForm,
+                      newAssignmentReason: e.target.value,
+                    })
+                  }
                   placeholder="Assignment reason (optional)"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="conditionOnNewAssignment">Condition for New Assignment *</Label>
-                <Select value={transferForm.conditionOnNewAssignment} onValueChange={(value) => setTransferForm({ ...transferForm, conditionOnNewAssignment: value })} required>
+                <Label htmlFor="conditionOnNewAssignment">
+                  Condition for New Assignment *
+                </Label>
+                <Select
+                  value={transferForm.conditionOnNewAssignment}
+                  onValueChange={(value) =>
+                    setTransferForm({
+                      ...transferForm,
+                      conditionOnNewAssignment: value,
+                    })
+                  }
+                  required
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Condition" />
                   </SelectTrigger>
@@ -1423,20 +1785,22 @@ export default function AssignmentsPage() {
             </div>
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setIsTransferDialogOpen(false)}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={transferAssetMutation.isPending}>
-                {transferAssetMutation.isPending ? "Processing..." : "Transfer Asset"}
+                {transferAssetMutation.isPending
+                  ? "Processing..."
+                  : "Transfer Asset"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

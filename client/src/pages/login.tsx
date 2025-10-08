@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +45,9 @@ export default function LoginPage() {
         window.location.href = "/";
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Login failed. Please check your credentials.");
+        setError(
+          errorData.message || "Login failed. Please check your credentials.",
+        );
       }
     } catch (err) {
       setError("Network error. Please try again.");
@@ -57,7 +65,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center overflow-hidden relative px-4">
       {/* Animated Gradient Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#6366f1] animate-gradient-shift"></div>
-      
+
       {/* Animated Background Shapes */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-float-slow"></div>
@@ -70,19 +78,20 @@ export default function LoginPage() {
         <div className="text-center mb-10 animate-fade-in">
           <div className="flex flex-col items-center justify-center space-y-4">
             {/* Brand Name with Gradient */}
-            <h1 
+            <h1
               className="text-5xl font-bold tracking-tight transform hover:scale-105 transition-transform duration-500"
               style={{
-                background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #3b82f6 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 30px rgba(168, 85, 247, 0.4))',
+                background:
+                  "linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #3b82f6 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: "drop-shadow(0 0 30px rgba(168, 85, 247, 0.4))",
               }}
             >
               BODYCRAFT
             </h1>
-            
+
             {/* Tagline with Dividers */}
             <div className="flex items-center gap-3">
               <div className="h-px w-8 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent"></div>
@@ -100,11 +109,11 @@ export default function LoginPage() {
         </div>
 
         {/* Glassmorphism Login Card */}
-        <div 
+        <div
           className="glass-card rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/10 animate-slide-up"
           style={{
-            background: 'rgba(255, 255, 255, 0.13)',
-            boxShadow: '0 0 40px rgba(8, 7, 16, 0.6)',
+            background: "rgba(255, 255, 255, 0.13)",
+            boxShadow: "0 0 40px rgba(8, 7, 16, 0.6)",
           }}
         >
           {/* Header */}
@@ -122,9 +131,14 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
-              <Alert variant="destructive" className="bg-red-500/20 border-red-500/50 backdrop-blur-sm animate-shake">
+              <Alert
+                variant="destructive"
+                className="bg-red-500/20 border-red-500/50 backdrop-blur-sm animate-shake"
+              >
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-white">{error}</AlertDescription>
+                <AlertDescription className="text-white">
+                  {error}
+                </AlertDescription>
               </Alert>
             )}
 
@@ -137,7 +151,9 @@ export default function LoginPage() {
                   type="text"
                   placeholder=" "
                   value={credentials.username}
-                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  onChange={(e) =>
+                    setCredentials({ ...credentials, username: e.target.value })
+                  }
                   onFocus={() => setUsernameFocused(true)}
                   onBlur={() => setUsernameFocused(false)}
                   required
@@ -145,17 +161,17 @@ export default function LoginPage() {
                   data-testid="input-username"
                   className="glass-input pl-12 pr-4 py-6 w-full rounded-xl border border-white/30 bg-white/10 placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/40 transition-all duration-300"
                   style={{
-                    backdropFilter: 'blur(10px)',
-                    color: '#e0e7ff',
-                    fontWeight: '500',
+                    backdropFilter: "blur(10px)",
+                    color: "#e0e7ff",
+                    fontWeight: "500",
                   }}
                 />
                 <label
                   htmlFor="username"
                   className={`absolute left-12 transition-all duration-300 pointer-events-none ${
                     usernameFocused || credentials.username
-                      ? 'opacity-0 invisible'
-                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60 opacity-100 visible'
+                      ? "opacity-0 invisible"
+                      : "top-1/2 -translate-y-1/2 text-sm text-white/60 opacity-100 visible"
                   }`}
                 >
                   Username
@@ -172,7 +188,9 @@ export default function LoginPage() {
                   type="password"
                   placeholder=" "
                   value={credentials.password}
-                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                  onChange={(e) =>
+                    setCredentials({ ...credentials, password: e.target.value })
+                  }
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   required
@@ -180,18 +198,18 @@ export default function LoginPage() {
                   data-testid="input-password"
                   className="glass-input pl-12 pr-12 py-6 w-full rounded-xl border border-white/30 bg-white/10 placeholder-transparent focus:border-purple-400 focus:ring-2 focus:ring-purple-400/40 transition-all duration-300"
                   style={{
-                    backdropFilter: 'blur(10px)',
-                    color: '#e0e7ff',
-                    fontWeight: '500',
-                    letterSpacing: '0.1em',
+                    backdropFilter: "blur(10px)",
+                    color: "#e0e7ff",
+                    fontWeight: "500",
+                    letterSpacing: "0.1em",
                   }}
                 />
                 <label
                   htmlFor="password"
                   className={`absolute left-12 transition-all duration-300 pointer-events-none ${
                     passwordFocused || credentials.password
-                      ? 'opacity-0 invisible'
-                      : 'top-1/2 -translate-y-1/2 text-sm text-white/60 opacity-100 visible'
+                      ? "opacity-0 invisible"
+                      : "top-1/2 -translate-y-1/2 text-sm text-white/60 opacity-100 visible"
                   }`}
                 >
                   Password
@@ -206,15 +224,17 @@ export default function LoginPage() {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-3 cursor-pointer group">
-                <div 
+                <div
                   className={`relative w-11 h-6 rounded-full transition-all duration-300 ${
-                    rememberMe ? 'bg-gradient-to-r from-purple-500 to-blue-500' : 'bg-white/20'
+                    rememberMe
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500"
+                      : "bg-white/20"
                   }`}
                   onClick={() => setRememberMe(!rememberMe)}
                 >
-                  <div 
+                  <div
                     className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
-                      rememberMe ? 'transform translate-x-5' : ''
+                      rememberMe ? "transform translate-x-5" : ""
                     }`}
                   ></div>
                 </div>
@@ -222,8 +242,8 @@ export default function LoginPage() {
                   Remember me
                 </span>
               </label>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-purple-300 text-sm font-light hover:text-purple-200 transition-colors duration-300"
               >
                 Forgot password?
@@ -272,7 +292,8 @@ export default function LoginPage() {
             </Button>
 
             <p className="text-center text-white/30 text-xs font-light mt-3">
-              Credentials: <span className="text-purple-300/80">admin</span> / <span className="text-purple-300/80">admin123</span>
+              Credentials: <span className="text-purple-300/80">admin</span> /{" "}
+              <span className="text-purple-300/80">admin123</span>
             </p>
           </form>
         </div>
@@ -281,7 +302,9 @@ export default function LoginPage() {
         <div className="text-center mt-8 space-y-2 animate-fade-in-delay">
           <div className="flex items-center justify-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-green-400/90 text-xs font-light">Secure Connection</span>
+            <span className="text-green-400/90 text-xs font-light">
+              Secure Connection
+            </span>
           </div>
           <p className="text-white/30 text-xs font-light">
             © 2025 BODYCRAFT. All rights reserved.

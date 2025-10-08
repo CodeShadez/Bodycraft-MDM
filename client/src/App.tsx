@@ -30,12 +30,12 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch("/api/auth/me");
         if (!response.ok) {
-          setLocation('/login');
+          setLocation("/login");
         }
       } catch (error) {
-        setLocation('/login');
+        setLocation("/login");
       }
     };
 
@@ -74,7 +74,9 @@ function Router() {
         {(params) => <ProtectedRoute component={Compliance} {...params} />}
       </Route>
       <Route path="/compliance-analytics">
-        {(params) => <ProtectedRoute component={ComplianceAnalytics} {...params} />}
+        {(params) => (
+          <ProtectedRoute component={ComplianceAnalytics} {...params} />
+        )}
       </Route>
       <Route path="/cctv">
         {(params) => <ProtectedRoute component={CCTV} {...params} />}
@@ -86,7 +88,9 @@ function Router() {
         {(params) => <ProtectedRoute component={Reports} {...params} />}
       </Route>
       <Route path="/financial">
-        {(params) => <ProtectedRoute component={FinancialOverview} {...params} />}
+        {(params) => (
+          <ProtectedRoute component={FinancialOverview} {...params} />
+        )}
       </Route>
       <Route path="/settings">
         {(params) => <ProtectedRoute component={Settings} {...params} />}
@@ -98,7 +102,7 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
-  const isLoginPage = location === '/login';
+  const isLoginPage = location === "/login";
 
   const style = {
     "--sidebar-width": "20rem",
@@ -114,7 +118,7 @@ function AppContent() {
       <div className="flex h-screen w-full relative overflow-hidden">
         {/* Animated Gradient Background */}
         <div className="fixed inset-0 glass-bg -z-10"></div>
-        
+
         {/* Animated Background Shapes */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-float-slow"></div>

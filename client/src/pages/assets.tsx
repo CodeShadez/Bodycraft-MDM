@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useLocation } from "wouter"
-import { 
-  Laptop, 
-  Monitor, 
-  Smartphone, 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import {
+  Laptop,
+  Monitor,
+  Smartphone,
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Eye,
   Download,
   Upload,
   MoreHorizontal,
@@ -28,28 +28,28 @@ import {
   X,
   SlidersHorizontal,
   Building2,
-  FileText
-} from "lucide-react"
+  FileText,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -58,7 +58,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,12 +66,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { ExcelExporter, ExcelImporter } from "@/lib/excel"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { ExcelExporter, ExcelImporter } from "@/lib/excel";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 // Asset type icons mapping
 const assetTypeIcons: Record<string, any> = {
@@ -84,160 +84,160 @@ const assetTypeIcons: Record<string, any> = {
   Switch: Package,
   Printer: Package,
   UPS: Package,
-  default: Package
-}
+  default: Package,
+};
 
 // Status color mapping
 const statusColors: Record<string, string> = {
   available: "bg-green-400",
-  assigned: "bg-blue-400", 
+  assigned: "bg-blue-400",
   maintenance: "bg-yellow-400",
-  retired: "bg-red-400"
-}
+  retired: "bg-red-400",
+};
 
 // Condition color mapping
 const conditionColors: Record<string, string> = {
   excellent: "bg-green-400",
   good: "bg-blue-400",
-  fair: "bg-yellow-400", 
-  poor: "bg-red-400"
-}
+  fair: "bg-yellow-400",
+  poor: "bg-red-400",
+};
 
 interface Asset {
-  assetId: string
-  modelName: string
-  brand: string
-  serviceTag: string | null
-  assetType: string
-  purchaseDate: string | null
-  warrantyExpiry: string | null
-  status: "available" | "assigned" | "maintenance" | "retired"
-  condition: "excellent" | "good" | "fair" | "poor"
-  locationId: number | null
-  departmentId: number | null
-  physicalLocation: string | null
-  floor: string | null
-  ownershipType: "company" | "rented" | "personal"
-  assignmentType: "person" | "outlet"
-  currentUserId: number | null
-  createdAt: string
-  updatedAt: string
+  assetId: string;
+  modelName: string;
+  brand: string;
+  serviceTag: string | null;
+  assetType: string;
+  purchaseDate: string | null;
+  warrantyExpiry: string | null;
+  status: "available" | "assigned" | "maintenance" | "retired";
+  condition: "excellent" | "good" | "fair" | "poor";
+  locationId: number | null;
+  departmentId: number | null;
+  physicalLocation: string | null;
+  floor: string | null;
+  ownershipType: "company" | "rented" | "personal";
+  assignmentType: "person" | "outlet";
+  currentUserId: number | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Location {
-  id: number
-  outletName: string
-  city: string
-  state: string
+  id: number;
+  outletName: string;
+  city: string;
+  state: string;
 }
 
 interface Employee {
-  id: number
-  employeeCode: string
-  firstName: string
-  lastName: string
-  department: string
+  id: number;
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  department: string;
 }
 
 export default function AssetsPage() {
-  const [location] = useLocation()
-  
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [locationFilter, setLocationFilter] = useState<string>("all")
-  const [conditionFilter, setConditionFilter] = useState<string>("all")
-  const [ownershipFilter, setOwnershipFilter] = useState<string>("all")
-  const [departmentFilter, setDepartmentFilter] = useState<string>("all")
-  
+  const [location] = useLocation();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [conditionFilter, setConditionFilter] = useState<string>("all");
+  const [ownershipFilter, setOwnershipFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+
   // Update filters when URL changes
   useEffect(() => {
     const handleUrlChange = () => {
-      const params = new URLSearchParams(window.location.search)
-      const newType = params.get('type')
-      const newStatus = params.get('status')
-      const action = params.get('action')
-      
+      const params = new URLSearchParams(window.location.search);
+      const newType = params.get("type");
+      const newStatus = params.get("status");
+      const action = params.get("action");
+
       if (newStatus) {
-        setStatusFilter(newStatus)
-      } else if (params.toString() === '' || !params.has('status')) {
-        setStatusFilter("all")
+        setStatusFilter(newStatus);
+      } else if (params.toString() === "" || !params.has("status")) {
+        setStatusFilter("all");
       }
-      
+
       if (newType) {
-        setTypeFilter(newType)
-      } else if (params.toString() === '' || !params.has('type')) {
-        setTypeFilter("all")
+        setTypeFilter(newType);
+      } else if (params.toString() === "" || !params.has("type")) {
+        setTypeFilter("all");
       }
 
       // Open create dialog if action=create
-      if (action === 'create') {
-        setIsCreateDialogOpen(true)
+      if (action === "create") {
+        setIsCreateDialogOpen(true);
         // Clean up URL without reloading, preserving other params
-        params.delete('action')
-        const newUrl = params.toString() 
+        params.delete("action");
+        const newUrl = params.toString()
           ? `${window.location.pathname}?${params.toString()}`
-          : window.location.pathname
-        window.history.replaceState({}, '', newUrl)
+          : window.location.pathname;
+        window.history.replaceState({}, "", newUrl);
       }
-    }
-    
-    handleUrlChange()
-    window.addEventListener('popstate', handleUrlChange)
-    
+    };
+
+    handleUrlChange();
+    window.addEventListener("popstate", handleUrlChange);
+
     return () => {
-      window.removeEventListener('popstate', handleUrlChange)
-    }
-  }, [location])
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
-  const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
-  const [importFile, setImportFile] = useState<File | null>(null)
-  const [importErrors, setImportErrors] = useState<string[]>([])
-  const [isImporting, setIsImporting] = useState(false)
-  
+      window.removeEventListener("popstate", handleUrlChange);
+    };
+  }, [location]);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+
   // Form state for create dialog
   const [newAsset, setNewAsset] = useState({
-    assetId: '',
-    assetType: '',
-    brand: '',
-    modelName: '',
-    serviceTag: '',
-    locationId: '',
-    departmentId: '',
-    physicalLocation: '',
-    floor: '',
-    ownershipType: 'company',
-    assignmentType: 'person',
-    purchaseDate: '',
-    warrantyExpiry: '',
-    status: 'available',
-    condition: 'good'
-  })
+    assetId: "",
+    assetType: "",
+    brand: "",
+    modelName: "",
+    serviceTag: "",
+    locationId: "",
+    departmentId: "",
+    physicalLocation: "",
+    floor: "",
+    ownershipType: "company",
+    assignmentType: "person",
+    purchaseDate: "",
+    warrantyExpiry: "",
+    status: "available",
+    condition: "good",
+  });
 
   // Form state for edit dialog
   const [editAsset, setEditAsset] = useState({
-    assetType: '',
-    brand: '',
-    modelName: '',
-    serviceTag: '',
-    locationId: '',
-    departmentId: '',
-    physicalLocation: '',
-    floor: '',
-    ownershipType: 'company',
-    assignmentType: 'person',
-    purchaseDate: '',
-    warrantyExpiry: '',
-    status: 'available',
-    condition: 'good'
-  })
-  
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+    assetType: "",
+    brand: "",
+    modelName: "",
+    serviceTag: "",
+    locationId: "",
+    departmentId: "",
+    physicalLocation: "",
+    floor: "",
+    ownershipType: "company",
+    assignmentType: "person",
+    purchaseDate: "",
+    warrantyExpiry: "",
+    status: "available",
+    condition: "good",
+  });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Populate editAsset when selectedAsset changes
   useEffect(() => {
@@ -246,59 +246,79 @@ export default function AssetsPage() {
         assetType: selectedAsset.assetType,
         brand: selectedAsset.brand,
         modelName: selectedAsset.modelName,
-        serviceTag: selectedAsset.serviceTag || '',
-        locationId: selectedAsset.locationId?.toString() || '',
-        departmentId: selectedAsset.departmentId?.toString() || '',
-        physicalLocation: selectedAsset.physicalLocation || '',
-        floor: selectedAsset.floor || '',
-        ownershipType: selectedAsset.ownershipType || 'company',
-        assignmentType: selectedAsset.assignmentType || 'person',
-        purchaseDate: selectedAsset.purchaseDate || '',
-        warrantyExpiry: selectedAsset.warrantyExpiry || '',
+        serviceTag: selectedAsset.serviceTag || "",
+        locationId: selectedAsset.locationId?.toString() || "",
+        departmentId: selectedAsset.departmentId?.toString() || "",
+        physicalLocation: selectedAsset.physicalLocation || "",
+        floor: selectedAsset.floor || "",
+        ownershipType: selectedAsset.ownershipType || "company",
+        assignmentType: selectedAsset.assignmentType || "person",
+        purchaseDate: selectedAsset.purchaseDate || "",
+        warrantyExpiry: selectedAsset.warrantyExpiry || "",
         status: selectedAsset.status,
-        condition: selectedAsset.condition
-      })
+        condition: selectedAsset.condition,
+      });
     }
-  }, [selectedAsset, isEditDialogOpen])
+  }, [selectedAsset, isEditDialogOpen]);
 
   // Fetch data
   const { data: assets, isLoading: assetsLoading } = useQuery<Asset[]>({
     queryKey: ["/api/assets"],
-  })
+  });
 
   const { data: locations } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
-  })
+  });
 
   const { data: departments } = useQuery<any[]>({
     queryKey: ["/api/departments"],
-  })
+  });
 
   const { data: employees } = useQuery<Employee[]>({
     queryKey: ["/api/employees"],
-  })
+  });
 
   // Get unique asset types for filter
-  const assetTypes = Array.from(new Set(assets?.map(asset => asset.assetType) || []))
+  const assetTypes = Array.from(
+    new Set(assets?.map((asset) => asset.assetType) || []),
+  );
 
   // Filter assets
-  const filteredAssets = assets?.filter(asset => {
-    const matchesSearch = 
-      asset.assetId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.modelName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (asset.serviceTag?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
-    
-    const matchesStatus = statusFilter === "all" || asset.status === statusFilter
-    const matchesType = typeFilter === "all" || asset.assetType === typeFilter
-    const matchesLocation = locationFilter === "all" || asset.locationId?.toString() === locationFilter
-    const matchesCondition = conditionFilter === "all" || asset.condition === conditionFilter
-    const matchesOwnership = ownershipFilter === "all" || asset.ownershipType === ownershipFilter
-    const matchesDepartment = departmentFilter === "all" || asset.departmentId?.toString() === departmentFilter
-    
-    return matchesSearch && matchesStatus && matchesType && matchesLocation && matchesCondition && matchesOwnership && matchesDepartment
-  }) || []
-  
+  const filteredAssets =
+    assets?.filter((asset) => {
+      const matchesSearch =
+        asset.assetId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset.modelName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset.serviceTag?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        false;
+
+      const matchesStatus =
+        statusFilter === "all" || asset.status === statusFilter;
+      const matchesType =
+        typeFilter === "all" || asset.assetType === typeFilter;
+      const matchesLocation =
+        locationFilter === "all" ||
+        asset.locationId?.toString() === locationFilter;
+      const matchesCondition =
+        conditionFilter === "all" || asset.condition === conditionFilter;
+      const matchesOwnership =
+        ownershipFilter === "all" || asset.ownershipType === ownershipFilter;
+      const matchesDepartment =
+        departmentFilter === "all" ||
+        asset.departmentId?.toString() === departmentFilter;
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesType &&
+        matchesLocation &&
+        matchesCondition &&
+        matchesOwnership &&
+        matchesDepartment
+      );
+    }) || [];
+
   // Count active filters
   const activeFiltersCount = [
     statusFilter !== "all" ? 1 : 0,
@@ -307,115 +327,137 @@ export default function AssetsPage() {
     conditionFilter !== "all" ? 1 : 0,
     ownershipFilter !== "all" ? 1 : 0,
     departmentFilter !== "all" ? 1 : 0,
-    searchTerm !== "" ? 1 : 0
-  ].reduce((sum, val) => sum + val, 0)
-  
+    searchTerm !== "" ? 1 : 0,
+  ].reduce((sum, val) => sum + val, 0);
+
   // Reset all filters
   const resetAllFilters = () => {
-    setSearchTerm("")
-    setStatusFilter("all")
-    setTypeFilter("all")
-    setLocationFilter("all")
-    setConditionFilter("all")
-    setOwnershipFilter("all")
-    setDepartmentFilter("all")
-  }
+    setSearchTerm("");
+    setStatusFilter("all");
+    setTypeFilter("all");
+    setLocationFilter("all");
+    setConditionFilter("all");
+    setOwnershipFilter("all");
+    setDepartmentFilter("all");
+  };
 
   // Create asset mutation
   const createAssetMutation = useMutation({
     mutationFn: async (assetData: any) => {
-      const response = await fetch('/api/assets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(assetData),
-        credentials: 'include'
-      })
+        credentials: "include",
+      });
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to create asset')
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create asset");
       }
-      return response.json()
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
-      toast({ title: "Success", description: "Asset created successfully" })
-      resetNewAssetForm()
-      setIsCreateDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+      toast({ title: "Success", description: "Asset created successfully" });
+      resetNewAssetForm();
+      setIsCreateDialogOpen(false);
     },
     onError: (error: Error) => {
-      toast({ title: "Error", description: error.message || "Failed to create asset", variant: "destructive" })
-    }
-  })
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create asset",
+        variant: "destructive",
+      });
+    },
+  });
 
-  // Update asset mutation  
+  // Update asset mutation
   const updateAssetMutation = useMutation({
-    mutationFn: async ({ assetId, data }: { assetId: string, data: any }) => {
+    mutationFn: async ({ assetId, data }: { assetId: string; data: any }) => {
       const response = await fetch(`/api/assets/${assetId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      })
-      if (!response.ok) throw new Error('Failed to update asset')
-      return response.json()
+      });
+      if (!response.ok) throw new Error("Failed to update asset");
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
-      toast({ title: "Success", description: "Asset updated successfully" })
-      setIsEditDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+      toast({ title: "Success", description: "Asset updated successfully" });
+      setIsEditDialogOpen(false);
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to update asset", variant: "destructive" })
-    }
-  })
+      toast({
+        title: "Error",
+        description: "Failed to update asset",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Delete asset mutation
   const deleteAssetMutation = useMutation({
     mutationFn: async (assetId: string) => {
       const response = await fetch(`/api/assets/${assetId}`, {
-        method: 'DELETE',
-      })
-      if (!response.ok) throw new Error('Failed to delete asset')
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete asset");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
-      toast({ title: "Success", description: "Asset deleted successfully" })
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+      toast({ title: "Success", description: "Asset deleted successfully" });
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to delete asset", variant: "destructive" })
-    }
-  })
+      toast({
+        title: "Error",
+        description: "Failed to delete asset",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Helper functions
   const getLocationName = (locationId: number | null) => {
-    if (!locationId) return "No location"
-    const location = locations?.find(loc => loc.id === locationId)
-    return location ? `${location.outletName}, ${location.city}` : "Unknown location"
-  }
+    if (!locationId) return "No location";
+    const location = locations?.find((loc) => loc.id === locationId);
+    return location
+      ? `${location.outletName}, ${location.city}`
+      : "Unknown location";
+  };
 
   const getEmployeeName = (employeeId: number | null) => {
-    if (!employeeId) return "Unassigned"
-    const employee = employees?.find(emp => emp.id === employeeId)
-    return employee ? `${employee.firstName} ${employee.lastName}` : "Unknown employee"
-  }
+    if (!employeeId) return "Unassigned";
+    const employee = employees?.find((emp) => emp.id === employeeId);
+    return employee
+      ? `${employee.firstName} ${employee.lastName}`
+      : "Unknown employee";
+  };
 
   const getAssetIcon = (assetType: string) => {
-    const IconComponent = assetTypeIcons[assetType] || assetTypeIcons.default
-    return <IconComponent className="h-4 w-4" />
-  }
+    const IconComponent = assetTypeIcons[assetType] || assetTypeIcons.default;
+    return <IconComponent className="h-4 w-4" />;
+  };
 
   const handleCreateAsset = (event: React.FormEvent) => {
-    event.preventDefault()
-    
+    event.preventDefault();
+
     // Validate required fields
-    if (!newAsset.assetId?.trim() || !newAsset.assetType?.trim() || !newAsset.brand?.trim() || !newAsset.modelName?.trim()) {
-      toast({ 
-        title: "Validation Error", 
-        description: "Please fill in all required fields (Asset ID, Asset Type, Brand, Model Name)", 
-        variant: "destructive" 
-      })
-      return
+    if (
+      !newAsset.assetId?.trim() ||
+      !newAsset.assetType?.trim() ||
+      !newAsset.brand?.trim() ||
+      !newAsset.modelName?.trim()
+    ) {
+      toast({
+        title: "Validation Error",
+        description:
+          "Please fill in all required fields (Asset ID, Asset Type, Brand, Model Name)",
+        variant: "destructive",
+      });
+      return;
     }
-    
+
     const assetData = {
       assetId: newAsset.assetId.trim(),
       modelName: newAsset.modelName.trim(),
@@ -427,50 +469,57 @@ export default function AssetsPage() {
       status: newAsset.status,
       condition: newAsset.condition,
       locationId: newAsset.locationId ? parseInt(newAsset.locationId) : null,
-      departmentId: newAsset.departmentId ? parseInt(newAsset.departmentId) : null,
+      departmentId: newAsset.departmentId
+        ? parseInt(newAsset.departmentId)
+        : null,
       physicalLocation: newAsset.physicalLocation?.trim() || null,
       floor: newAsset.floor?.trim() || null,
       ownershipType: newAsset.ownershipType,
       assignmentType: newAsset.assignmentType,
-    }
+    };
 
-    createAssetMutation.mutate(assetData)
-  }
-  
+    createAssetMutation.mutate(assetData);
+  };
+
   const resetNewAssetForm = () => {
     setNewAsset({
-      assetId: '',
-      assetType: '',
-      brand: '',
-      modelName: '',
-      serviceTag: '',
-      locationId: '',
-      departmentId: '',
-      physicalLocation: '',
-      floor: '',
-      ownershipType: 'company',
-      assignmentType: 'person',
-      purchaseDate: '',
-      warrantyExpiry: '',
-      status: 'available',
-      condition: 'good'
-    })
-  }
+      assetId: "",
+      assetType: "",
+      brand: "",
+      modelName: "",
+      serviceTag: "",
+      locationId: "",
+      departmentId: "",
+      physicalLocation: "",
+      floor: "",
+      ownershipType: "company",
+      assignmentType: "person",
+      purchaseDate: "",
+      warrantyExpiry: "",
+      status: "available",
+      condition: "good",
+    });
+  };
 
   const handleUpdateAsset = (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!selectedAsset) return
-    
+    event.preventDefault();
+    if (!selectedAsset) return;
+
     // Validate required fields
-    if (!editAsset.assetType?.trim() || !editAsset.brand?.trim() || !editAsset.modelName?.trim()) {
-      toast({ 
-        title: "Validation Error", 
-        description: "Please fill in all required fields (Asset Type, Brand, Model Name)", 
-        variant: "destructive" 
-      })
-      return
+    if (
+      !editAsset.assetType?.trim() ||
+      !editAsset.brand?.trim() ||
+      !editAsset.modelName?.trim()
+    ) {
+      toast({
+        title: "Validation Error",
+        description:
+          "Please fill in all required fields (Asset Type, Brand, Model Name)",
+        variant: "destructive",
+      });
+      return;
     }
-    
+
     const assetData = {
       modelName: editAsset.modelName.trim(),
       brand: editAsset.brand.trim(),
@@ -481,105 +530,140 @@ export default function AssetsPage() {
       status: editAsset.status,
       condition: editAsset.condition,
       locationId: editAsset.locationId ? parseInt(editAsset.locationId) : null,
-      departmentId: editAsset.departmentId ? parseInt(editAsset.departmentId) : null,
+      departmentId: editAsset.departmentId
+        ? parseInt(editAsset.departmentId)
+        : null,
       physicalLocation: editAsset.physicalLocation?.trim() || null,
       floor: editAsset.floor?.trim() || null,
       ownershipType: editAsset.ownershipType,
       assignmentType: editAsset.assignmentType,
-    }
+    };
 
-    updateAssetMutation.mutate({ assetId: selectedAsset.assetId, data: assetData })
-  }
+    updateAssetMutation.mutate({
+      assetId: selectedAsset.assetId,
+      data: assetData,
+    });
+  };
 
   // Excel Export Handler
   const handleExportAssets = () => {
     if (!filteredAssets || !locations) {
-      toast({ title: "Error", description: "No data available to export", variant: "destructive" })
-      return
+      toast({
+        title: "Error",
+        description: "No data available to export",
+        variant: "destructive",
+      });
+      return;
     }
-    
-    ExcelExporter.exportAssets(filteredAssets, locations)
-    toast({ title: "Success", description: `Exported ${filteredAssets.length} assets to Excel` })
-  }
+
+    ExcelExporter.exportAssets(filteredAssets, locations);
+    toast({
+      title: "Success",
+      description: `Exported ${filteredAssets.length} assets to Excel`,
+    });
+  };
 
   // Excel Import Handler
   const handleImportAssets = async () => {
     if (!importFile) {
-      toast({ title: "Error", description: "Please select a file to import", variant: "destructive" })
-      return
+      toast({
+        title: "Error",
+        description: "Please select a file to import",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setIsImporting(true)
-    setImportErrors([])
+    setIsImporting(true);
+    setImportErrors([]);
 
     try {
       // Parse Excel file
-      const data = await ExcelImporter.parseExcelFile(importFile)
-      
+      const data = await ExcelImporter.parseExcelFile(importFile);
+
       if (data.length === 0) {
-        toast({ title: "Error", description: "The Excel file is empty", variant: "destructive" })
-        setIsImporting(false)
-        return
+        toast({
+          title: "Error",
+          description: "The Excel file is empty",
+          variant: "destructive",
+        });
+        setIsImporting(false);
+        return;
       }
 
       // Validate data
-      const { valid, errors } = ExcelImporter.validateAssetData(data)
-      
+      const { valid, errors } = ExcelImporter.validateAssetData(data);
+
       if (errors.length > 0) {
-        setImportErrors(errors)
-        setIsImporting(false)
-        return
+        setImportErrors(errors);
+        setIsImporting(false);
+        return;
       }
 
       // Import valid assets
-      let successCount = 0
-      let errorCount = 0
-      
+      let successCount = 0;
+      let errorCount = 0;
+
       for (const assetData of valid) {
         try {
-          const response = await fetch('/api/assets', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch("/api/assets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(assetData),
-          })
-          
+          });
+
           if (response.ok) {
-            successCount++
+            successCount++;
           } else {
-            errorCount++
-            const errorData = await response.json()
-            setImportErrors(prev => [...prev, `Asset ${assetData.assetId}: ${errorData.message || 'Import failed'}`])
+            errorCount++;
+            const errorData = await response.json();
+            setImportErrors((prev) => [
+              ...prev,
+              `Asset ${assetData.assetId}: ${errorData.message || "Import failed"}`,
+            ]);
           }
         } catch (error) {
-          errorCount++
-          setImportErrors(prev => [...prev, `Asset ${assetData.assetId}: Network error`])
+          errorCount++;
+          setImportErrors((prev) => [
+            ...prev,
+            `Asset ${assetData.assetId}: Network error`,
+          ]);
         }
       }
 
       // Refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/assets'] })
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
 
       if (successCount > 0) {
-        toast({ 
-          title: "Import Complete", 
-          description: `Successfully imported ${successCount} assets${errorCount > 0 ? `, ${errorCount} failed` : ''}` 
-        })
-        
+        toast({
+          title: "Import Complete",
+          description: `Successfully imported ${successCount} assets${errorCount > 0 ? `, ${errorCount} failed` : ""}`,
+        });
+
         if (errorCount === 0) {
-          setIsImportDialogOpen(false)
-          setImportFile(null)
+          setIsImportDialogOpen(false);
+          setImportFile(null);
         }
       } else {
-        toast({ title: "Import Failed", description: "No assets were imported", variant: "destructive" })
+        toast({
+          title: "Import Failed",
+          description: "No assets were imported",
+          variant: "destructive",
+        });
       }
-
     } catch (error) {
-      toast({ title: "Error", description: "Failed to parse Excel file", variant: "destructive" })
-      setImportErrors(['Failed to parse Excel file. Please ensure it\'s a valid Excel file.'])
+      toast({
+        title: "Error",
+        description: "Failed to parse Excel file",
+        variant: "destructive",
+      });
+      setImportErrors([
+        "Failed to parse Excel file. Please ensure it's a valid Excel file.",
+      ]);
     } finally {
-      setIsImporting(false)
+      setIsImporting(false);
     }
-  }
+  };
 
   if (assetsLoading) {
     return (
@@ -593,23 +677,32 @@ export default function AssetsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
-      
+      <SidebarTrigger
+        data-testid="button-sidebar-toggle"
+        className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Assets</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Assets
+          </h1>
           <p className="text-white/70">
-            Comprehensive inventory management and lifecycle tracking for enterprise resources
+            Comprehensive inventory management and lifecycle tracking for
+            enterprise resources
           </p>
         </div>
         <div className="flex gap-2">
-          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <Dialog
+            open={isImportDialogOpen}
+            onOpenChange={setIsImportDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Upload className="h-4 w-4" />
@@ -620,13 +713,14 @@ export default function AssetsPage() {
               <DialogHeader>
                 <DialogTitle>Import Assets from Excel</DialogTitle>
                 <DialogDescription>
-                  Bulk import enterprise resources using standardized Excel templates for efficient data onboarding
+                  Bulk import enterprise resources using standardized Excel
+                  templates for efficient data onboarding
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => ExcelImporter.downloadAssetTemplate()}
                     className="gap-2"
                   >
@@ -634,7 +728,7 @@ export default function AssetsPage() {
                     Download Template
                   </Button>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="excel-file">Excel File *</Label>
                   <Input
@@ -642,38 +736,40 @@ export default function AssetsPage() {
                     type="file"
                     accept=".xlsx,.xls"
                     onChange={(e) => {
-                      const file = e.target.files?.[0]
+                      const file = e.target.files?.[0];
                       if (file) {
-                        setImportFile(file)
-                        setImportErrors([])
+                        setImportFile(file);
+                        setImportErrors([]);
                       }
                     }}
                   />
                 </div>
-                
+
                 {importErrors.length > 0 && (
                   <div className="space-y-2">
                     <Label className="text-red-600">Import Errors:</Label>
                     <div className="bg-red-50 p-3 rounded max-h-32 overflow-y-auto">
                       {importErrors.map((error, index) => (
-                        <div key={index} className="text-sm text-red-600">• {error}</div>
+                        <div key={index} className="text-sm text-red-600">
+                          • {error}
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
               <DialogFooter>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
-                    setIsImportDialogOpen(false)
-                    setImportFile(null)
-                    setImportErrors([])
+                    setIsImportDialogOpen(false);
+                    setImportFile(null);
+                    setImportErrors([]);
                   }}
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handleImportAssets}
                   disabled={!importFile || isImporting}
                 >
@@ -682,15 +778,18 @@ export default function AssetsPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="gap-2"
             onClick={handleExportAssets}
           >
             <Download className="h-4 w-4" />
             Export
           </Button>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -701,7 +800,8 @@ export default function AssetsPage() {
               <DialogHeader>
                 <DialogTitle>Create New Asset</DialogTitle>
                 <DialogDescription>
-                  Add enterprise resources with complete lifecycle tracking and warranty information
+                  Add enterprise resources with complete lifecycle tracking and
+                  warranty information
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateAsset} className="space-y-4">
@@ -713,15 +813,19 @@ export default function AssetsPage() {
                       placeholder="BFC001"
                       required
                       value={newAsset.assetId}
-                      onChange={(e) => setNewAsset({...newAsset, assetId: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({ ...newAsset, assetId: e.target.value })
+                      }
                       data-testid="input-asset-id"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="assetType">Asset Type *</Label>
-                    <Select 
-                      value={newAsset.assetType} 
-                      onValueChange={(value) => setNewAsset({...newAsset, assetType: value})}
+                    <Select
+                      value={newAsset.assetType}
+                      onValueChange={(value) =>
+                        setNewAsset({ ...newAsset, assetType: value })
+                      }
                       required
                     >
                       <SelectTrigger data-testid="select-asset-type">
@@ -750,7 +854,9 @@ export default function AssetsPage() {
                       placeholder="Dell, HP, Lenovo..."
                       required
                       value={newAsset.brand}
-                      onChange={(e) => setNewAsset({...newAsset, brand: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({ ...newAsset, brand: e.target.value })
+                      }
                       data-testid="input-brand"
                     />
                   </div>
@@ -761,7 +867,9 @@ export default function AssetsPage() {
                       placeholder="ThinkPad E15, OptiPlex 3080..."
                       required
                       value={newAsset.modelName}
-                      onChange={(e) => setNewAsset({...newAsset, modelName: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({ ...newAsset, modelName: e.target.value })
+                      }
                       data-testid="input-model-name"
                     />
                   </div>
@@ -774,22 +882,29 @@ export default function AssetsPage() {
                       id="serviceTag"
                       placeholder="Manufacturer service tag"
                       value={newAsset.serviceTag}
-                      onChange={(e) => setNewAsset({...newAsset, serviceTag: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({ ...newAsset, serviceTag: e.target.value })
+                      }
                       data-testid="input-service-tag"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="locationId">Location</Label>
-                    <Select 
-                      value={newAsset.locationId} 
-                      onValueChange={(value) => setNewAsset({...newAsset, locationId: value})}
+                    <Select
+                      value={newAsset.locationId}
+                      onValueChange={(value) =>
+                        setNewAsset({ ...newAsset, locationId: value })
+                      }
                     >
                       <SelectTrigger data-testid="select-location">
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                       <SelectContent>
-                        {locations?.map(location => (
-                          <SelectItem key={location.id} value={location.id.toString()}>
+                        {locations?.map((location) => (
+                          <SelectItem
+                            key={location.id}
+                            value={location.id.toString()}
+                          >
                             {location.outletName}, {location.city}
                           </SelectItem>
                         ))}
@@ -798,19 +913,26 @@ export default function AssetsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="departmentId">Department</Label>
-                    <Select 
-                      value={newAsset.departmentId} 
-                      onValueChange={(value) => setNewAsset({...newAsset, departmentId: value})}
+                    <Select
+                      value={newAsset.departmentId}
+                      onValueChange={(value) =>
+                        setNewAsset({ ...newAsset, departmentId: value })
+                      }
                     >
                       <SelectTrigger data-testid="select-department">
                         <SelectValue placeholder="Select department" />
                       </SelectTrigger>
                       <SelectContent>
-                        {departments?.filter(d => d.isActive).map(dept => (
-                          <SelectItem key={dept.id} value={dept.id.toString()}>
-                            {dept.name} ({dept.type})
-                          </SelectItem>
-                        ))}
+                        {departments
+                          ?.filter((d) => d.isActive)
+                          .map((dept) => (
+                            <SelectItem
+                              key={dept.id}
+                              value={dept.id.toString()}
+                            >
+                              {dept.name} ({dept.type})
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -823,7 +945,12 @@ export default function AssetsPage() {
                       id="physicalLocation"
                       placeholder="Reception, Front Desk, Room 1..."
                       value={newAsset.physicalLocation}
-                      onChange={(e) => setNewAsset({...newAsset, physicalLocation: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({
+                          ...newAsset,
+                          physicalLocation: e.target.value,
+                        })
+                      }
                       data-testid="input-physical-location"
                     />
                   </div>
@@ -833,7 +960,9 @@ export default function AssetsPage() {
                       id="floor"
                       placeholder="Ground Floor, 1st Floor..."
                       value={newAsset.floor}
-                      onChange={(e) => setNewAsset({...newAsset, floor: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({ ...newAsset, floor: e.target.value })
+                      }
                       data-testid="input-floor"
                     />
                   </div>
@@ -842,9 +971,11 @@ export default function AssetsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="ownershipType">Ownership Type</Label>
-                    <Select 
-                      value={newAsset.ownershipType} 
-                      onValueChange={(value) => setNewAsset({...newAsset, ownershipType: value})}
+                    <Select
+                      value={newAsset.ownershipType}
+                      onValueChange={(value) =>
+                        setNewAsset({ ...newAsset, ownershipType: value })
+                      }
                     >
                       <SelectTrigger data-testid="select-ownership-type">
                         <SelectValue />
@@ -858,16 +989,22 @@ export default function AssetsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="assignmentType">Assignment Type</Label>
-                    <Select 
-                      value={newAsset.assignmentType} 
-                      onValueChange={(value) => setNewAsset({...newAsset, assignmentType: value})}
+                    <Select
+                      value={newAsset.assignmentType}
+                      onValueChange={(value) =>
+                        setNewAsset({ ...newAsset, assignmentType: value })
+                      }
                     >
                       <SelectTrigger data-testid="select-assignment-type">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="person">Assigned to Person</SelectItem>
-                        <SelectItem value="outlet">Assigned to Outlet</SelectItem>
+                        <SelectItem value="person">
+                          Assigned to Person
+                        </SelectItem>
+                        <SelectItem value="outlet">
+                          Assigned to Outlet
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -880,7 +1017,12 @@ export default function AssetsPage() {
                       id="purchaseDate"
                       type="date"
                       value={newAsset.purchaseDate}
-                      onChange={(e) => setNewAsset({...newAsset, purchaseDate: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({
+                          ...newAsset,
+                          purchaseDate: e.target.value,
+                        })
+                      }
                       data-testid="input-purchase-date"
                     />
                   </div>
@@ -890,7 +1032,12 @@ export default function AssetsPage() {
                       id="warrantyExpiry"
                       type="date"
                       value={newAsset.warrantyExpiry}
-                      onChange={(e) => setNewAsset({...newAsset, warrantyExpiry: e.target.value})}
+                      onChange={(e) =>
+                        setNewAsset({
+                          ...newAsset,
+                          warrantyExpiry: e.target.value,
+                        })
+                      }
                       data-testid="input-warranty-expiry"
                     />
                   </div>
@@ -899,9 +1046,11 @@ export default function AssetsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select 
-                      value={newAsset.status} 
-                      onValueChange={(value) => setNewAsset({...newAsset, status: value})}
+                    <Select
+                      value={newAsset.status}
+                      onValueChange={(value) =>
+                        setNewAsset({ ...newAsset, status: value })
+                      }
                     >
                       <SelectTrigger data-testid="select-status">
                         <SelectValue />
@@ -916,9 +1065,11 @@ export default function AssetsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="condition">Condition</Label>
-                    <Select 
-                      value={newAsset.condition} 
-                      onValueChange={(value) => setNewAsset({...newAsset, condition: value})}
+                    <Select
+                      value={newAsset.condition}
+                      onValueChange={(value) =>
+                        setNewAsset({ ...newAsset, condition: value })
+                      }
                     >
                       <SelectTrigger data-testid="select-condition">
                         <SelectValue />
@@ -934,29 +1085,31 @@ export default function AssetsPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => {
-                      resetNewAssetForm()
-                      setIsCreateDialogOpen(false)
+                      resetNewAssetForm();
+                      setIsCreateDialogOpen(false);
                     }}
                     data-testid="button-cancel-create"
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={
-                      createAssetMutation.isPending || 
-                      !newAsset.assetId?.trim() || 
-                      !newAsset.assetType?.trim() || 
-                      !newAsset.brand?.trim() || 
+                      createAssetMutation.isPending ||
+                      !newAsset.assetId?.trim() ||
+                      !newAsset.assetType?.trim() ||
+                      !newAsset.brand?.trim() ||
                       !newAsset.modelName?.trim()
                     }
                     data-testid="button-submit-create"
                   >
-                    {createAssetMutation.isPending ? "Creating..." : "Create Asset"}
+                    {createAssetMutation.isPending
+                      ? "Creating..."
+                      : "Create Asset"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -973,7 +1126,9 @@ export default function AssetsPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{assets?.length || 0}</div>
+            <div className="text-2xl font-bold text-white/90">
+              {assets?.length || 0}
+            </div>
             <p className="text-xs text-muted-foreground">
               Across {locations?.length || 0} locations
             </p>
@@ -987,7 +1142,7 @@ export default function AssetsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white/90">
-              {assets?.filter(a => a.status === 'available').length || 0}
+              {assets?.filter((a) => a.status === "available").length || 0}
             </div>
             <p className="text-xs text-muted-foreground">
               Ready for assignment
@@ -1002,11 +1157,9 @@ export default function AssetsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white/90">
-              {assets?.filter(a => a.status === 'assigned').length || 0}
+              {assets?.filter((a) => a.status === "assigned").length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Currently in use
-            </p>
+            <p className="text-xs text-muted-foreground">Currently in use</p>
           </CardContent>
         </Card>
 
@@ -1017,11 +1170,9 @@ export default function AssetsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white/90">
-              {assets?.filter(a => a.status === 'maintenance').length || 0}
+              {assets?.filter((a) => a.status === "maintenance").length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Under service
-            </p>
+            <p className="text-xs text-muted-foreground">Under service</p>
           </CardContent>
         </Card>
       </div>
@@ -1050,7 +1201,7 @@ export default function AssetsPage() {
                 </button>
               )}
             </div>
-            
+
             <Button
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               variant="outline"
@@ -1070,7 +1221,10 @@ export default function AssetsPage() {
           {/* Quick Filters */}
           <div className="flex flex-wrap gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[160px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all" data-testid="select-filter-status">
+              <SelectTrigger
+                className="w-[160px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+                data-testid="select-filter-status"
+              >
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
                   <SelectValue placeholder="Status" />
@@ -1086,7 +1240,10 @@ export default function AssetsPage() {
             </Select>
 
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[160px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all" data-testid="select-filter-type">
+              <SelectTrigger
+                className="w-[160px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+                data-testid="select-filter-type"
+              >
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-muted-foreground" />
                   <SelectValue placeholder="Type" />
@@ -1094,14 +1251,19 @@ export default function AssetsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                {assetTypes.map(type => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                {assetTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
             <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="w-[200px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all" data-testid="select-filter-location">
+              <SelectTrigger
+                className="w-[200px] backdrop-blur-sm border-border/40 hover:border-primary/50 transition-all"
+                data-testid="select-filter-location"
+              >
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <SelectValue placeholder="Location" />
@@ -1109,7 +1271,7 @@ export default function AssetsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Locations</SelectItem>
-                {locations?.map(location => (
+                {locations?.map((location) => (
                   <SelectItem key={location.id} value={location.id.toString()}>
                     {location.outletName}
                   </SelectItem>
@@ -1138,8 +1300,14 @@ export default function AssetsPage() {
                   <Filter className="h-4 w-4 text-primary" />
                   Condition
                 </label>
-                <Select value={conditionFilter} onValueChange={setConditionFilter}>
-                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-condition">
+                <Select
+                  value={conditionFilter}
+                  onValueChange={setConditionFilter}
+                >
+                  <SelectTrigger
+                    className="backdrop-blur-sm border-border/40"
+                    data-testid="select-filter-condition"
+                  >
                     <SelectValue placeholder="All Conditions" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1157,8 +1325,14 @@ export default function AssetsPage() {
                   <FileText className="h-4 w-4 text-primary" />
                   Ownership
                 </label>
-                <Select value={ownershipFilter} onValueChange={setOwnershipFilter}>
-                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-ownership">
+                <Select
+                  value={ownershipFilter}
+                  onValueChange={setOwnershipFilter}
+                >
+                  <SelectTrigger
+                    className="backdrop-blur-sm border-border/40"
+                    data-testid="select-filter-ownership"
+                  >
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1175,13 +1349,19 @@ export default function AssetsPage() {
                   <User className="h-4 w-4 text-primary" />
                   Department
                 </label>
-                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                  <SelectTrigger className="backdrop-blur-sm border-border/40" data-testid="select-filter-department">
+                <Select
+                  value={departmentFilter}
+                  onValueChange={setDepartmentFilter}
+                >
+                  <SelectTrigger
+                    className="backdrop-blur-sm border-border/40"
+                    data-testid="select-filter-department"
+                  >
                     <SelectValue placeholder="All Departments" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Departments</SelectItem>
-                    {departments?.map(dept => (
+                    {departments?.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id.toString()}>
                         {dept.name}
                       </SelectItem>
@@ -1197,25 +1377,38 @@ export default function AssetsPage() {
             <div className="text-sm text-muted-foreground">
               Showing {filteredAssets.length} of {assets?.length || 0} assets
             </div>
-            
+
             {activeFiltersCount > 0 && (
               <div className="flex gap-1">
                 {statusFilter !== "all" && (
                   <Badge variant="secondary" className="gap-1">
                     Status: {statusFilter}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setStatusFilter("all")} />
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setStatusFilter("all")}
+                    />
                   </Badge>
                 )}
                 {typeFilter !== "all" && (
                   <Badge variant="secondary" className="gap-1">
                     Type: {typeFilter}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setTypeFilter("all")} />
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setTypeFilter("all")}
+                    />
                   </Badge>
                 )}
                 {locationFilter !== "all" && (
                   <Badge variant="secondary" className="gap-1">
-                    Location: {locations?.find(l => l.id.toString() === locationFilter)?.outletName}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setLocationFilter("all")} />
+                    Location:{" "}
+                    {
+                      locations?.find((l) => l.id.toString() === locationFilter)
+                        ?.outletName
+                    }
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setLocationFilter("all")}
+                    />
                   </Badge>
                 )}
               </div>
@@ -1237,230 +1430,333 @@ export default function AssetsPage() {
                 <TableHead>Assigned To</TableHead>
               </TableRow>
             </TableHeader>
-              <TableBody>
-                {filteredAssets && filteredAssets.length > 0 ? filteredAssets.flatMap((asset) => {
-                  const isExpanded = expandedAssetId === asset.assetId
+            <TableBody>
+              {filteredAssets && filteredAssets.length > 0 ? (
+                filteredAssets.flatMap((asset) => {
+                  const isExpanded = expandedAssetId === asset.assetId;
                   const rows = [
-                    <TableRow 
+                    <TableRow
                       key={`main-${asset.assetId}`}
-                      onClick={() => setExpandedAssetId(isExpanded ? null : asset.assetId)}
+                      onClick={() =>
+                        setExpandedAssetId(isExpanded ? null : asset.assetId)
+                      }
                       className="hover:bg-muted/20 transition-all duration-150 border-b border-border/30 group cursor-pointer"
                       data-testid={`row-asset-${asset.assetId}`}
                     >
-                        {/* Asset Details with Chevron */}
-                        <TableCell className="py-3 px-4">
+                      {/* Asset Details with Chevron */}
+                      <TableCell className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
                           <div className="flex items-center gap-2">
-                            <div className="flex items-center justify-center w-8 h-8 bg-muted/50 rounded-full group-hover:bg-muted transition-colors">
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
+                            <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
+                              {getAssetIcon(asset.assetType)}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0 group-hover:bg-primary/15 transition-colors">
-                                {getAssetIcon(asset.assetType)}
+                            <div className="min-w-0">
+                              <div
+                                className="font-semibold text-sm text-foreground"
+                                data-testid={`text-asset-id-${asset.assetId}`}
+                              >
+                                {asset.assetId}
                               </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-sm text-foreground" data-testid={`text-asset-id-${asset.assetId}`}>
-                                  {asset.assetId}
-                                </div>
-                                <p className="text-sm text-muted-foreground truncate">
-                                  {asset.brand} {asset.modelName}
-                                </p>
-                              </div>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {asset.brand} {asset.modelName}
+                              </p>
                             </div>
                           </div>
-                        </TableCell>
+                        </div>
+                      </TableCell>
 
-                        {/* Asset Type */}
-                        <TableCell className="py-3 px-3">
-                          <span className="text-sm font-medium" data-testid={`badge-type-${asset.assetId}`}>
-                            {asset.assetType}
+                      {/* Asset Type */}
+                      <TableCell className="py-3 px-3">
+                        <span
+                          className="text-sm font-medium"
+                          data-testid={`badge-type-${asset.assetId}`}
+                        >
+                          {asset.assetType}
+                        </span>
+                      </TableCell>
+
+                      {/* Status */}
+                      <TableCell className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`}
+                          />
+                          <span
+                            className="text-sm font-medium capitalize"
+                            data-testid={`text-status-${asset.assetId}`}
+                          >
+                            {asset.status}
                           </span>
-                        </TableCell>
+                        </div>
+                      </TableCell>
 
-                        {/* Status */}
-                        <TableCell className="py-3 px-3">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`} />
-                            <span className="text-sm font-medium capitalize" data-testid={`text-status-${asset.assetId}`}>
-                              {asset.status}
-                            </span>
-                          </div>
-                        </TableCell>
+                      {/* Location */}
+                      <TableCell className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span
+                            className="text-sm truncate"
+                            data-testid={`text-location-${asset.assetId}`}
+                          >
+                            {getLocationName(asset.locationId)}
+                          </span>
+                        </div>
+                      </TableCell>
 
-                        {/* Location */}
-                        <TableCell className="py-3 px-3">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm truncate" data-testid={`text-location-${asset.assetId}`}>
-                              {getLocationName(asset.locationId)}
-                            </span>
-                          </div>
-                        </TableCell>
-
-                        {/* Assigned To */}
-                        <TableCell className="py-3 px-3">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm truncate" data-testid={`text-assigned-${asset.assetId}`}>
-                              {asset.assignmentType === 'outlet' 
-                                ? getLocationName(asset.locationId) 
-                                : getEmployeeName(asset.currentUserId)}
-                            </span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                      {/* Assigned To */}
+                      <TableCell className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span
+                            className="text-sm truncate"
+                            data-testid={`text-assigned-${asset.assetId}`}
+                          >
+                            {asset.assignmentType === "outlet"
+                              ? getLocationName(asset.locationId)
+                              : getEmployeeName(asset.currentUserId)}
+                          </span>
+                        </div>
+                      </TableCell>
+                    </TableRow>,
                   ];
 
                   if (isExpanded) {
                     rows.push(
-                      <TableRow key={`expanded-${asset.assetId}`} className="bg-muted/10 hover:bg-muted/10">
+                      <TableRow
+                        key={`expanded-${asset.assetId}`}
+                        className="bg-muted/10 hover:bg-muted/10"
+                      >
                         <TableCell colSpan={5} className="p-6">
-                            <div className="grid grid-cols-3 gap-6">
-                              {/* Column 1 - Basic Info */}
-                              <div className="space-y-4">
-                                <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Basic Information</h4>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Asset Type</Label>
-                                    <p className="text-sm font-medium mt-1">{asset.assetType}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Brand</Label>
-                                    <p className="text-sm font-medium mt-1">{asset.brand}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Model</Label>
-                                    <p className="text-sm font-medium mt-1">{asset.modelName}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Service Tag</Label>
-                                    <p className="text-sm font-mono font-medium mt-1">{asset.serviceTag || "—"}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Ownership Type</Label>
-                                    <p className="text-sm font-medium mt-1">
-                                      {asset.ownershipType === 'company' ? 'Company Owned' : 
-                                       asset.ownershipType === 'rented' ? 'Rented' : 
-                                       asset.ownershipType === 'personal' ? 'Personal' : '—'}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* Column 2 - Status & Location */}
-                                <div className="space-y-4">
-                                  <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Status & Location</h4>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Status</Label>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <div className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`} />
-                                      <span className="text-sm font-medium capitalize">{asset.status}</span>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Condition</Label>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <div className={`w-2 h-2 rounded-full ${conditionColors[asset.condition]}`} />
-                                      <span className="text-sm font-medium capitalize">{asset.condition}</span>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Outlet Location</Label>
-                                    <p className="text-sm font-medium mt-1">{getLocationName(asset.locationId)}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Physical Location</Label>
-                                    <p className="text-sm font-medium mt-1">{asset.physicalLocation || "—"}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Floor</Label>
-                                    <p className="text-sm font-medium mt-1">{asset.floor || "—"}</p>
-                                  </div>
-                                </div>
-
-                                {/* Column 3 - Assignment & Dates */}
-                                <div className="space-y-4">
-                                  <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Assignment & Timeline</h4>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Department</Label>
-                                    <p className="text-sm font-medium mt-1">
-                                      {asset.departmentId 
-                                        ? departments?.find(d => d.id === asset.departmentId)?.name || "—"
+                          <div className="grid grid-cols-3 gap-6">
+                            {/* Column 1 - Basic Info */}
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                                Basic Information
+                              </h4>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Asset Type
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.assetType}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Brand
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.brand}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Model
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.modelName}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Service Tag
+                                </Label>
+                                <p className="text-sm font-mono font-medium mt-1">
+                                  {asset.serviceTag || "—"}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Ownership Type
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.ownershipType === "company"
+                                    ? "Company Owned"
+                                    : asset.ownershipType === "rented"
+                                      ? "Rented"
+                                      : asset.ownershipType === "personal"
+                                        ? "Personal"
                                         : "—"}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Assignment Type</Label>
-                                    <p className="text-sm font-medium mt-1">
-                                      {asset.assignmentType === 'person' ? 'Assigned to Person' : 'Assigned to Outlet'}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Assigned To</Label>
-                                    <p className="text-sm font-medium mt-1">
-                                      {asset.assignmentType === 'outlet' 
-                                        ? getLocationName(asset.locationId) 
-                                        : getEmployeeName(asset.currentUserId)}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Purchase Date</Label>
-                                    <p className="text-sm font-medium mt-1">{asset.purchaseDate || "—"}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Warranty Expiry</Label>
-                                    <p className="text-sm font-medium mt-1">{asset.warrantyExpiry || "—"}</p>
-                                  </div>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Column 2 - Status & Location */}
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                                Status & Location
+                              </h4>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Status
+                                </Label>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${statusColors[asset.status]}`}
+                                  />
+                                  <span className="text-sm font-medium capitalize">
+                                    {asset.status}
+                                  </span>
                                 </div>
                               </div>
-
-                            <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedAsset(asset)
-                                  setIsEditDialogOpen(true)
-                                }}
-                                data-testid={`button-edit-asset-${asset.assetId}`}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Asset
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  if (window.confirm(`Are you sure you want to delete asset ${asset.assetId}? This action cannot be undone.`)) {
-                                    deleteAssetMutation.mutate(asset.assetId)
-                                  }
-                                }}
-                                data-testid={`button-delete-asset-${asset.assetId}`}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Asset
-                              </Button>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Condition
+                                </Label>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${conditionColors[asset.condition]}`}
+                                  />
+                                  <span className="text-sm font-medium capitalize">
+                                    {asset.condition}
+                                  </span>
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Outlet Location
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {getLocationName(asset.locationId)}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Physical Location
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.physicalLocation || "—"}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Floor
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.floor || "—"}
+                                </p>
+                              </div>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                    )
+
+                            {/* Column 3 - Assignment & Dates */}
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                                Assignment & Timeline
+                              </h4>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Department
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.departmentId
+                                    ? departments?.find(
+                                        (d) => d.id === asset.departmentId,
+                                      )?.name || "—"
+                                    : "—"}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Assignment Type
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.assignmentType === "person"
+                                    ? "Assigned to Person"
+                                    : "Assigned to Outlet"}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Assigned To
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.assignmentType === "outlet"
+                                    ? getLocationName(asset.locationId)
+                                    : getEmployeeName(asset.currentUserId)}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Purchase Date
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.purchaseDate || "—"}
+                                </p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">
+                                  Warranty Expiry
+                                </Label>
+                                <p className="text-sm font-medium mt-1">
+                                  {asset.warrantyExpiry || "—"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 mt-6 pt-4 border-t border-border/50">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedAsset(asset);
+                                setIsEditDialogOpen(true);
+                              }}
+                              data-testid={`button-edit-asset-${asset.assetId}`}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Asset
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (
+                                  window.confirm(
+                                    `Are you sure you want to delete asset ${asset.assetId}? This action cannot be undone.`,
+                                  )
+                                ) {
+                                  deleteAssetMutation.mutate(asset.assetId);
+                                }
+                              }}
+                              data-testid={`button-delete-asset-${asset.assetId}`}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Asset
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>,
+                    );
                   }
 
-                  return rows
-                }) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                      <Package className="mx-auto h-12 w-12 mb-4 opacity-40" />
-                      <p className="text-lg font-medium mb-1">No assets found</p>
-                      <p className="text-sm">Try adjusting your filters or create a new asset</p>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  return rows;
+                })
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-12 text-muted-foreground"
+                  >
+                    <Package className="mx-auto h-12 w-12 mb-4 opacity-40" />
+                    <p className="text-lg font-medium mb-1">No assets found</p>
+                    <p className="text-sm">
+                      Try adjusting your filters or create a new asset
+                    </p>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
@@ -1470,7 +1766,8 @@ export default function AssetsPage() {
           <DialogHeader>
             <DialogTitle>Edit Asset</DialogTitle>
             <DialogDescription>
-              Modify specifications, status, warranty details, and location assignment for {selectedAsset?.assetId}
+              Modify specifications, status, warranty details, and location
+              assignment for {selectedAsset?.assetId}
             </DialogDescription>
           </DialogHeader>
           {selectedAsset && (
@@ -1478,7 +1775,13 @@ export default function AssetsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-assetType">Asset Type *</Label>
-                  <Select value={editAsset.assetType} onValueChange={(value) => setEditAsset({ ...editAsset, assetType: value })} required>
+                  <Select
+                    value={editAsset.assetType}
+                    onValueChange={(value) =>
+                      setEditAsset({ ...editAsset, assetType: value })
+                    }
+                    required
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1500,7 +1803,9 @@ export default function AssetsPage() {
                   <Input
                     id="edit-brand"
                     value={editAsset.brand}
-                    onChange={(e) => setEditAsset({ ...editAsset, brand: e.target.value })}
+                    onChange={(e) =>
+                      setEditAsset({ ...editAsset, brand: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -1512,7 +1817,9 @@ export default function AssetsPage() {
                   <Input
                     id="edit-modelName"
                     value={editAsset.modelName}
-                    onChange={(e) => setEditAsset({ ...editAsset, modelName: e.target.value })}
+                    onChange={(e) =>
+                      setEditAsset({ ...editAsset, modelName: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -1521,7 +1828,9 @@ export default function AssetsPage() {
                   <Input
                     id="edit-serviceTag"
                     value={editAsset.serviceTag}
-                    onChange={(e) => setEditAsset({ ...editAsset, serviceTag: e.target.value })}
+                    onChange={(e) =>
+                      setEditAsset({ ...editAsset, serviceTag: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -1529,13 +1838,21 @@ export default function AssetsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-locationId">Location</Label>
-                  <Select value={editAsset.locationId} onValueChange={(value) => setEditAsset({ ...editAsset, locationId: value })}>
+                  <Select
+                    value={editAsset.locationId}
+                    onValueChange={(value) =>
+                      setEditAsset({ ...editAsset, locationId: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
                     <SelectContent>
-                      {locations?.map(location => (
-                        <SelectItem key={location.id} value={location.id.toString()}>
+                      {locations?.map((location) => (
+                        <SelectItem
+                          key={location.id}
+                          value={location.id.toString()}
+                        >
                           {location.outletName}, {location.city}
                         </SelectItem>
                       ))}
@@ -1548,7 +1865,12 @@ export default function AssetsPage() {
                     id="edit-purchaseDate"
                     type="date"
                     value={editAsset.purchaseDate}
-                    onChange={(e) => setEditAsset({ ...editAsset, purchaseDate: e.target.value })}
+                    onChange={(e) =>
+                      setEditAsset({
+                        ...editAsset,
+                        purchaseDate: e.target.value,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -1560,12 +1882,22 @@ export default function AssetsPage() {
                     id="edit-warrantyExpiry"
                     type="date"
                     value={editAsset.warrantyExpiry}
-                    onChange={(e) => setEditAsset({ ...editAsset, warrantyExpiry: e.target.value })}
+                    onChange={(e) =>
+                      setEditAsset({
+                        ...editAsset,
+                        warrantyExpiry: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-status">Status</Label>
-                  <Select value={editAsset.status} onValueChange={(value: any) => setEditAsset({ ...editAsset, status: value })}>
+                  <Select
+                    value={editAsset.status}
+                    onValueChange={(value: any) =>
+                      setEditAsset({ ...editAsset, status: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1581,7 +1913,12 @@ export default function AssetsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-condition">Condition</Label>
-                <Select value={editAsset.condition} onValueChange={(value: any) => setEditAsset({ ...editAsset, condition: value })}>
+                <Select
+                  value={editAsset.condition}
+                  onValueChange={(value: any) =>
+                    setEditAsset({ ...editAsset, condition: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1596,28 +1933,42 @@ export default function AssetsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-departmentId">Department</Label>
-                <Select value={editAsset.departmentId} onValueChange={(value) => setEditAsset({ ...editAsset, departmentId: value })}>
+                <Select
+                  value={editAsset.departmentId}
+                  onValueChange={(value) =>
+                    setEditAsset({ ...editAsset, departmentId: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent>
-                    {departments?.filter(d => d.isActive).map(dept => (
-                      <SelectItem key={dept.id} value={dept.id.toString()}>
-                        {dept.name} ({dept.type})
-                      </SelectItem>
-                    ))}
+                    {departments
+                      ?.filter((d) => d.isActive)
+                      .map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id.toString()}>
+                          {dept.name} ({dept.type})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-physicalLocation">Physical Location</Label>
+                  <Label htmlFor="edit-physicalLocation">
+                    Physical Location
+                  </Label>
                   <Input
                     id="edit-physicalLocation"
                     placeholder="Reception, Front Desk, Room 1..."
                     value={editAsset.physicalLocation}
-                    onChange={(e) => setEditAsset({ ...editAsset, physicalLocation: e.target.value })}
+                    onChange={(e) =>
+                      setEditAsset({
+                        ...editAsset,
+                        physicalLocation: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -1626,7 +1977,9 @@ export default function AssetsPage() {
                     id="edit-floor"
                     placeholder="Ground Floor, 1st Floor..."
                     value={editAsset.floor}
-                    onChange={(e) => setEditAsset({ ...editAsset, floor: e.target.value })}
+                    onChange={(e) =>
+                      setEditAsset({ ...editAsset, floor: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -1634,7 +1987,12 @@ export default function AssetsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-ownershipType">Ownership Type</Label>
-                  <Select value={editAsset.ownershipType} onValueChange={(value: any) => setEditAsset({ ...editAsset, ownershipType: value })}>
+                  <Select
+                    value={editAsset.ownershipType}
+                    onValueChange={(value: any) =>
+                      setEditAsset({ ...editAsset, ownershipType: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1647,7 +2005,12 @@ export default function AssetsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-assignmentType">Assignment Type</Label>
-                  <Select value={editAsset.assignmentType} onValueChange={(value: any) => setEditAsset({ ...editAsset, assignmentType: value })}>
+                  <Select
+                    value={editAsset.assignmentType}
+                    onValueChange={(value: any) =>
+                      setEditAsset({ ...editAsset, assignmentType: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1660,15 +2023,17 @@ export default function AssetsPage() {
               </div>
 
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setIsEditDialogOpen(false)}
                 >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={updateAssetMutation.isPending}>
-                  {updateAssetMutation.isPending ? "Updating..." : "Update Asset"}
+                  {updateAssetMutation.isPending
+                    ? "Updating..."
+                    : "Update Asset"}
                 </Button>
               </DialogFooter>
             </form>
@@ -1676,5 +2041,5 @@ export default function AssetsPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

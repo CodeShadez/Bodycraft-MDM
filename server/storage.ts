@@ -1,26 +1,47 @@
-import { 
-  type Asset, type InsertAsset,
-  type Employee, type InsertEmployee,
-  type Location, type InsertLocation,
-  type Department, type InsertDepartment,
-  type AssetAssignmentHistory, type InsertAssetAssignmentHistory,
-  type AssetMaintenance, type InsertAssetMaintenance,
-  type CctvSystem, type InsertCctvSystem,
-  type BiometricSystem, type InsertBiometricSystem,
-  type Backup, type InsertBackup,
-  type User, type InsertUser,
-  type CompanySettings, type InsertCompanySettings,
-  type AssetType, type InsertAssetType,
-  type ApprovalRequest, type InsertApprovalRequest,
-  type ApprovalAction, type InsertApprovalAction,
-  type Invoice, type InsertInvoice,
-  type ComplianceSignal, type InsertComplianceSignal,
-  type ComplianceRiskScore, type InsertComplianceRiskScore,
-  type AutomationRun, type InsertAutomationRun,
-  type AiRecommendation, type InsertAiRecommendation,
-  type BackupVerification, type InsertBackupVerification,
-  type ComplianceAssignmentQueue, type InsertComplianceAssignmentQueue
-} from "@shared/schema";
+import {
+  type Asset,
+  type InsertAsset,
+  type Employee,
+  type InsertEmployee,
+  type Location,
+  type InsertLocation,
+  type Department,
+  type InsertDepartment,
+  type AssetAssignmentHistory,
+  type InsertAssetAssignmentHistory,
+  type AssetMaintenance,
+  type InsertAssetMaintenance,
+  type CctvSystem,
+  type InsertCctvSystem,
+  type BiometricSystem,
+  type InsertBiometricSystem,
+  type Backup,
+  type InsertBackup,
+  type User,
+  type InsertUser,
+  type CompanySettings,
+  type InsertCompanySettings,
+  type AssetType,
+  type InsertAssetType,
+  type ApprovalRequest,
+  type InsertApprovalRequest,
+  type ApprovalAction,
+  type InsertApprovalAction,
+  type Invoice,
+  type InsertInvoice,
+  type ComplianceSignal,
+  type InsertComplianceSignal,
+  type ComplianceRiskScore,
+  type InsertComplianceRiskScore,
+  type AutomationRun,
+  type InsertAutomationRun,
+  type AiRecommendation,
+  type InsertAiRecommendation,
+  type BackupVerification,
+  type InsertBackupVerification,
+  type ComplianceAssignmentQueue,
+  type InsertComplianceAssignmentQueue,
+} from "@shared/schema-sqlite";
 
 // BODYCRAFT MDM Storage Interface
 export interface IStorage {
@@ -28,58 +49,91 @@ export interface IStorage {
   getAsset(assetId: string): Promise<Asset | undefined>;
   getAllAssets(): Promise<Asset[]>;
   createAsset(asset: InsertAsset): Promise<Asset>;
-  updateAsset(assetId: string, asset: Partial<InsertAsset>): Promise<Asset | undefined>;
+  updateAsset(
+    assetId: string,
+    asset: Partial<InsertAsset>,
+  ): Promise<Asset | undefined>;
   deleteAsset(assetId: string): Promise<boolean>;
-  
+
   // Employees
   getEmployee(id: number): Promise<Employee | undefined>;
   getAllEmployees(): Promise<Employee[]>;
   createEmployee(employee: InsertEmployee): Promise<Employee>;
-  updateEmployee(id: number, employee: Partial<InsertEmployee>): Promise<Employee | undefined>;
+  updateEmployee(
+    id: number,
+    employee: Partial<InsertEmployee>,
+  ): Promise<Employee | undefined>;
   deleteEmployee(id: number): Promise<boolean>;
-  
+
   // Locations
   getLocation(id: number): Promise<Location | undefined>;
   getAllLocations(): Promise<Location[]>;
   createLocation(location: InsertLocation): Promise<Location>;
-  updateLocation(id: number, location: Partial<InsertLocation>): Promise<Location | undefined>;
+  updateLocation(
+    id: number,
+    location: Partial<InsertLocation>,
+  ): Promise<Location | undefined>;
   deleteLocation(id: number): Promise<boolean>;
-  
+
   // Departments
   getDepartment(id: number): Promise<Department | undefined>;
   getAllDepartments(): Promise<Department[]>;
   createDepartment(department: InsertDepartment): Promise<Department>;
-  updateDepartment(id: number, department: Partial<InsertDepartment>): Promise<Department | undefined>;
+  updateDepartment(
+    id: number,
+    department: Partial<InsertDepartment>,
+  ): Promise<Department | undefined>;
   deleteDepartment(id: number): Promise<boolean>;
-  
+
   // Assignment History
-  getAssignmentHistory(assetId?: string, employeeId?: number): Promise<AssetAssignmentHistory[]>;
-  createAssignment(assignment: InsertAssetAssignmentHistory): Promise<AssetAssignmentHistory>;
-  
+  getAssignmentHistory(
+    assetId?: string,
+    employeeId?: number,
+  ): Promise<AssetAssignmentHistory[]>;
+  createAssignment(
+    assignment: InsertAssetAssignmentHistory,
+  ): Promise<AssetAssignmentHistory>;
+
   // Maintenance
   getMaintenanceRecords(assetId?: string): Promise<AssetMaintenance[]>;
-  createMaintenanceRecord(maintenance: InsertAssetMaintenance): Promise<AssetMaintenance>;
-  updateMaintenanceRecord(id: number, maintenance: Partial<InsertAssetMaintenance>): Promise<AssetMaintenance | undefined>;
+  createMaintenanceRecord(
+    maintenance: InsertAssetMaintenance,
+  ): Promise<AssetMaintenance>;
+  updateMaintenanceRecord(
+    id: number,
+    maintenance: Partial<InsertAssetMaintenance>,
+  ): Promise<AssetMaintenance | undefined>;
   deleteMaintenanceRecord(id: number): Promise<boolean>;
-  
+
   // CCTV Systems
   getAllCctvSystems(): Promise<CctvSystem[]>;
   createCctvSystem(system: InsertCctvSystem): Promise<CctvSystem>;
-  updateCctvSystem(id: number, system: Partial<InsertCctvSystem>): Promise<CctvSystem | undefined>;
+  updateCctvSystem(
+    id: number,
+    system: Partial<InsertCctvSystem>,
+  ): Promise<CctvSystem | undefined>;
   deleteCctvSystem(id: number): Promise<boolean>;
-  
+
   // Biometric Systems
   getAllBiometricSystems(): Promise<BiometricSystem[]>;
-  createBiometricSystem(system: InsertBiometricSystem): Promise<BiometricSystem>;
-  updateBiometricSystem(id: number, system: Partial<InsertBiometricSystem>): Promise<BiometricSystem | undefined>;
+  createBiometricSystem(
+    system: InsertBiometricSystem,
+  ): Promise<BiometricSystem>;
+  updateBiometricSystem(
+    id: number,
+    system: Partial<InsertBiometricSystem>,
+  ): Promise<BiometricSystem | undefined>;
   deleteBiometricSystem(id: number): Promise<boolean>;
-  
+
   // Backups
   getBackups(assetId?: string): Promise<Backup[]>;
   createBackup(backup: InsertBackup): Promise<Backup>;
-  updateBackup(id: number, backup: Partial<InsertBackup>): Promise<Backup | undefined>;
+  updateBackup(
+    id: number,
+    backup: Partial<InsertBackup>,
+  ): Promise<Backup | undefined>;
   deleteBackup(id: number): Promise<boolean>;
-  
+
   // Users (Authentication & Management)
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
@@ -87,38 +141,57 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
-  
+
   // Company Settings
   getCompanySettings(): Promise<CompanySettings | undefined>;
-  updateCompanySettings(settings: Partial<InsertCompanySettings>): Promise<CompanySettings>;
-  
+  updateCompanySettings(
+    settings: Partial<InsertCompanySettings>,
+  ): Promise<CompanySettings>;
+
   // Asset Types
   getAllAssetTypes(): Promise<AssetType[]>;
   createAssetType(assetType: InsertAssetType): Promise<AssetType>;
-  
+
   // Approval Requests
   getApprovalRequest(id: number): Promise<ApprovalRequest | undefined>;
-  getAllApprovalRequests(filters?: { status?: string; requestedBy?: number }): Promise<ApprovalRequest[]>;
-  createApprovalRequest(request: InsertApprovalRequest): Promise<ApprovalRequest>;
-  updateApprovalRequest(id: number, request: Partial<InsertApprovalRequest>): Promise<ApprovalRequest | undefined>;
-  
+  getAllApprovalRequests(filters?: {
+    status?: string;
+    requestedBy?: number;
+  }): Promise<ApprovalRequest[]>;
+  createApprovalRequest(
+    request: InsertApprovalRequest,
+  ): Promise<ApprovalRequest>;
+  updateApprovalRequest(
+    id: number,
+    request: Partial<InsertApprovalRequest>,
+  ): Promise<ApprovalRequest | undefined>;
+
   // Approval Actions
   getApprovalActions(requestId: number): Promise<ApprovalAction[]>;
   createApprovalAction(action: InsertApprovalAction): Promise<ApprovalAction>;
-  
+
   // Invoices
   getAllInvoices(): Promise<Invoice[]>;
   getInvoice(id: number): Promise<Invoice | undefined>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
-  updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
+  updateInvoice(
+    id: number,
+    invoice: Partial<InsertInvoice>,
+  ): Promise<Invoice | undefined>;
   deleteInvoice(id: number): Promise<boolean>;
-  
+
   // Dashboard Statistics
   getDashboardStats(): Promise<any>;
   getRecentActivities(limit?: number): Promise<any[]>;
-  
+
   // Compliance Management
-  getComplianceTasks(filters?: { status?: string; priority?: string; taskType?: string; locationId?: number; overdueOnly?: boolean }): Promise<any[]>;
+  getComplianceTasks(filters?: {
+    status?: string;
+    priority?: string;
+    taskType?: string;
+    locationId?: number;
+    overdueOnly?: boolean;
+  }): Promise<any[]>;
   getComplianceTask(id: number): Promise<any | undefined>;
   createComplianceTask(task: any): Promise<any>;
   updateComplianceTask(id: number, task: any): Promise<any | undefined>;
@@ -127,25 +200,42 @@ export interface IStorage {
   uploadComplianceEvidence(evidence: any): Promise<any>;
   createComplianceAuditTrail(trail: any): Promise<any>;
   getComplianceAuditTrail(taskId: number): Promise<any[]>;
-  
+
   // Phase 2: Advanced Analytics
-  getPredictiveMaintenance(locationId: number | null, assetType: string | null, riskLevel: string | null): Promise<any[]>;
+  getPredictiveMaintenance(
+    locationId: number | null,
+    assetType: string | null,
+    riskLevel: string | null,
+  ): Promise<any[]>;
   getUtilizationOptimization(): Promise<any>;
   getLocationPerformanceAnalytics(): Promise<any[]>;
   createAssetTransfer(transfer: any): Promise<any>;
   getRealTimeDashboardData(): Promise<any>;
   getDashboardTrends(metric: string, period: string): Promise<any[]>;
-  
+
   // AI Compliance Automation
-  createComplianceSignal(signal: InsertComplianceSignal): Promise<ComplianceSignal>;
-  getActiveComplianceSignals(filters?: { locationId?: number; severity?: string }): Promise<ComplianceSignal[]>;
+  createComplianceSignal(
+    signal: InsertComplianceSignal,
+  ): Promise<ComplianceSignal>;
+  getActiveComplianceSignals(filters?: {
+    locationId?: number;
+    severity?: string;
+  }): Promise<ComplianceSignal[]>;
   resolveComplianceSignal(signalId: number): Promise<ComplianceSignal>;
-  
-  createComplianceRiskScore(score: InsertComplianceRiskScore): Promise<ComplianceRiskScore>;
-  getLatestRiskScores(filters?: { locationId?: number; assetId?: string }): Promise<ComplianceRiskScore[]>;
-  
+
+  createComplianceRiskScore(
+    score: InsertComplianceRiskScore,
+  ): Promise<ComplianceRiskScore>;
+  getLatestRiskScores(filters?: {
+    locationId?: number;
+    assetId?: string;
+  }): Promise<ComplianceRiskScore[]>;
+
   createAutomationRun(run: InsertAutomationRun): Promise<AutomationRun>;
-  updateAutomationRun(id: number, run: Partial<InsertAutomationRun>): Promise<AutomationRun>;
+  updateAutomationRun(
+    id: number,
+    run: Partial<InsertAutomationRun>,
+  ): Promise<AutomationRun>;
   getAutomationRun(id: number): Promise<AutomationRun | undefined>;
   getAutomationRuns(limit?: number): Promise<AutomationRun[]>;
   getAutomationRunSummary(): Promise<{
@@ -158,20 +248,118 @@ export interface IStorage {
     avgExecutionTime: number;
     lastRun: AutomationRun | null;
   }>;
-  
-  createAiRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation>;
-  getAiRecommendations(filters?: { targetType?: string; status?: string; locationId?: number }): Promise<AiRecommendation[]>;
-  updateAiRecommendation(id: number, recommendation: Partial<InsertAiRecommendation>): Promise<AiRecommendation>;
-  
-  createBackupVerification(verification: InsertBackupVerification): Promise<BackupVerification>;
-  getBackupVerifications(filters?: { assetId?: string; status?: string }): Promise<BackupVerification[]>;
+
+  createAiRecommendation(
+    recommendation: InsertAiRecommendation,
+  ): Promise<AiRecommendation>;
+  getAiRecommendations(filters?: {
+    targetType?: string;
+    status?: string;
+    locationId?: number;
+  }): Promise<AiRecommendation[]>;
+  updateAiRecommendation(
+    id: number,
+    recommendation: Partial<InsertAiRecommendation>,
+  ): Promise<AiRecommendation>;
+
+  createBackupVerification(
+    verification: InsertBackupVerification,
+  ): Promise<BackupVerification>;
+  getBackupVerifications(filters?: {
+    assetId?: string;
+    status?: string;
+  }): Promise<BackupVerification[]>;
   getDueBackupVerifications(): Promise<BackupVerification[]>;
-  
-  createComplianceAssignment(assignment: InsertComplianceAssignmentQueue): Promise<ComplianceAssignmentQueue>;
-  getComplianceAssignments(filters?: { userId?: number; status?: string }): Promise<ComplianceAssignmentQueue[]>;
+
+  createComplianceAssignment(
+    assignment: InsertComplianceAssignmentQueue,
+  ): Promise<ComplianceAssignmentQueue>;
+  getComplianceAssignments(filters?: {
+    userId?: number;
+    status?: string;
+  }): Promise<ComplianceAssignmentQueue[]>;
 }
 
 export class MemStorage implements IStorage {
+  // --- STUBS FOR ALL MISSING IStorage METHODS ---
+  async getDepartment(id: number): Promise<Department | undefined> { return undefined; }
+  async getAllDepartments(): Promise<Department[]> { return []; }
+  async createDepartment(department: InsertDepartment): Promise<Department> { return {} as Department; }
+  async updateDepartment(id: number, department: Partial<InsertDepartment>): Promise<Department | undefined> { return undefined; }
+  async deleteDepartment(id: number): Promise<boolean> { return false; }
+  // async getAssignmentHistory(assetId?: string, employeeId?: number): Promise<AssetAssignmentHistory[]> { return []; }
+  // async createAssignment(assignment: InsertAssetAssignmentHistory): Promise<AssetAssignmentHistory> { return {} as AssetAssignmentHistory; }
+  // async getMaintenanceRecords(assetId?: string): Promise<AssetMaintenance[]> { return []; }
+  // async createMaintenanceRecord(maintenance: InsertAssetMaintenance): Promise<AssetMaintenance> { return {} as AssetMaintenance; }
+  // async updateMaintenanceRecord(id: number, maintenance: Partial<InsertAssetMaintenance>): Promise<AssetMaintenance | undefined> { return undefined; }
+  // async deleteMaintenanceRecord(id: number): Promise<boolean> { return false; }
+  async getAllCctvSystems(): Promise<CctvSystem[]> { return []; }
+  async getCctvSystem(id: number): Promise<CctvSystem | undefined> { return undefined; }
+  async createCctvSystem(system: InsertCctvSystem): Promise<CctvSystem> { return {} as CctvSystem; }
+  async updateCctvSystem(id: number, system: Partial<InsertCctvSystem>): Promise<CctvSystem | undefined> { return undefined; }
+  async deleteCctvSystem(id: number): Promise<boolean> { return false; }
+  async getAllBiometricSystems(): Promise<BiometricSystem[]> { return []; }
+  async getBiometricSystem(id: number): Promise<BiometricSystem | undefined> { return undefined; }
+  async createBiometricSystem(system: InsertBiometricSystem): Promise<BiometricSystem> { return {} as BiometricSystem; }
+  async updateBiometricSystem(id: number, system: Partial<InsertBiometricSystem>): Promise<BiometricSystem | undefined> { return undefined; }
+  async deleteBiometricSystem(id: number): Promise<boolean> { return false; }
+  async getBackups(): Promise<Backup[]> { return []; }
+  async getBackup(id: number): Promise<Backup | undefined> { return undefined; }
+  async createBackup(backup: InsertBackup): Promise<Backup> { return {} as Backup; }
+  async updateBackup(id: number, backup: Partial<InsertBackup>): Promise<Backup | undefined> { return undefined; }
+  async deleteBackup(id: number): Promise<boolean> { return false; }
+  async getUser(id: number): Promise<User | undefined> { return undefined; }
+  async getAllUsers(): Promise<User[]> { return []; }
+  async createUser(user: InsertUser): Promise<User> { return {} as User; }
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> { return undefined; }
+  async deleteUser(id: number): Promise<boolean> { return false; }
+  async getCompanySettings(): Promise<CompanySettings | undefined> { return undefined; }
+  async updateCompanySettings(settings: Partial<InsertCompanySettings>): Promise<CompanySettings | undefined> { return undefined; }
+  async getAssetType(id: number): Promise<AssetType | undefined> { return undefined; }
+  async getAllAssetTypes(): Promise<AssetType[]> { return []; }
+  async createAssetType(assetType: InsertAssetType): Promise<AssetType> { return {} as AssetType; }
+  async updateAssetType(id: number, assetType: Partial<InsertAssetType>): Promise<AssetType | undefined> { return undefined; }
+  async deleteAssetType(id: number): Promise<boolean> { return false; }
+  async getInvoice(id: number): Promise<Invoice | undefined> { return undefined; }
+  async getAllInvoices(): Promise<Invoice[]> { return []; }
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> { return {} as Invoice; }
+  async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> { return undefined; }
+  async deleteInvoice(id: number): Promise<boolean> { return false; }
+  async getDashboardStats(): Promise<any> { return {}; }
+  async getRecentActivities(limit?: number): Promise<any[]> { return []; }
+  async getComplianceTasks(filters?: any): Promise<any[]> { return []; }
+  async getComplianceTask(id: number): Promise<any | undefined> { return undefined; }
+  async createComplianceTask(task: any): Promise<any> { return {}; }
+  async updateComplianceTask(id: number, task: any): Promise<any | undefined> { return undefined; }
+  async deleteComplianceTask(id: number): Promise<boolean> { return false; }
+  async getComplianceDashboardStats(locationId?: number): Promise<any> { return {}; }
+  async uploadComplianceEvidence(evidence: any): Promise<any> { return {}; }
+  async createComplianceAuditTrail(trail: any): Promise<any> { return {}; }
+  async getComplianceAuditTrail(taskId: number): Promise<any[]> { return []; }
+  async getPredictiveMaintenance(locationId: number | null, assetType: string | null, riskLevel: string | null): Promise<any[]> { return []; }
+  async getUtilizationOptimization(): Promise<any> { return {}; }
+  async getLocationPerformanceAnalytics(): Promise<any[]> { return []; }
+  async createAssetTransfer(transfer: any): Promise<any> { return {}; }
+  async getRealTimeDashboardData(): Promise<any> { return {}; }
+  async getDashboardTrends(metric: string, period: string): Promise<any[]> { return []; }
+  async createComplianceSignal(signal: InsertComplianceSignal): Promise<ComplianceSignal> { return {} as ComplianceSignal; }
+  async getActiveComplianceSignals(filters?: any): Promise<ComplianceSignal[]> { return []; }
+  async resolveComplianceSignal(signalId: number): Promise<ComplianceSignal> { return {} as ComplianceSignal; }
+  async createComplianceRiskScore(score: InsertComplianceRiskScore): Promise<ComplianceRiskScore> { return {} as ComplianceRiskScore; }
+  async getLatestRiskScores(filters?: any): Promise<ComplianceRiskScore[]> { return []; }
+  async createAutomationRun(run: InsertAutomationRun): Promise<AutomationRun> { return {} as AutomationRun; }
+  async updateAutomationRun(id: number, run: Partial<InsertAutomationRun>): Promise<AutomationRun> { return {} as AutomationRun; }
+  async getAutomationRun(id: number): Promise<AutomationRun | undefined> { return undefined; }
+  async getAutomationRuns(limit?: number): Promise<AutomationRun[]> { return []; }
+  async getAutomationRunSummary(): Promise<{ total: number; successful: number; failed: number; successRate: number; totalTasksGenerated: number; totalRisksDetected: number; avgExecutionTime: number; lastRun: AutomationRun | null; }> { return { total: 0, successful: 0, failed: 0, successRate: 0, totalTasksGenerated: 0, totalRisksDetected: 0, avgExecutionTime: 0, lastRun: null }; }
+  async createAiRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation> { return {} as AiRecommendation; }
+  async getAiRecommendations(filters?: any): Promise<AiRecommendation[]> { return []; }
+  async updateAiRecommendation(id: number, recommendation: Partial<InsertAiRecommendation>): Promise<AiRecommendation> { return {} as AiRecommendation; }
+  async createBackupVerification(verification: InsertBackupVerification): Promise<BackupVerification> { return {} as BackupVerification; }
+  async getBackupVerifications(filters?: any): Promise<BackupVerification[]> { return []; }
+  async getDueBackupVerifications(): Promise<BackupVerification[]> { return []; }
+  async createComplianceAssignment(assignment: InsertComplianceAssignmentQueue): Promise<ComplianceAssignmentQueue> { return {} as ComplianceAssignmentQueue; }
+  async getComplianceAssignments(filters?: any): Promise<ComplianceAssignmentQueue[]> { return []; }
   private assets: Map<string, Asset>;
   private employees: Map<number, Employee>;
   private locations: Map<number, Location>;
@@ -180,7 +368,7 @@ export class MemStorage implements IStorage {
   private cctvSystems: Map<number, CctvSystem>;
   private biometricSystems: Map<number, BiometricSystem>;
   private backups: Backup[];
-  
+
   // Counters for auto-increment IDs
   private nextEmployeeId: number = 1;
   private nextLocationId: number = 1;
@@ -199,7 +387,7 @@ export class MemStorage implements IStorage {
     this.cctvSystems = new Map();
     this.biometricSystems = new Map();
     this.backups = [];
-    
+
     // Initialize with sample data
     this.initializeSampleData();
   }
@@ -215,34 +403,45 @@ export class MemStorage implements IStorage {
 
   async createAsset(insertAsset: InsertAsset): Promise<Asset> {
     const asset: Asset = {
-      ...insertAsset,
-      status: insertAsset.status || "available",
-      condition: insertAsset.condition || "good",
+      assetId: insertAsset.assetId,
+      modelName: insertAsset.modelName,
+      brand: insertAsset.brand,
       serviceTag: insertAsset.serviceTag || null,
+      assetType: insertAsset.assetType,
       purchaseDate: insertAsset.purchaseDate || null,
       warrantyExpiry: insertAsset.warrantyExpiry || null,
-      locationId: insertAsset.locationId || null,
-      currentUserId: insertAsset.currentUserId || null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      status: insertAsset.status || "available",
+      condition: insertAsset.condition || "good",
+      departmentId: insertAsset.departmentId ?? null,
+      physicalLocation: insertAsset.physicalLocation ?? null,
+      floor: insertAsset.floor ?? null,
+      ownershipType: insertAsset.ownershipType || "company",
+      assignmentType: insertAsset.assignmentType || "person",
+      locationId: insertAsset.locationId ?? null,
+      currentUserId: insertAsset.currentUserId ?? null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     this.assets.set(asset.assetId, asset);
     return asset;
   }
 
-  async updateAsset(assetId: string, updateData: Partial<InsertAsset>): Promise<Asset | undefined> {
+  async updateAsset(
+    assetId: string,
+    updateData: Partial<InsertAsset>,
+  ): Promise<Asset | undefined> {
     const existing = this.assets.get(assetId);
     if (!existing) return undefined;
-    
+
     // Prevent assetId changes as suggested by architect
     const { assetId: _, ...safeUpdateData } = updateData;
-    
+
     const updated: Asset = {
       ...existing,
       ...safeUpdateData,
       assetId: existing.assetId, // Preserve original asset ID
       createdAt: existing.createdAt, // Preserve creation date
-      updatedAt: new Date(),
+  updatedAt: new Date().toISOString(),
     };
     this.assets.set(assetId, updated);
     return updated;
@@ -273,18 +472,21 @@ export class MemStorage implements IStorage {
       phone: insertEmployee.phone || null,
       status: insertEmployee.status || "active",
       locationId: insertEmployee.locationId || null,
-      createdAt: new Date(),
+  createdAt: new Date().toISOString(),
     };
     this.employees.set(employee.id, employee);
     return employee;
   }
 
-  async updateEmployee(id: number, updateData: Partial<InsertEmployee>): Promise<Employee | undefined> {
+  async updateEmployee(
+    id: number,
+    updateData: Partial<InsertEmployee>,
+  ): Promise<Employee | undefined> {
     const existing = this.employees.get(id);
     if (!existing) return undefined;
-    
-    const updated: Employee = { 
-      ...existing, 
+
+    const updated: Employee = {
+      ...existing,
       ...updateData,
       id: existing.id, // Prevent ID changes
       createdAt: existing.createdAt, // Preserve creation date
@@ -315,18 +517,21 @@ export class MemStorage implements IStorage {
       address: insertLocation.address || null,
       managerName: insertLocation.managerName || null,
       contactDetails: insertLocation.contactDetails || null,
-      createdAt: new Date(),
+  createdAt: new Date().toISOString(),
     };
     this.locations.set(location.id, location);
     return location;
   }
 
-  async updateLocation(id: number, updateData: Partial<InsertLocation>): Promise<Location | undefined> {
+  async updateLocation(
+    id: number,
+    updateData: Partial<InsertLocation>,
+  ): Promise<Location | undefined> {
     const existing = this.locations.get(id);
     if (!existing) return undefined;
-    
-    const updated: Location = { 
-      ...existing, 
+
+    const updated: Location = {
+      ...existing,
       ...updateData,
       id: existing.id, // Prevent ID changes
       createdAt: existing.createdAt, // Preserve creation date
@@ -340,21 +545,26 @@ export class MemStorage implements IStorage {
   }
 
   // Assignment History
-  async getAssignmentHistory(assetId?: string, employeeId?: number): Promise<AssetAssignmentHistory[]> {
+  async getAssignmentHistory(
+    assetId?: string,
+    employeeId?: number,
+  ): Promise<AssetAssignmentHistory[]> {
     let filtered = this.assignmentHistory;
-    
+
     if (assetId) {
-      filtered = filtered.filter(h => h.assetId === assetId);
+      filtered = filtered.filter((h) => h.assetId === assetId);
     }
-    
+
     if (employeeId) {
-      filtered = filtered.filter(h => h.employeeId === employeeId);
+      filtered = filtered.filter((h) => h.employeeId === employeeId);
     }
-    
+
     return filtered;
   }
 
-  async createAssignment(insertAssignment: InsertAssetAssignmentHistory): Promise<AssetAssignmentHistory> {
+  async createAssignment(
+    insertAssignment: InsertAssetAssignmentHistory,
+  ): Promise<AssetAssignmentHistory> {
     const assignment: AssetAssignmentHistory = {
       id: this.nextAssignmentId++,
       assetId: insertAssignment.assetId,
@@ -367,7 +577,7 @@ export class MemStorage implements IStorage {
       conditionOnReturn: insertAssignment.conditionOnReturn || null,
       backupDetails: insertAssignment.backupDetails || null,
       createdBy: insertAssignment.createdBy || null,
-      createdAt: new Date(),
+  createdAt: new Date().toISOString(),
     };
     this.assignmentHistory.push(assignment);
     return assignment;
@@ -376,12 +586,14 @@ export class MemStorage implements IStorage {
   // Maintenance
   async getMaintenanceRecords(assetId?: string): Promise<AssetMaintenance[]> {
     if (assetId) {
-      return this.maintenance.filter(m => m.assetId === assetId);
+      return this.maintenance.filter((m) => m.assetId === assetId);
     }
     return this.maintenance;
   }
 
-  async createMaintenanceRecord(insertMaintenance: InsertAssetMaintenance): Promise<AssetMaintenance> {
+  async createMaintenanceRecord(
+    insertMaintenance: InsertAssetMaintenance,
+  ): Promise<AssetMaintenance> {
     const maintenance: AssetMaintenance = {
       id: this.nextMaintenanceId++,
       assetId: insertMaintenance.assetId,
@@ -392,23 +604,29 @@ export class MemStorage implements IStorage {
       cost: insertMaintenance.cost || null,
       technicianName: insertMaintenance.technicianName || null,
       partsReplaced: insertMaintenance.partsReplaced || null,
-      createdAt: new Date(),
+  createdAt: new Date().toISOString(),
     };
     this.maintenance.push(maintenance);
     return maintenance;
   }
 
-  async updateMaintenanceRecord(id: number, updateData: Partial<InsertAssetMaintenance>): Promise<AssetMaintenance | undefined> {
-    const index = this.maintenance.findIndex(m => m.id === id);
+  async updateMaintenanceRecord(
+    id: number,
+    updateData: Partial<InsertAssetMaintenance>,
+  ): Promise<AssetMaintenance | undefined> {
+    const index = this.maintenance.findIndex((m) => m.id === id);
     if (index === -1) return undefined;
-    
-    const updated: AssetMaintenance = { ...this.maintenance[index], ...updateData };
+
+    const updated: AssetMaintenance = {
+      ...this.maintenance[index],
+      ...updateData,
+    };
     this.maintenance[index] = updated;
     return updated;
   }
 
   async deleteMaintenanceRecord(id: number): Promise<boolean> {
-    const index = this.maintenance.findIndex(m => m.id === id);
+    const index = this.maintenance.findIndex((m) => m.id === id);
     if (index === -1) return false;
     this.maintenance.splice(index, 1);
     return true;
@@ -430,16 +648,19 @@ export class MemStorage implements IStorage {
       status: insertSystem.status || "online",
       lastOnline: insertSystem.lastOnline || null,
       locationId: insertSystem.locationId || null,
-      createdAt: new Date(),
+  createdAt: new Date().toISOString(),
     };
     this.cctvSystems.set(system.id, system);
     return system;
   }
 
-  async updateCctvSystem(id: number, updateData: Partial<InsertCctvSystem>): Promise<CctvSystem | undefined> {
+  async updateCctvSystem(
+    id: number,
+    updateData: Partial<InsertCctvSystem>,
+  ): Promise<CctvSystem | undefined> {
     const existing = this.cctvSystems.get(id);
     if (!existing) return undefined;
-    
+
     const updated: CctvSystem = { ...existing, ...updateData };
     this.cctvSystems.set(id, updated);
     return updated;
@@ -454,27 +675,32 @@ export class MemStorage implements IStorage {
     return Array.from(this.biometricSystems.values());
   }
 
-  async createBiometricSystem(insertSystem: InsertBiometricSystem): Promise<BiometricSystem> {
+  async createBiometricSystem(
+    insertSystem: InsertBiometricSystem,
+  ): Promise<BiometricSystem> {
     const system: BiometricSystem = {
       id: this.nextBiometricId++,
       deviceName: insertSystem.deviceName,
       deviceModel: insertSystem.deviceModel || null,
       ipAddress: insertSystem.ipAddress || null,
       locationDetails: insertSystem.locationDetails || null,
-      employeeCount: insertSystem.employeeCount ?? 0,  // Fix: Use nullish coalescing to handle 0 properly
+      employeeCount: insertSystem.employeeCount ?? 0, // Fix: Use nullish coalescing to handle 0 properly
       lastSyncDate: insertSystem.lastSyncDate || null,
       status: insertSystem.status || "online",
       locationId: insertSystem.locationId || null,
-      createdAt: new Date(),
+  createdAt: new Date().toISOString(),
     };
     this.biometricSystems.set(system.id, system);
     return system;
   }
 
-  async updateBiometricSystem(id: number, updateData: Partial<InsertBiometricSystem>): Promise<BiometricSystem | undefined> {
+  async updateBiometricSystem(
+    id: number,
+    updateData: Partial<InsertBiometricSystem>,
+  ): Promise<BiometricSystem | undefined> {
     const existing = this.biometricSystems.get(id);
     if (!existing) return undefined;
-    
+
     const updated: BiometricSystem = { ...existing, ...updateData };
     this.biometricSystems.set(id, updated);
     return updated;
@@ -487,7 +713,7 @@ export class MemStorage implements IStorage {
   // Backups
   async getBackups(assetId?: string): Promise<Backup[]> {
     if (assetId) {
-      return this.backups.filter(b => b.assetId === assetId);
+      return this.backups.filter((b) => b.assetId === assetId);
     }
     return this.backups;
   }
@@ -502,23 +728,26 @@ export class MemStorage implements IStorage {
       backupType: insertBackup.backupType || null,
       backupLocation: insertBackup.backupLocation || null,
       performedBy: insertBackup.performedBy || null,
-      createdAt: new Date(),
+  createdAt: new Date().toISOString(),
     };
     this.backups.push(backup);
     return backup;
   }
 
-  async updateBackup(id: number, updateData: Partial<InsertBackup>): Promise<Backup | undefined> {
-    const index = this.backups.findIndex(b => b.id === id);
+  async updateBackup(
+    id: number,
+    updateData: Partial<InsertBackup>,
+  ): Promise<Backup | undefined> {
+    const index = this.backups.findIndex((b) => b.id === id);
     if (index === -1) return undefined;
-    
+
     const updated: Backup = { ...this.backups[index], ...updateData };
     this.backups[index] = updated;
     return updated;
   }
 
   async deleteBackup(id: number): Promise<boolean> {
-    const index = this.backups.findIndex(b => b.id === id);
+    const index = this.backups.findIndex((b) => b.id === id);
     if (index === -1) return false;
     this.backups.splice(index, 1);
     return true;
@@ -527,71 +756,235 @@ export class MemStorage implements IStorage {
   private initializeSampleData() {
     // Sample locations
     const locations = [
-      { outletName: "JP Nagar", city: "Bangalore", state: "Karnataka", managerName: "Rajesh Kumar", contactDetails: "rajesh@bodycraft.com" },
-      { outletName: "Koramangala", city: "Bangalore", state: "Karnataka", managerName: "Priya Sharma", contactDetails: "priya@bodycraft.com" },
-      { outletName: "Indiranagar", city: "Bangalore", state: "Karnataka", managerName: "Amit Singh", contactDetails: "amit@bodycraft.com" },
+      {
+        outletName: "JP Nagar",
+        city: "Bangalore",
+        state: "Karnataka",
+        managerName: "Rajesh Kumar",
+        contactDetails: "rajesh@bodycraft.com",
+      },
+      {
+        outletName: "Koramangala",
+        city: "Bangalore",
+        state: "Karnataka",
+        managerName: "Priya Sharma",
+        contactDetails: "priya@bodycraft.com",
+      },
+      {
+        outletName: "Indiranagar",
+        city: "Bangalore",
+        state: "Karnataka",
+        managerName: "Amit Singh",
+        contactDetails: "amit@bodycraft.com",
+      },
     ];
 
-    locations.forEach(loc => {
+    locations.forEach((loc) => {
       const location: Location = {
         ...loc,
         id: this.nextLocationId++,
         address: null,
-        createdAt: new Date(),
+  createdAt: new Date().toISOString(),
       };
       this.locations.set(location.id, location);
     });
 
     // Sample employees
     const employees = [
-      { employeeCode: "BFC2024001", firstName: "Rajesh", lastName: "Kumar", department: "IT", designation: "Manager", email: "rajesh@bodycraft.com", status: "active", locationId: 1 },
-      { employeeCode: "BFC2024002", firstName: "Priya", lastName: "Sharma", department: "Sales", designation: "Executive", email: "priya@bodycraft.com", status: "active", locationId: 2 },
-      { employeeCode: "BFC2024003", firstName: "Amit", lastName: "Singh", department: "Operations", designation: "Specialist", email: "amit@bodycraft.com", status: "active", locationId: 3 },
-      { employeeCode: "BFC2024004", firstName: "Sunita", lastName: "Reddy", department: "Marketing", designation: "Specialist", email: "sunita@bodycraft.com", status: "active", locationId: 1 },
+      {
+        employeeCode: "BFC2024001",
+        firstName: "Rajesh",
+        lastName: "Kumar",
+        department: "IT",
+        designation: "Manager",
+        email: "rajesh@bodycraft.com",
+        status: "active",
+        locationId: 1,
+      },
+      {
+        employeeCode: "BFC2024002",
+        firstName: "Priya",
+        lastName: "Sharma",
+        department: "Sales",
+        designation: "Executive",
+        email: "priya@bodycraft.com",
+        status: "active",
+        locationId: 2,
+      },
+      {
+        employeeCode: "BFC2024003",
+        firstName: "Amit",
+        lastName: "Singh",
+        department: "Operations",
+        designation: "Specialist",
+        email: "amit@bodycraft.com",
+        status: "active",
+        locationId: 3,
+      },
+      {
+        employeeCode: "BFC2024004",
+        firstName: "Sunita",
+        lastName: "Reddy",
+        department: "Marketing",
+        designation: "Specialist",
+        email: "sunita@bodycraft.com",
+        status: "active",
+        locationId: 1,
+      },
     ];
 
-    employees.forEach(emp => {
+    employees.forEach((emp) => {
       const employee: Employee = {
         ...emp,
         id: this.nextEmployeeId++,
         phone: null,
-        createdAt: new Date(),
+  createdAt: new Date().toISOString(),
       };
       this.employees.set(employee.id, employee);
     });
 
     // Sample assets
     const assets = [
-      { assetId: "BFC001", modelName: "ThinkPad E15", brand: "Lenovo", serviceTag: "LEN001", assetType: "Laptop", status: "assigned", condition: "good", locationId: 1, currentUserId: 1 },
-      { assetId: "BFC002", modelName: "OptiPlex 3080", brand: "Dell", serviceTag: "DELL002", assetType: "Desktop", status: "available", condition: "excellent", locationId: 1, currentUserId: null },
-      { assetId: "BFC003", modelName: "Surface Pro 8", brand: "Microsoft", serviceTag: "MS003", assetType: "Laptop", status: "assigned", condition: "good", locationId: 2, currentUserId: 2 },
-      { assetId: "BFC004", modelName: "UZ2450", brand: "Dell", serviceTag: "DELL004", assetType: "Monitor", status: "available", condition: "good", locationId: 2, currentUserId: null },
-      { assetId: "BFC005", modelName: "iPhone 14", brand: "Apple", serviceTag: "APL005", assetType: "Mobile", status: "assigned", condition: "excellent", locationId: 3, currentUserId: 3 },
-      { assetId: "BFC006", modelName: "MacBook Pro 14", brand: "Apple", serviceTag: "APL006", assetType: "Laptop", status: "maintenance", condition: "fair", locationId: 3, currentUserId: null },
-      { assetId: "BFC007", modelName: "ThinkPad X1", brand: "Lenovo", serviceTag: "LEN007", assetType: "Laptop", status: "assigned", condition: "good", locationId: 1, currentUserId: 4 },
+      {
+        assetId: "BFC001",
+        modelName: "ThinkPad E15",
+        brand: "Lenovo",
+        serviceTag: "LEN001",
+        assetType: "Laptop",
+        status: "assigned",
+        condition: "good",
+        locationId: 1,
+        currentUserId: 1,
+      },
+      {
+        assetId: "BFC002",
+        modelName: "OptiPlex 3080",
+        brand: "Dell",
+        serviceTag: "DELL002",
+        assetType: "Desktop",
+        status: "available",
+        condition: "excellent",
+        locationId: 1,
+        currentUserId: null,
+      },
+      {
+        assetId: "BFC003",
+        modelName: "Surface Pro 8",
+        brand: "Microsoft",
+        serviceTag: "MS003",
+        assetType: "Laptop",
+        status: "assigned",
+        condition: "good",
+        locationId: 2,
+        currentUserId: 2,
+      },
+      {
+        assetId: "BFC004",
+        modelName: "UZ2450",
+        brand: "Dell",
+        serviceTag: "DELL004",
+        assetType: "Monitor",
+        status: "available",
+        condition: "good",
+        locationId: 2,
+        currentUserId: null,
+      },
+      {
+        assetId: "BFC005",
+        modelName: "iPhone 14",
+        brand: "Apple",
+        serviceTag: "APL005",
+        assetType: "Mobile",
+        status: "assigned",
+        condition: "excellent",
+        locationId: 3,
+        currentUserId: 3,
+      },
+      {
+        assetId: "BFC006",
+        modelName: "MacBook Pro 14",
+        brand: "Apple",
+        serviceTag: "APL006",
+        assetType: "Laptop",
+        status: "maintenance",
+        condition: "fair",
+        locationId: 3,
+        currentUserId: null,
+      },
+      {
+        assetId: "BFC007",
+        modelName: "ThinkPad X1",
+        brand: "Lenovo",
+        serviceTag: "LEN007",
+        assetType: "Laptop",
+        status: "assigned",
+        condition: "good",
+        locationId: 1,
+        currentUserId: 4,
+      },
     ];
 
-    assets.forEach(asset => {
+    assets.forEach((asset) => {
       const fullAsset: Asset = {
-        ...asset,
+        assetId: asset.assetId,
+        modelName: asset.modelName,
+        brand: asset.brand,
+        serviceTag: asset.serviceTag || null,
+        assetType: asset.assetType,
         purchaseDate: null,
         warrantyExpiry: null,
-        serviceTag: asset.serviceTag,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        status: asset.status,
+        condition: asset.condition,
+        departmentId: null,
+        physicalLocation: null,
+        floor: null,
+        ownershipType: "company",
+        assignmentType: "person",
+        locationId: asset.locationId ?? null,
+        currentUserId: asset.currentUserId ?? null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       this.assets.set(asset.assetId, fullAsset);
     });
 
     // Sample assignment history
     const assignmentHistory = [
-      { assetId: "BFC001", employeeId: 1, assignedDate: "2024-01-15", returnedDate: null, assignmentReason: "New employee setup", createdBy: 1 },
-      { assetId: "BFC003", employeeId: 2, assignedDate: "2024-02-01", returnedDate: null, assignmentReason: "Department transfer", createdBy: 1 },
-      { assetId: "BFC005", employeeId: 3, assignedDate: "2024-02-15", returnedDate: null, assignmentReason: "Business requirement", createdBy: 1 },
-      { assetId: "BFC007", employeeId: 4, assignedDate: "2024-03-01", returnedDate: null, assignmentReason: "New hire equipment", createdBy: 1 },
+      {
+        assetId: "BFC001",
+        employeeId: 1,
+        assignedDate: "2024-01-15",
+        returnedDate: null,
+        assignmentReason: "New employee setup",
+        createdBy: 1,
+      },
+      {
+        assetId: "BFC003",
+        employeeId: 2,
+        assignedDate: "2024-02-01",
+        returnedDate: null,
+        assignmentReason: "Department transfer",
+        createdBy: 1,
+      },
+      {
+        assetId: "BFC005",
+        employeeId: 3,
+        assignedDate: "2024-02-15",
+        returnedDate: null,
+        assignmentReason: "Business requirement",
+        createdBy: 1,
+      },
+      {
+        assetId: "BFC007",
+        employeeId: 4,
+        assignedDate: "2024-03-01",
+        returnedDate: null,
+        assignmentReason: "New hire equipment",
+        createdBy: 1,
+      },
     ];
 
-    assignmentHistory.forEach(hist => {
+    assignmentHistory.forEach((hist) => {
       const assignment: AssetAssignmentHistory = {
         ...hist,
         id: this.nextAssignmentId++,
@@ -599,19 +992,46 @@ export class MemStorage implements IStorage {
         conditionOnAssignment: null,
         conditionOnReturn: null,
         backupDetails: null,
-        createdAt: new Date(),
+  createdAt: new Date().toISOString(),
       };
       this.assignmentHistory.push(assignment);
     });
 
     // Sample maintenance records
     const maintenanceRecords = [
-      { assetId: "BFC006", maintenanceType: "corrective", description: "Screen replacement due to crack", scheduledDate: "2024-03-01", completedDate: "2024-03-02", cost: "15000.00", technicianName: "Ravi Tech Services", partsReplaced: "LCD Screen" },
-      { assetId: "BFC001", maintenanceType: "preventive", description: "Regular cleaning and system check", scheduledDate: "2024-03-15", completedDate: "2024-03-15", cost: "500.00", technicianName: "Internal IT", partsReplaced: null },
-      { assetId: "BFC002", maintenanceType: "upgrade", description: "RAM upgrade from 8GB to 16GB", scheduledDate: "2024-02-20", completedDate: "2024-02-21", cost: "3500.00", technicianName: "Dell Support", partsReplaced: "8GB DDR4 RAM" },
+      {
+        assetId: "BFC006",
+        maintenanceType: "corrective",
+        description: "Screen replacement due to crack",
+        scheduledDate: "2024-03-01",
+        completedDate: "2024-03-02",
+        cost: "15000.00",
+        technicianName: "Ravi Tech Services",
+        partsReplaced: "LCD Screen",
+      },
+      {
+        assetId: "BFC001",
+        maintenanceType: "preventive",
+        description: "Regular cleaning and system check",
+        scheduledDate: "2024-03-15",
+        completedDate: "2024-03-15",
+        cost: "500.00",
+        technicianName: "Internal IT",
+        partsReplaced: null,
+      },
+      {
+        assetId: "BFC002",
+        maintenanceType: "upgrade",
+        description: "RAM upgrade from 8GB to 16GB",
+        scheduledDate: "2024-02-20",
+        completedDate: "2024-02-21",
+        cost: "3500.00",
+        technicianName: "Dell Support",
+        partsReplaced: "8GB DDR4 RAM",
+      },
     ];
 
-    maintenanceRecords.forEach(record => {
+    maintenanceRecords.forEach((record) => {
       const maintenance: AssetMaintenance = {
         id: this.nextMaintenanceId++,
         assetId: record.assetId,
@@ -619,23 +1039,68 @@ export class MemStorage implements IStorage {
         description: record.description,
         scheduledDate: record.scheduledDate,
         completedDate: record.completedDate,
-        cost: record.cost,
+        cost: typeof record.cost === "string" ? parseFloat(record.cost) : record.cost,
         technicianName: record.technicianName,
         partsReplaced: record.partsReplaced,
-        createdAt: new Date(),
+  createdAt: new Date().toISOString(),
       };
       this.maintenance.push(maintenance);
     });
 
     // Sample CCTV systems
-    const cctvSystems = [
-      { deviceName: "JP Nagar Entrance Camera", ipAddress: "192.168.1.101", locationDetails: "Main entrance", username: "admin", passwordHash: "hashed_password_1", status: "online", lastOnline: new Date(), locationId: 1 },
-      { deviceName: "JP Nagar DVR System", ipAddress: "192.168.1.102", locationDetails: "Server room", username: "admin", passwordHash: "hashed_password_2", status: "online", lastOnline: new Date(), locationId: 1 },
-      { deviceName: "Koramangala Reception Cam", ipAddress: "192.168.2.101", locationDetails: "Reception area", username: "admin", passwordHash: "hashed_password_3", status: "online", lastOnline: new Date(), locationId: 2 },
-      { deviceName: "Indiranagar Security DVR", ipAddress: "192.168.3.101", locationDetails: "Security office", username: "admin", passwordHash: "hashed_password_4", status: "offline", lastOnline: null, locationId: 3 },
+    const cctvSystems: Array<{
+      deviceName: string;
+      ipAddress: string;
+      locationDetails: string;
+      username: string;
+      passwordHash: string;
+      status: string;
+      lastOnline: string | Date | null;
+      locationId: number;
+    }> = [
+      {
+        deviceName: "JP Nagar Entrance Camera",
+        ipAddress: "192.168.1.101",
+        locationDetails: "Main entrance",
+        username: "admin",
+        passwordHash: "hashed_password_1",
+        status: "online",
+  lastOnline: new Date().toISOString(),
+        locationId: 1,
+      },
+      {
+        deviceName: "JP Nagar DVR System",
+        ipAddress: "192.168.1.102",
+        locationDetails: "Server room",
+        username: "admin",
+        passwordHash: "hashed_password_2",
+        status: "online",
+  lastOnline: new Date().toISOString(),
+        locationId: 1,
+      },
+      {
+        deviceName: "Koramangala Reception Cam",
+        ipAddress: "192.168.2.101",
+        locationDetails: "Reception area",
+        username: "admin",
+        passwordHash: "hashed_password_3",
+        status: "online",
+  lastOnline: new Date().toISOString(),
+        locationId: 2,
+      },
+      {
+        deviceName: "Indiranagar Security DVR",
+        ipAddress: "192.168.3.101",
+        locationDetails: "Security office",
+        username: "admin",
+        passwordHash: "hashed_password_4",
+        status: "offline",
+        lastOnline: null,
+        locationId: 3,
+      },
     ];
 
-    cctvSystems.forEach(system => {
+    cctvSystems.forEach((system) => {
       const cctvSystem: CctvSystem = {
         id: this.nextCctvId++,
         deviceName: system.deviceName,
@@ -644,21 +1109,48 @@ export class MemStorage implements IStorage {
         username: system.username,
         passwordHash: system.passwordHash,
         status: system.status,
-        lastOnline: system.lastOnline,
+        lastOnline: typeof system.lastOnline === "string" ? system.lastOnline : (system.lastOnline ? system.lastOnline.toISOString() : null),
         locationId: system.locationId,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       };
       this.cctvSystems.set(cctvSystem.id, cctvSystem);
     });
 
     // Sample biometric systems
     const biometricSystems = [
-      { deviceName: "JP Nagar Attendance", deviceModel: "eSSL K30 Pro", ipAddress: "192.168.1.201", locationDetails: "Main entrance", employeeCount: 15, lastSyncDate: new Date(), status: "online", locationId: 1 },
-      { deviceName: "Koramangala Biometric", deviceModel: "ZKTeco F18", ipAddress: "192.168.2.201", locationDetails: "Employee entrance", employeeCount: 12, lastSyncDate: new Date(), status: "online", locationId: 2 },
-      { deviceName: "Indiranagar Access Control", deviceModel: "Realtime T502", ipAddress: "192.168.3.201", locationDetails: "Staff entry", employeeCount: 18, lastSyncDate: new Date(), status: "error", locationId: 3 },
+      {
+        deviceName: "JP Nagar Attendance",
+        deviceModel: "eSSL K30 Pro",
+        ipAddress: "192.168.1.201",
+        locationDetails: "Main entrance",
+        employeeCount: 15,
+  lastSyncDate: new Date().toISOString(),
+        status: "online",
+        locationId: 1,
+      },
+      {
+        deviceName: "Koramangala Biometric",
+        deviceModel: "ZKTeco F18",
+        ipAddress: "192.168.2.201",
+        locationDetails: "Employee entrance",
+        employeeCount: 12,
+        lastSyncDate: new Date(),
+        status: "online",
+        locationId: 2,
+      },
+      {
+        deviceName: "Indiranagar Access Control",
+        deviceModel: "Realtime T502",
+        ipAddress: "192.168.3.201",
+        locationDetails: "Staff entry",
+        employeeCount: 18,
+        lastSyncDate: new Date(),
+        status: "error",
+        locationId: 3,
+      },
     ];
 
-    biometricSystems.forEach(system => {
+    biometricSystems.forEach((system) => {
       const biometricSystem: BiometricSystem = {
         id: this.nextBiometricId++,
         deviceName: system.deviceName,
@@ -666,32 +1158,56 @@ export class MemStorage implements IStorage {
         ipAddress: system.ipAddress,
         locationDetails: system.locationDetails,
         employeeCount: system.employeeCount,
-        lastSyncDate: system.lastSyncDate,
+        lastSyncDate: typeof system.lastSyncDate === "string" ? system.lastSyncDate : system.lastSyncDate.toISOString(),
         status: system.status,
         locationId: system.locationId,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       };
       this.biometricSystems.set(biometricSystem.id, biometricSystem);
     });
 
     // Sample backup records
     const backupRecords = [
-      { assetId: "BFC001", employeeId: 1, backupDate: new Date("2024-01-14"), backupSize: "250GB", backupType: "full", backupLocation: "NAS Server - /backups/users/rajesh", performedBy: 1 },
-      { assetId: "BFC003", employeeId: 2, backupDate: new Date("2024-01-31"), backupSize: "180GB", backupType: "selective", backupLocation: "Cloud Storage - AWS S3", performedBy: 1 },
-      { assetId: "BFC005", employeeId: 3, backupDate: new Date("2024-02-14"), backupSize: "128GB", backupType: "full", backupLocation: "Local Server - /backups/mobile", performedBy: 1 },
+      {
+        assetId: "BFC001",
+        employeeId: 1,
+        backupDate: new Date("2024-01-14"),
+        backupSize: "250GB",
+        backupType: "full",
+        backupLocation: "NAS Server - /backups/users/rajesh",
+        performedBy: 1,
+      },
+      {
+        assetId: "BFC003",
+        employeeId: 2,
+        backupDate: new Date("2024-01-31"),
+        backupSize: "180GB",
+        backupType: "selective",
+        backupLocation: "Cloud Storage - AWS S3",
+        performedBy: 1,
+      },
+      {
+        assetId: "BFC005",
+        employeeId: 3,
+        backupDate: new Date("2024-02-14"),
+        backupSize: "128GB",
+        backupType: "full",
+        backupLocation: "Local Server - /backups/mobile",
+        performedBy: 1,
+      },
     ];
 
-    backupRecords.forEach(record => {
+    backupRecords.forEach((record) => {
       const backup: Backup = {
         id: this.nextBackupId++,
         assetId: record.assetId,
         employeeId: record.employeeId,
-        backupDate: record.backupDate,
+        backupDate: typeof record.backupDate === "string" ? record.backupDate : record.backupDate.toISOString(),
         backupSize: record.backupSize,
         backupType: record.backupType,
         backupLocation: record.backupLocation,
         performedBy: record.performedBy,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       };
       this.backups.push(backup);
     });

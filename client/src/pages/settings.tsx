@@ -1,22 +1,41 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { 
-  Building2, 
-  Users, 
-  Package, 
-  MapPin, 
-  Settings, 
-  Shield, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Building2,
+  Users,
+  Package,
+  MapPin,
+  Settings,
+  Shield,
   Database,
   Bell,
   Upload,
@@ -30,7 +49,7 @@ import {
   Key,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -69,24 +88,30 @@ interface AssetType {
 export default function SettingsPage() {
   const { toast } = useToast();
   const { data: currentUser } = useUser();
-  
+
   // Fetch company settings
-  const { data: companySettings, isLoading: loadingCompanySettings } = useQuery<CompanySettings>({
-    queryKey: ["/api/settings/company"],
-  });
+  const { data: companySettings, isLoading: loadingCompanySettings } =
+    useQuery<CompanySettings>({
+      queryKey: ["/api/settings/company"],
+    });
 
   // Fetch users
   const { data: users, isLoading: loadingUsers } = useQuery<User[]>({
     queryKey: ["/api/users"],
-    enabled: currentUser?.user?.role === 'super_admin' || currentUser?.user?.role === 'admin',
+    enabled:
+      currentUser?.user?.role === "super_admin" ||
+      currentUser?.user?.role === "admin",
   });
 
   // Fetch asset types
-  const { data: assetTypes, isLoading: loadingAssetTypes } = useQuery<AssetType[]>({
+  const { data: assetTypes, isLoading: loadingAssetTypes } = useQuery<
+    AssetType[]
+  >({
     queryKey: ["/api/asset-types"],
   });
 
-  const [editingCompanySettings, setEditingCompanySettings] = useState<CompanySettings | null>(null);
+  const [editingCompanySettings, setEditingCompanySettings] =
+    useState<CompanySettings | null>(null);
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
@@ -112,14 +137,19 @@ export default function SettingsPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Admin password reset state
-  const [adminResetDialog, setAdminResetDialog] = useState<{ open: boolean; user: User | null }>({
+  const [adminResetDialog, setAdminResetDialog] = useState<{
+    open: boolean;
+    user: User | null;
+  }>({
     open: false,
     user: null,
   });
   const [adminResetPassword, setAdminResetPassword] = useState("");
-  const [adminResetConfirmPassword, setAdminResetConfirmPassword] = useState("");
+  const [adminResetConfirmPassword, setAdminResetConfirmPassword] =
+    useState("");
   const [showAdminResetPassword, setShowAdminResetPassword] = useState(false);
-  const [showAdminResetConfirmPassword, setShowAdminResetConfirmPassword] = useState(false);
+  const [showAdminResetConfirmPassword, setShowAdminResetConfirmPassword] =
+    useState(false);
 
   // Update company settings mutation
   const updateCompanySettingsMutation = useMutation({
@@ -154,12 +184,12 @@ export default function SettingsPage() {
         title: "Success",
         description: "User created successfully",
       });
-      setNewUser({ 
-        username: "", 
-        email: "", 
-        firstName: "", 
-        lastName: "", 
-        role: "user", 
+      setNewUser({
+        username: "",
+        email: "",
+        firstName: "",
+        lastName: "",
+        role: "user",
         password: "",
         locationId: null,
       });
@@ -243,8 +273,19 @@ export default function SettingsPage() {
 
   // Admin password reset mutation
   const adminPasswordResetMutation = useMutation({
-    mutationFn: async ({ userId, newPassword, confirmPassword }: { userId: number; newPassword: string; confirmPassword: string }) => {
-      return await apiRequest("POST", `/api/users/${userId}/reset-password`, { newPassword, confirmPassword });
+    mutationFn: async ({
+      userId,
+      newPassword,
+      confirmPassword,
+    }: {
+      userId: number;
+      newPassword: string;
+      confirmPassword: string;
+    }) => {
+      return await apiRequest("POST", `/api/users/${userId}/reset-password`, {
+        newPassword,
+        confirmPassword,
+      });
     },
     onSuccess: () => {
       toast({
@@ -256,7 +297,7 @@ export default function SettingsPage() {
       setAdminResetConfirmPassword("");
       setShowAdminResetPassword(false);
       setShowAdminResetConfirmPassword(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
     },
     onError: (error: any) => {
       toast({
@@ -274,7 +315,13 @@ export default function SettingsPage() {
   };
 
   const handleCreateUser = () => {
-    if (!newUser.username || !newUser.email || !newUser.firstName || !newUser.lastName || !newUser.password) {
+    if (
+      !newUser.username ||
+      !newUser.email ||
+      !newUser.firstName ||
+      !newUser.lastName ||
+      !newUser.password
+    ) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
@@ -291,12 +338,12 @@ export default function SettingsPage() {
       });
       return;
     }
-    
+
     createUserMutation.mutate(newUser);
   };
 
   const handleToggleUserStatus = (userId: number, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
     updateUserMutation.mutate({ id: userId, status: newStatus });
   };
 
@@ -309,13 +356,17 @@ export default function SettingsPage() {
       });
       return;
     }
-    
+
     createAssetTypeMutation.mutate(newAssetType);
   };
 
   const handlePasswordReset = () => {
     // Validate fields
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       toast({
         title: "Validation Error",
         description: "All password fields are required",
@@ -403,26 +454,32 @@ export default function SettingsPage() {
     }
 
     // Super admin can reset anyone's password (except their own)
-    if (currentUser?.user?.role === 'super_admin') {
+    if (currentUser?.user?.role === "super_admin") {
       return true;
     }
 
     // Admin cannot reset super admin passwords
-    if (currentUser?.user?.role === 'admin' && targetUser.role !== 'super_admin') {
+    if (
+      currentUser?.user?.role === "admin" &&
+      targetUser.role !== "super_admin"
+    ) {
       return true;
     }
 
     return false;
   };
 
-  const isSuperAdmin = currentUser?.user?.role === 'super_admin';
-  const isAdmin = currentUser?.user?.role === 'admin' || isSuperAdmin;
+  const isSuperAdmin = currentUser?.user?.role === "super_admin";
+  const isAdmin = currentUser?.user?.role === "admin" || isSuperAdmin;
 
   return (
     <div className="min-h-screen glass-bg p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
-        
+        <SidebarTrigger
+          data-testid="button-sidebar-toggle"
+          className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md"
+        />
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -430,7 +487,9 @@ export default function SettingsPage() {
               <Settings className="h-8 w-8 text-purple-400" />
               System Settings
             </h1>
-            <p className="text-white/60 mt-1">Manage system configuration and preferences</p>
+            <p className="text-white/60 mt-1">
+              Manage system configuration and preferences
+            </p>
           </div>
         </div>
 
@@ -475,76 +534,139 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {loadingCompanySettings ? (
-                  <div className="text-white/60">Loading company settings...</div>
+                  <div className="text-white/60">
+                    Loading company settings...
+                  </div>
                 ) : (
                   <>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="companyName" className="text-white/80">Company Name</Label>
+                        <Label htmlFor="companyName" className="text-white/80">
+                          Company Name
+                        </Label>
                         <Input
                           id="companyName"
-                          value={editingCompanySettings?.companyName || companySettings?.companyName || ""}
-                          onChange={(e) => setEditingCompanySettings({
-                            ...(editingCompanySettings || companySettings || {} as CompanySettings),
-                            companyName: e.target.value
-                          })}
+                          value={
+                            editingCompanySettings?.companyName ||
+                            companySettings?.companyName ||
+                            ""
+                          }
+                          onChange={(e) =>
+                            setEditingCompanySettings({
+                              ...(editingCompanySettings ||
+                                companySettings ||
+                                ({} as CompanySettings)),
+                              companyName: e.target.value,
+                            })
+                          }
                           placeholder="BODYCRAFT"
                           className="glass-input"
                           data-testid="input-company-name"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <Label htmlFor="timezone" className="text-white/80">Timezone</Label>
+                        <Label htmlFor="timezone" className="text-white/80">
+                          Timezone
+                        </Label>
                         <Select
-                          value={editingCompanySettings?.timezone || companySettings?.timezone || "Asia/Kolkata"}
-                          onValueChange={(value) => setEditingCompanySettings({
-                            ...(editingCompanySettings || companySettings || {} as CompanySettings),
-                            timezone: value
-                          })}
+                          value={
+                            editingCompanySettings?.timezone ||
+                            companySettings?.timezone ||
+                            "Asia/Kolkata"
+                          }
+                          onValueChange={(value) =>
+                            setEditingCompanySettings({
+                              ...(editingCompanySettings ||
+                                companySettings ||
+                                ({} as CompanySettings)),
+                              timezone: value,
+                            })
+                          }
                         >
-                          <SelectTrigger className="glass-input" data-testid="select-timezone">
+                          <SelectTrigger
+                            className="glass-input"
+                            data-testid="select-timezone"
+                          >
                             <SelectValue placeholder="Select timezone" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST)</SelectItem>
+                            <SelectItem value="Asia/Kolkata">
+                              Asia/Kolkata (IST)
+                            </SelectItem>
                             <SelectItem value="UTC">UTC</SelectItem>
-                            <SelectItem value="America/New_York">America/New York (EST)</SelectItem>
-                            <SelectItem value="Europe/London">Europe/London (GMT)</SelectItem>
+                            <SelectItem value="America/New_York">
+                              America/New York (EST)
+                            </SelectItem>
+                            <SelectItem value="Europe/London">
+                              Europe/London (GMT)
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="dateFormat" className="text-white/80">Date Format</Label>
+                        <Label htmlFor="dateFormat" className="text-white/80">
+                          Date Format
+                        </Label>
                         <Select
-                          value={editingCompanySettings?.dateFormat || companySettings?.dateFormat || "DD/MM/YYYY"}
-                          onValueChange={(value) => setEditingCompanySettings({
-                            ...(editingCompanySettings || companySettings || {} as CompanySettings),
-                            dateFormat: value
-                          })}
+                          value={
+                            editingCompanySettings?.dateFormat ||
+                            companySettings?.dateFormat ||
+                            "DD/MM/YYYY"
+                          }
+                          onValueChange={(value) =>
+                            setEditingCompanySettings({
+                              ...(editingCompanySettings ||
+                                companySettings ||
+                                ({} as CompanySettings)),
+                              dateFormat: value,
+                            })
+                          }
                         >
-                          <SelectTrigger className="glass-input" data-testid="select-date-format">
+                          <SelectTrigger
+                            className="glass-input"
+                            data-testid="select-date-format"
+                          >
                             <SelectValue placeholder="Select date format" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                            <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                            <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                            <SelectItem value="DD/MM/YYYY">
+                              DD/MM/YYYY
+                            </SelectItem>
+                            <SelectItem value="MM/DD/YYYY">
+                              MM/DD/YYYY
+                            </SelectItem>
+                            <SelectItem value="YYYY-MM-DD">
+                              YYYY-MM-DD
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="language" className="text-white/80">Language</Label>
+                        <Label htmlFor="language" className="text-white/80">
+                          Language
+                        </Label>
                         <Select
-                          value={editingCompanySettings?.language || companySettings?.language || "en"}
-                          onValueChange={(value) => setEditingCompanySettings({
-                            ...(editingCompanySettings || companySettings || {} as CompanySettings),
-                            language: value
-                          })}
+                          value={
+                            editingCompanySettings?.language ||
+                            companySettings?.language ||
+                            "en"
+                          }
+                          onValueChange={(value) =>
+                            setEditingCompanySettings({
+                              ...(editingCompanySettings ||
+                                companySettings ||
+                                ({} as CompanySettings)),
+                              language: value,
+                            })
+                          }
                         >
-                          <SelectTrigger className="glass-input" data-testid="select-language">
+                          <SelectTrigger
+                            className="glass-input"
+                            data-testid="select-language"
+                          >
                             <SelectValue placeholder="Select language" />
                           </SelectTrigger>
                           <SelectContent>
@@ -558,17 +680,22 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="flex gap-3">
-                      <Button 
-                        onClick={handleSaveCompanySettings} 
-                        disabled={!editingCompanySettings || updateCompanySettingsMutation.isPending}
+                      <Button
+                        onClick={handleSaveCompanySettings}
+                        disabled={
+                          !editingCompanySettings ||
+                          updateCompanySettingsMutation.isPending
+                        }
                         className="bg-gradient-to-r from-purple-500 to-blue-500"
                         data-testid="button-save-company-settings"
                       >
-                        {updateCompanySettingsMutation.isPending ? "Saving..." : "Save Changes"}
+                        {updateCompanySettingsMutation.isPending
+                          ? "Saving..."
+                          : "Save Changes"}
                       </Button>
                       {editingCompanySettings && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           onClick={() => setEditingCompanySettings(null)}
                           data-testid="button-cancel-company-settings"
                         >
@@ -603,14 +730,24 @@ export default function SettingsPage() {
                         <Plus className="h-5 w-5 text-purple-400" />
                         Create New User
                       </h3>
-                      
+
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="new-username" className="text-white/80">Username *</Label>
+                          <Label
+                            htmlFor="new-username"
+                            className="text-white/80"
+                          >
+                            Username *
+                          </Label>
                           <Input
                             id="new-username"
                             value={newUser.username}
-                            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                username: e.target.value,
+                              })
+                            }
                             placeholder="Enter username"
                             className="glass-input"
                             data-testid="input-new-username"
@@ -618,12 +755,16 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="new-email" className="text-white/80">Email *</Label>
+                          <Label htmlFor="new-email" className="text-white/80">
+                            Email *
+                          </Label>
                           <Input
                             id="new-email"
                             type="email"
                             value={newUser.email}
-                            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                            onChange={(e) =>
+                              setNewUser({ ...newUser, email: e.target.value })
+                            }
                             placeholder="Enter email"
                             className="glass-input"
                             data-testid="input-new-email"
@@ -631,11 +772,21 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="new-first-name" className="text-white/80">First Name *</Label>
+                          <Label
+                            htmlFor="new-first-name"
+                            className="text-white/80"
+                          >
+                            First Name *
+                          </Label>
                           <Input
                             id="new-first-name"
                             value={newUser.firstName}
-                            onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                firstName: e.target.value,
+                              })
+                            }
                             placeholder="Enter first name"
                             className="glass-input"
                             data-testid="input-new-firstname"
@@ -643,11 +794,21 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="new-last-name" className="text-white/80">Last Name *</Label>
+                          <Label
+                            htmlFor="new-last-name"
+                            className="text-white/80"
+                          >
+                            Last Name *
+                          </Label>
                           <Input
                             id="new-last-name"
                             value={newUser.lastName}
-                            onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                lastName: e.target.value,
+                              })
+                            }
                             placeholder="Enter last name"
                             className="glass-input"
                             data-testid="input-new-lastname"
@@ -655,16 +816,25 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="new-role" className="text-white/80">Role *</Label>
+                          <Label htmlFor="new-role" className="text-white/80">
+                            Role *
+                          </Label>
                           <Select
                             value={newUser.role}
-                            onValueChange={(value) => setNewUser({ ...newUser, role: value })}
+                            onValueChange={(value) =>
+                              setNewUser({ ...newUser, role: value })
+                            }
                           >
-                            <SelectTrigger className="glass-input" data-testid="select-new-role">
+                            <SelectTrigger
+                              className="glass-input"
+                              data-testid="select-new-role"
+                            >
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="super_admin">Super Admin</SelectItem>
+                              <SelectItem value="super_admin">
+                                Super Admin
+                              </SelectItem>
                               <SelectItem value="admin">Admin</SelectItem>
                               <SelectItem value="manager">Manager</SelectItem>
                               <SelectItem value="user">User</SelectItem>
@@ -673,12 +843,22 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="new-password" className="text-white/80">Password * (min 8 characters)</Label>
+                          <Label
+                            htmlFor="new-password"
+                            className="text-white/80"
+                          >
+                            Password * (min 8 characters)
+                          </Label>
                           <Input
                             id="new-password"
                             type="password"
                             value={newUser.password}
-                            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                            onChange={(e) =>
+                              setNewUser({
+                                ...newUser,
+                                password: e.target.value,
+                              })
+                            }
                             placeholder="Enter password"
                             className="glass-input"
                             data-testid="input-new-password"
@@ -686,21 +866,25 @@ export default function SettingsPage() {
                         </div>
                       </div>
 
-                      <Button 
-                        onClick={handleCreateUser} 
+                      <Button
+                        onClick={handleCreateUser}
                         disabled={createUserMutation.isPending}
                         className="bg-gradient-to-r from-purple-500 to-blue-500"
                         data-testid="button-create-user"
                       >
-                        {createUserMutation.isPending ? "Creating..." : "Create User"}
+                        {createUserMutation.isPending
+                          ? "Creating..."
+                          : "Create User"}
                       </Button>
                     </div>
                   )}
 
                   {/* Existing Users List */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white/90">Existing Users</h3>
-                    
+                    <h3 className="text-lg font-semibold text-white/90">
+                      Existing Users
+                    </h3>
+
                     {loadingUsers ? (
                       <div className="text-white/60">Loading users...</div>
                     ) : users && users.length > 0 ? (
@@ -713,46 +897,67 @@ export default function SettingsPage() {
                           >
                             <div className="flex-1">
                               <div className="flex items-center gap-3">
-                                <h4 className="font-medium text-white/90">{user.firstName} {user.lastName}</h4>
-                                <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                                <h4 className="font-medium text-white/90">
+                                  {user.firstName} {user.lastName}
+                                </h4>
+                                <Badge
+                                  variant={
+                                    user.status === "active"
+                                      ? "default"
+                                      : "secondary"
+                                  }
+                                >
                                   {user.status}
                                 </Badge>
                                 <Badge variant="outline">{user.role}</Badge>
                               </div>
                               <div className="text-sm text-white/60 mt-1">
                                 {user.email} • @{user.username}
-                                {user.lastLogin && ` • Last login: ${new Date(user.lastLogin).toLocaleDateString()}`}
+                                {user.lastLogin &&
+                                  ` • Last login: ${new Date(user.lastLogin).toLocaleDateString()}`}
                               </div>
                             </div>
-                            
+
                             <div className="flex gap-2 items-center min-w-[280px] justify-end">
                               {/* Reset Password Button - Available to admins and super admins */}
-                              {isAdmin && user.id !== currentUser?.user?.id && canResetUserPassword(user) && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setAdminResetDialog({ open: true, user })}
-                                  data-testid={`button-reset-password-${user.id}`}
-                                  className="shrink-0"
-                                >
-                                  <Key className="h-4 w-4 mr-2" />
-                                  Reset Password
-                                </Button>
-                              )}
-                              
+                              {isAdmin &&
+                                user.id !== currentUser?.user?.id &&
+                                canResetUserPassword(user) && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      setAdminResetDialog({ open: true, user })
+                                    }
+                                    data-testid={`button-reset-password-${user.id}`}
+                                    className="shrink-0"
+                                  >
+                                    <Key className="h-4 w-4 mr-2" />
+                                    Reset Password
+                                  </Button>
+                                )}
+
                               {/* Activate/Deactivate Button - Super Admin Only */}
-                              {isSuperAdmin && user.id !== currentUser?.user?.id && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleToggleUserStatus(user.id, user.status)}
-                                  disabled={updateUserMutation.isPending}
-                                  data-testid={`button-toggle-status-${user.id}`}
-                                  className="shrink-0 min-w-[100px]"
-                                >
-                                  {user.status === 'active' ? 'Deactivate' : 'Activate'}
-                                </Button>
-                              )}
+                              {isSuperAdmin &&
+                                user.id !== currentUser?.user?.id && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleToggleUserStatus(
+                                        user.id,
+                                        user.status,
+                                      )
+                                    }
+                                    disabled={updateUserMutation.isPending}
+                                    data-testid={`button-toggle-status-${user.id}`}
+                                    className="shrink-0 min-w-[100px]"
+                                  >
+                                    {user.status === "active"
+                                      ? "Deactivate"
+                                      : "Activate"}
+                                  </Button>
+                                )}
                             </div>
                           </div>
                         ))}
@@ -785,14 +990,24 @@ export default function SettingsPage() {
                     <Plus className="h-5 w-5 text-purple-400" />
                     Add Asset Type
                   </h3>
-                  
+
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="asset-type-name" className="text-white/80">Type Name *</Label>
+                      <Label
+                        htmlFor="asset-type-name"
+                        className="text-white/80"
+                      >
+                        Type Name *
+                      </Label>
                       <Input
                         id="asset-type-name"
                         value={newAssetType.name}
-                        onChange={(e) => setNewAssetType({ ...newAssetType, name: e.target.value })}
+                        onChange={(e) =>
+                          setNewAssetType({
+                            ...newAssetType,
+                            name: e.target.value,
+                          })
+                        }
                         placeholder="e.g., Laptop, Desktop"
                         className="glass-input"
                         data-testid="input-asset-type-name"
@@ -800,11 +1015,21 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="asset-type-description" className="text-white/80">Description</Label>
+                      <Label
+                        htmlFor="asset-type-description"
+                        className="text-white/80"
+                      >
+                        Description
+                      </Label>
                       <Input
                         id="asset-type-description"
                         value={newAssetType.description}
-                        onChange={(e) => setNewAssetType({ ...newAssetType, description: e.target.value })}
+                        onChange={(e) =>
+                          setNewAssetType({
+                            ...newAssetType,
+                            description: e.target.value,
+                          })
+                        }
                         placeholder="Brief description of this asset type"
                         className="glass-input"
                         data-testid="input-asset-type-description"
@@ -812,20 +1037,24 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <Button 
+                  <Button
                     onClick={handleCreateAssetType}
                     disabled={createAssetTypeMutation.isPending}
                     className="bg-gradient-to-r from-purple-500 to-blue-500"
                     data-testid="button-create-asset-type"
                   >
-                    {createAssetTypeMutation.isPending ? "Creating..." : "Add Asset Type"}
+                    {createAssetTypeMutation.isPending
+                      ? "Creating..."
+                      : "Add Asset Type"}
                   </Button>
                 </div>
 
                 {/* Existing Asset Types */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white/90">Existing Asset Types</h3>
-                  
+                  <h3 className="text-lg font-semibold text-white/90">
+                    Existing Asset Types
+                  </h3>
+
                   {loadingAssetTypes ? (
                     <div className="text-white/60">Loading asset types...</div>
                   ) : assetTypes && assetTypes.length > 0 ? (
@@ -837,13 +1066,19 @@ export default function SettingsPage() {
                           data-testid={`asset-type-${type.id}`}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-white/90">{type.name}</h4>
-                            <Badge variant={type.isActive ? 'default' : 'secondary'}>
-                              {type.isActive ? 'Active' : 'Inactive'}
+                            <h4 className="font-medium text-white/90">
+                              {type.name}
+                            </h4>
+                            <Badge
+                              variant={type.isActive ? "default" : "secondary"}
+                            >
+                              {type.isActive ? "Active" : "Inactive"}
                             </Badge>
                           </div>
                           {type.description && (
-                            <p className="text-sm text-white/60">{type.description}</p>
+                            <p className="text-sm text-white/60">
+                              {type.description}
+                            </p>
                           )}
                         </div>
                       ))}
@@ -875,10 +1110,14 @@ export default function SettingsPage() {
                     Location Configuration
                   </h3>
                   <p className="text-white/60 mb-6">
-                    Full location management is available on the dedicated Locations page with advanced features.
+                    Full location management is available on the dedicated
+                    Locations page with advanced features.
                   </p>
                   <Link href="/locations">
-                    <Button className="bg-gradient-to-r from-purple-500 to-blue-500" data-testid="button-goto-locations">
+                    <Button
+                      className="bg-gradient-to-r from-purple-500 to-blue-500"
+                      data-testid="button-goto-locations"
+                    >
                       <LinkIcon className="h-4 w-4 mr-2" />
                       Go to Locations Page
                     </Button>
@@ -913,18 +1152,29 @@ export default function SettingsPage() {
                         id="current-password"
                         type={showCurrentPassword ? "text" : "password"}
                         value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            currentPassword: e.target.value,
+                          })
+                        }
                         className="glass-input pr-10"
                         placeholder="Enter current password"
                         data-testid="input-current-password"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        onClick={() =>
+                          setShowCurrentPassword(!showCurrentPassword)
+                        }
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
                         data-testid="button-toggle-current-password"
                       >
-                        {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showCurrentPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -939,7 +1189,12 @@ export default function SettingsPage() {
                         id="new-password"
                         type={showNewPassword ? "text" : "password"}
                         value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            newPassword: e.target.value,
+                          })
+                        }
                         className="glass-input pr-10"
                         placeholder="Enter new password (min. 8 characters)"
                         data-testid="input-new-password"
@@ -950,7 +1205,11 @@ export default function SettingsPage() {
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
                         data-testid="button-toggle-new-password"
                       >
-                        {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showNewPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -965,18 +1224,29 @@ export default function SettingsPage() {
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
                         value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
                         className="glass-input pr-10"
                         placeholder="Re-enter new password"
                         data-testid="input-confirm-password"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
                         data-testid="button-toggle-confirm-password"
                       >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -989,7 +1259,9 @@ export default function SettingsPage() {
                     data-testid="button-reset-password"
                   >
                     <Lock className="h-4 w-4 mr-2" />
-                    {passwordResetMutation.isPending ? "Updating..." : "Update Password"}
+                    {passwordResetMutation.isPending
+                      ? "Updating..."
+                      : "Update Password"}
                   </Button>
                 </div>
 
@@ -1021,8 +1293,12 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                     <div>
-                      <h4 className="font-medium text-white/90">Role-Based Access Control (RBAC)</h4>
-                      <p className="text-sm text-white/60 mt-1">Location-based data isolation is active</p>
+                      <h4 className="font-medium text-white/90">
+                        Role-Based Access Control (RBAC)
+                      </h4>
+                      <p className="text-sm text-white/60 mt-1">
+                        Location-based data isolation is active
+                      </p>
                     </div>
                     <Badge variant="default" className="bg-green-500">
                       <Check className="h-3 w-3 mr-1" />
@@ -1032,16 +1308,24 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                     <div>
-                      <h4 className="font-medium text-white/90">Session Timeout</h4>
-                      <p className="text-sm text-white/60 mt-1">Auto logout after 480 minutes of inactivity</p>
+                      <h4 className="font-medium text-white/90">
+                        Session Timeout
+                      </h4>
+                      <p className="text-sm text-white/60 mt-1">
+                        Auto logout after 480 minutes of inactivity
+                      </p>
                     </div>
                     <Badge variant="outline">8 hours</Badge>
                   </div>
 
                   <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                     <div>
-                      <h4 className="font-medium text-white/90">Password Policy</h4>
-                      <p className="text-sm text-white/60 mt-1">Minimum 8 characters with bcrypt hashing</p>
+                      <h4 className="font-medium text-white/90">
+                        Password Policy
+                      </h4>
+                      <p className="text-sm text-white/60 mt-1">
+                        Minimum 8 characters with bcrypt hashing
+                      </p>
                     </div>
                     <Badge variant="default" className="bg-green-500">
                       <Check className="h-3 w-3 mr-1" />
@@ -1051,8 +1335,12 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                     <div>
-                      <h4 className="font-medium text-white/90">Database Encryption</h4>
-                      <p className="text-sm text-white/60 mt-1">PostgreSQL with encrypted connections</p>
+                      <h4 className="font-medium text-white/90">
+                        Database Encryption
+                      </h4>
+                      <p className="text-sm text-white/60 mt-1">
+                        PostgreSQL with encrypted connections
+                      </p>
                     </div>
                     <Badge variant="default" className="bg-green-500">
                       <Check className="h-3 w-3 mr-1" />
@@ -1062,8 +1350,12 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                     <div>
-                      <h4 className="font-medium text-white/90">Approval Workflows</h4>
-                      <p className="text-sm text-white/60 mt-1">Multi-level approvals for asset transfers</p>
+                      <h4 className="font-medium text-white/90">
+                        Approval Workflows
+                      </h4>
+                      <p className="text-sm text-white/60 mt-1">
+                        Multi-level approvals for asset transfers
+                      </p>
                     </div>
                     <Badge variant="default" className="bg-green-500">
                       <Check className="h-3 w-3 mr-1" />
@@ -1075,7 +1367,9 @@ export default function SettingsPage() {
                 <Separator className="bg-white/10" />
 
                 <div className="text-sm text-white/60">
-                  <p className="font-medium text-white/80 mb-2">Security Features:</p>
+                  <p className="font-medium text-white/80 mb-2">
+                    Security Features:
+                  </p>
                   <ul className="list-disc list-inside space-y-1">
                     <li>Production-ready RBAC with location-based isolation</li>
                     <li>Secure session management with PostgreSQL</li>
@@ -1091,15 +1385,18 @@ export default function SettingsPage() {
       </div>
 
       {/* Admin Password Reset Dialog */}
-      <Dialog open={adminResetDialog.open} onOpenChange={(open) => {
-        if (!open) {
-          setAdminResetDialog({ open: false, user: null });
-          setAdminResetPassword("");
-          setAdminResetConfirmPassword("");
-          setShowAdminResetPassword(false);
-          setShowAdminResetConfirmPassword(false);
-        }
-      }}>
+      <Dialog
+        open={adminResetDialog.open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAdminResetDialog({ open: false, user: null });
+            setAdminResetPassword("");
+            setAdminResetConfirmPassword("");
+            setShowAdminResetPassword(false);
+            setShowAdminResetConfirmPassword(false);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-purple-900/40 via-blue-900/40 to-purple-900/40 backdrop-blur-xl border border-white/10">
           <DialogHeader>
             <DialogTitle className="text-white/90 flex items-center gap-2">
@@ -1107,7 +1404,8 @@ export default function SettingsPage() {
               Reset Password for {adminResetDialog.user?.username}
             </DialogTitle>
             <DialogDescription className="text-white/60">
-              Set a new password for this user. The user will be able to use this password immediately.
+              Set a new password for this user. The user will be able to use
+              this password immediately.
             </DialogDescription>
           </DialogHeader>
 
@@ -1128,17 +1426,26 @@ export default function SettingsPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowAdminResetPassword(!showAdminResetPassword)}
+                  onClick={() =>
+                    setShowAdminResetPassword(!showAdminResetPassword)
+                  }
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90 transition-colors w-4 h-4 flex items-center justify-center"
                   data-testid="button-toggle-admin-reset-password"
                 >
-                  {showAdminResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showAdminResetPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="admin-reset-confirm-password" className="text-white/80">
+              <Label
+                htmlFor="admin-reset-confirm-password"
+                className="text-white/80"
+              >
                 Confirm Password
               </Label>
               <div className="relative">
@@ -1153,18 +1460,27 @@ export default function SettingsPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowAdminResetConfirmPassword(!showAdminResetConfirmPassword)}
+                  onClick={() =>
+                    setShowAdminResetConfirmPassword(
+                      !showAdminResetConfirmPassword,
+                    )
+                  }
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90 transition-colors w-4 h-4 flex items-center justify-center"
                   data-testid="button-toggle-admin-reset-confirm-password"
                 >
-                  {showAdminResetConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showAdminResetConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
 
             <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <p className="text-sm text-blue-300/90">
-                <strong>Note:</strong> The password must be at least 8 characters long.
+                <strong>Note:</strong> The password must be at least 8
+                characters long.
               </p>
             </div>
           </div>
@@ -1190,7 +1506,9 @@ export default function SettingsPage() {
               data-testid="button-confirm-admin-reset"
             >
               <Lock className="h-4 w-4 mr-2" />
-              {adminPasswordResetMutation.isPending ? "Resetting..." : "Reset Password"}
+              {adminPasswordResetMutation.isPending
+                ? "Resetting..."
+                : "Reset Password"}
             </Button>
           </DialogFooter>
         </DialogContent>

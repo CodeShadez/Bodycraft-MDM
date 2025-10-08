@@ -1,12 +1,12 @@
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { 
-  Fingerprint, 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Fingerprint,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
   Download,
   Upload,
   MoreHorizontal,
@@ -21,28 +21,28 @@ import {
   Power,
   User,
   Users,
-  Key
-} from "lucide-react"
+  Key,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +51,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,43 +59,48 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Progress } from "@/components/ui/progress"
-import { useToast } from "@/hooks/use-toast"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface BiometricSystem {
-  id: number
-  systemName: string
-  systemType: "fingerprint_scanner" | "face_recognition" | "iris_scanner" | "palm_scanner" | "access_controller"
-  brand: string
-  model: string
-  serialNumber: string | null
-  ipAddress: string | null
-  macAddress: string | null
-  locationId: number
-  installationDate: string
-  warrantyUntil: string | null
-  status: "active" | "inactive" | "maintenance" | "fault"
-  enrolledUsers: number | null
-  maxUsers: number | null
-  accessLevel: "entry_only" | "full_access" | "restricted"
-  integrationSystem: string | null
-  firmwareVersion: string | null
-  lastSyncDate: string | null
-  maintenanceContract: string | null
-  notes: string | null
-  createdAt: string
-  updatedAt: string
+  id: number;
+  systemName: string;
+  systemType:
+    | "fingerprint_scanner"
+    | "face_recognition"
+    | "iris_scanner"
+    | "palm_scanner"
+    | "access_controller";
+  brand: string;
+  model: string;
+  serialNumber: string | null;
+  ipAddress: string | null;
+  macAddress: string | null;
+  locationId: number;
+  installationDate: string;
+  warrantyUntil: string | null;
+  status: "active" | "inactive" | "maintenance" | "fault";
+  enrolledUsers: number | null;
+  maxUsers: number | null;
+  accessLevel: "entry_only" | "full_access" | "restricted";
+  integrationSystem: string | null;
+  firmwareVersion: string | null;
+  lastSyncDate: string | null;
+  maintenanceContract: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Location {
-  id: number
-  outletName: string
-  city: string
-  state: string
+  id: number;
+  outletName: string;
+  city: string;
+  state: string;
 }
 
 // Status color mapping
@@ -103,8 +108,8 @@ const statusColors: Record<string, string> = {
   active: "bg-green-400",
   inactive: "bg-gray-500",
   maintenance: "bg-yellow-400",
-  fault: "bg-red-400"
-}
+  fault: "bg-red-400",
+};
 
 // System type icons
 const systemTypeIcons: Record<string, any> = {
@@ -112,21 +117,23 @@ const systemTypeIcons: Record<string, any> = {
   face_recognition: Scan,
   iris_scanner: Eye,
   palm_scanner: User,
-  access_controller: Key
-}
+  access_controller: Key,
+};
 
 export default function BiometricPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [locationFilter, setLocationFilter] = useState<string>("all")
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [selectedSystem, setSelectedSystem] = useState<BiometricSystem | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedSystem, setSelectedSystem] = useState<BiometricSystem | null>(
+    null,
+  );
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Mock biometric data - In real app, this would come from API
   const mockBiometricData: BiometricSystem[] = [
@@ -152,7 +159,7 @@ export default function BiometricPage() {
       maintenanceContract: "BiometricTech Solutions",
       notes: "Primary attendance and access control for all employees",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-20T08:30:00Z"
+      updatedAt: "2024-01-20T08:30:00Z",
     },
     {
       id: 2,
@@ -176,7 +183,7 @@ export default function BiometricPage() {
       maintenanceContract: "SecureTech Solutions",
       notes: "Restricted access for management and senior staff only",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-20T06:15:00Z"
+      updatedAt: "2024-01-20T06:15:00Z",
     },
     {
       id: 3,
@@ -198,9 +205,10 @@ export default function BiometricPage() {
       firmwareVersion: "3.4.1",
       lastSyncDate: "2024-01-18T17:00:00Z",
       maintenanceContract: "Local Tech Services",
-      notes: "Exit scanner for attendance tracking. Under maintenance for sensor cleaning",
+      notes:
+        "Exit scanner for attendance tracking. Under maintenance for sensor cleaning",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-18T17:30:00Z"
+      updatedAt: "2024-01-18T17:30:00Z",
     },
     {
       id: 4,
@@ -222,9 +230,10 @@ export default function BiometricPage() {
       firmwareVersion: "4.4.8",
       lastSyncDate: "2024-01-19T09:00:00Z",
       maintenanceContract: "ZKTeco Service",
-      notes: "Central access control system managing multiple doors and entry points",
+      notes:
+        "Central access control system managing multiple doors and entry points",
       createdAt: "2023-12-01T00:00:00Z",
-      updatedAt: "2024-01-19T09:30:00Z"
+      updatedAt: "2024-01-19T09:30:00Z",
     },
     {
       id: 5,
@@ -246,122 +255,164 @@ export default function BiometricPage() {
       firmwareVersion: "1.2.3",
       lastSyncDate: "2024-01-20T07:30:00Z",
       maintenanceContract: "Fujitsu Support",
-      notes: "High-security palm scanner for staff room and sensitive areas access",
+      notes:
+        "High-security palm scanner for staff room and sensitive areas access",
       createdAt: "2024-02-01T00:00:00Z",
-      updatedAt: "2024-01-20T07:45:00Z"
-    }
-  ]
+      updatedAt: "2024-01-20T07:45:00Z",
+    },
+  ];
 
   // Fetch data
   const { data: locations } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
-  })
+  });
 
   // Use mock data for biometric systems
-  const biometricSystems = mockBiometricData
+  const biometricSystems = mockBiometricData;
 
   // Filter biometric systems
-  const filteredSystems = biometricSystems?.filter(system => {
-    const location = locations?.find(l => l.id === system.locationId)
-    
-    const matchesSearch = 
-      system.systemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.ipAddress?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === "all" || system.status === statusFilter
-    const matchesType = typeFilter === "all" || system.systemType === typeFilter
-    const matchesLocation = locationFilter === "all" || system.locationId.toString() === locationFilter
-    
-    return matchesSearch && matchesStatus && matchesType && matchesLocation
-  }) || []
+  const filteredSystems =
+    biometricSystems?.filter((system) => {
+      const location = locations?.find((l) => l.id === system.locationId);
+
+      const matchesSearch =
+        system.systemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.ipAddress?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "all" || system.status === statusFilter;
+      const matchesType =
+        typeFilter === "all" || system.systemType === typeFilter;
+      const matchesLocation =
+        locationFilter === "all" ||
+        system.locationId.toString() === locationFilter;
+
+      return matchesSearch && matchesStatus && matchesType && matchesLocation;
+    }) || [];
 
   // Helper functions
   const getLocationName = (locationId: number) => {
-    const location = locations?.find(loc => loc.id === locationId)
-    return location ? `${location.outletName}, ${location.city}` : "Unknown"
-  }
+    const location = locations?.find((loc) => loc.id === locationId);
+    return location ? `${location.outletName}, ${location.city}` : "Unknown";
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-green-100 text-green-800"
-      case "inactive": return "bg-gray-100 text-gray-800"
-      case "maintenance": return "bg-yellow-100 text-yellow-800"
-      case "fault": return "bg-red-100 text-red-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "inactive":
+        return "bg-gray-100 text-gray-800";
+      case "maintenance":
+        return "bg-yellow-100 text-yellow-800";
+      case "fault":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getAccessLevelBadgeColor = (level: string) => {
     switch (level) {
-      case "full_access": return "bg-blue-100 text-blue-800"
-      case "restricted": return "bg-orange-100 text-orange-800"
-      case "entry_only": return "bg-gray-100 text-gray-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "full_access":
+        return "bg-blue-100 text-blue-800";
+      case "restricted":
+        return "bg-orange-100 text-orange-800";
+      case "entry_only":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getSystemTypeIcon = (type: string) => {
-    return systemTypeIcons[type] || Settings
-  }
+    return systemTypeIcons[type] || Settings;
+  };
 
   const getSystemTypeLabel = (type: string) => {
     switch (type) {
-      case "fingerprint_scanner": return "Fingerprint Scanner"
-      case "face_recognition": return "Face Recognition"
-      case "iris_scanner": return "Iris Scanner"
-      case "palm_scanner": return "Palm Scanner"
-      case "access_controller": return "Access Controller"
-      default: return type.charAt(0).toUpperCase() + type.slice(1)
+      case "fingerprint_scanner":
+        return "Fingerprint Scanner";
+      case "face_recognition":
+        return "Face Recognition";
+      case "iris_scanner":
+        return "Iris Scanner";
+      case "palm_scanner":
+        return "Palm Scanner";
+      case "access_controller":
+        return "Access Controller";
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
     }
-  }
+  };
 
   const getAccessLevelLabel = (level: string) => {
     switch (level) {
-      case "full_access": return "Full Access"
-      case "restricted": return "Restricted"
-      case "entry_only": return "Entry Only"
-      default: return level.charAt(0).toUpperCase() + level.slice(1)
+      case "full_access":
+        return "Full Access";
+      case "restricted":
+        return "Restricted";
+      case "entry_only":
+        return "Entry Only";
+      default:
+        return level.charAt(0).toUpperCase() + level.slice(1);
     }
-  }
+  };
 
   // Calculate system metrics
-  const totalSystems = biometricSystems.length
-  const activeSystems = biometricSystems.filter(s => s.status === "active").length
-  const totalEnrolledUsers = biometricSystems.reduce((sum, s) => sum + (s.enrolledUsers || 0), 0)
-  const totalCapacity = biometricSystems.reduce((sum, s) => sum + (s.maxUsers || 0), 0)
-  const utilizationRate = totalCapacity > 0 ? Math.round((totalEnrolledUsers / totalCapacity) * 100) : 0
+  const totalSystems = biometricSystems.length;
+  const activeSystems = biometricSystems.filter(
+    (s) => s.status === "active",
+  ).length;
+  const totalEnrolledUsers = biometricSystems.reduce(
+    (sum, s) => sum + (s.enrolledUsers || 0),
+    0,
+  );
+  const totalCapacity = biometricSystems.reduce(
+    (sum, s) => sum + (s.maxUsers || 0),
+    0,
+  );
+  const utilizationRate =
+    totalCapacity > 0
+      ? Math.round((totalEnrolledUsers / totalCapacity) * 100)
+      : 0;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
-      
+      <SidebarTrigger
+        data-testid="button-sidebar-toggle"
+        className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Biometric Systems</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Biometric Systems
+          </h1>
           <p className="text-white/70">
-            Manage access control and attendance systems across all BODYCRAFT locations
+            Manage access control and attendance systems across all BODYCRAFT
+            locations
           </p>
         </div>
         <div className="flex gap-2">
@@ -373,7 +424,10 @@ export default function BiometricPage() {
             <Download className="h-4 w-4" />
             Export Report
           </Button>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -384,7 +438,8 @@ export default function BiometricPage() {
               <DialogHeader>
                 <DialogTitle>Add Biometric System</DialogTitle>
                 <DialogDescription>
-                  Deploy new biometric authentication infrastructure with access controls and attendance integration
+                  Deploy new biometric authentication infrastructure with access
+                  controls and attendance integration
                 </DialogDescription>
               </DialogHeader>
               <form className="space-y-4">
@@ -405,11 +460,21 @@ export default function BiometricPage() {
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="fingerprint_scanner">Fingerprint Scanner</SelectItem>
-                        <SelectItem value="face_recognition">Face Recognition</SelectItem>
-                        <SelectItem value="iris_scanner">Iris Scanner</SelectItem>
-                        <SelectItem value="palm_scanner">Palm Scanner</SelectItem>
-                        <SelectItem value="access_controller">Access Controller</SelectItem>
+                        <SelectItem value="fingerprint_scanner">
+                          Fingerprint Scanner
+                        </SelectItem>
+                        <SelectItem value="face_recognition">
+                          Face Recognition
+                        </SelectItem>
+                        <SelectItem value="iris_scanner">
+                          Iris Scanner
+                        </SelectItem>
+                        <SelectItem value="palm_scanner">
+                          Palm Scanner
+                        </SelectItem>
+                        <SelectItem value="access_controller">
+                          Access Controller
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -452,8 +517,11 @@ export default function BiometricPage() {
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                       <SelectContent>
-                        {locations?.map(location => (
-                          <SelectItem key={location.id} value={location.id.toString()}>
+                        {locations?.map((location) => (
+                          <SelectItem
+                            key={location.id}
+                            value={location.id.toString()}
+                          >
                             {location.outletName}, {location.city}
                           </SelectItem>
                         ))}
@@ -497,7 +565,9 @@ export default function BiometricPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="installationDate">Installation Date *</Label>
+                    <Label htmlFor="installationDate">
+                      Installation Date *
+                    </Label>
                     <Input
                       id="installationDate"
                       name="installationDate"
@@ -527,16 +597,14 @@ export default function BiometricPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setIsCreateDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">
-                    Add Biometric System
-                  </Button>
+                  <Button type="submit">Add Biometric System</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -552,7 +620,9 @@ export default function BiometricPage() {
             <Fingerprint className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{totalSystems}</div>
+            <div className="text-2xl font-bold text-white/90">
+              {totalSystems}
+            </div>
             <p className="text-xs text-muted-foreground">
               Biometric access systems
             </p>
@@ -561,11 +631,15 @@ export default function BiometricPage() {
 
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Systems</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Systems
+            </CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{activeSystems}</div>
+            <div className="text-2xl font-bold text-white/90">
+              {activeSystems}
+            </div>
             <p className="text-xs text-muted-foreground">
               Currently operational
             </p>
@@ -574,11 +648,15 @@ export default function BiometricPage() {
 
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Enrolled Users</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Enrolled Users
+            </CardTitle>
             <Users className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{totalEnrolledUsers}</div>
+            <div className="text-2xl font-bold text-white/90">
+              {totalEnrolledUsers}
+            </div>
             <p className="text-xs text-muted-foreground">
               Total user registrations
             </p>
@@ -591,7 +669,9 @@ export default function BiometricPage() {
             <Shield className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{utilizationRate}%</div>
+            <div className="text-2xl font-bold text-white/90">
+              {utilizationRate}%
+            </div>
             <div className="mt-2">
               <Progress value={utilizationRate} className="h-2" />
             </div>
@@ -637,11 +717,17 @@ export default function BiometricPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="fingerprint_scanner">Fingerprint</SelectItem>
-                  <SelectItem value="face_recognition">Face Recognition</SelectItem>
+                  <SelectItem value="fingerprint_scanner">
+                    Fingerprint
+                  </SelectItem>
+                  <SelectItem value="face_recognition">
+                    Face Recognition
+                  </SelectItem>
                   <SelectItem value="iris_scanner">Iris Scanner</SelectItem>
                   <SelectItem value="palm_scanner">Palm Scanner</SelectItem>
-                  <SelectItem value="access_controller">Access Controller</SelectItem>
+                  <SelectItem value="access_controller">
+                    Access Controller
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -651,8 +737,11 @@ export default function BiometricPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Locations</SelectItem>
-                  {locations?.map(location => (
-                    <SelectItem key={location.id} value={location.id.toString()}>
+                  {locations?.map((location) => (
+                    <SelectItem
+                      key={location.id}
+                      value={location.id.toString()}
+                    >
                       {location.outletName}
                     </SelectItem>
                   ))}
@@ -660,9 +749,10 @@ export default function BiometricPage() {
               </Select>
             </div>
           </div>
-          
+
           <div className="text-sm text-muted-foreground">
-            Showing {filteredSystems.length} of {biometricSystems?.length || 0} biometric systems
+            Showing {filteredSystems.length} of {biometricSystems?.length || 0}{" "}
+            biometric systems
           </div>
         </CardContent>
       </Card>
@@ -685,11 +775,12 @@ export default function BiometricPage() {
             </TableHeader>
             <TableBody>
               {filteredSystems.map((system) => {
-                const SystemIcon = getSystemTypeIcon(system.systemType)
-                const utilizationPercent = system.maxUsers && system.enrolledUsers 
-                  ? Math.round((system.enrolledUsers / system.maxUsers) * 100)
-                  : 0
-                
+                const SystemIcon = getSystemTypeIcon(system.systemType);
+                const utilizationPercent =
+                  system.maxUsers && system.enrolledUsers
+                    ? Math.round((system.enrolledUsers / system.maxUsers) * 100)
+                    : 0;
+
                 return (
                   <TableRow key={system.id}>
                     <TableCell>
@@ -726,7 +817,9 @@ export default function BiometricPage() {
                       <div className="text-sm">
                         {system.enrolledUsers && system.maxUsers ? (
                           <div>
-                            <div className="font-medium">{system.enrolledUsers} / {system.maxUsers}</div>
+                            <div className="font-medium">
+                              {system.enrolledUsers} / {system.maxUsers}
+                            </div>
                             <div className="text-xs text-muted-foreground">
                               {utilizationPercent}% used
                             </div>
@@ -737,16 +830,16 @@ export default function BiometricPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={getAccessLevelBadgeColor(system.accessLevel)}
                       >
                         {getAccessLevelLabel(system.accessLevel)}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={getStatusBadgeColor(system.status)}
                       >
                         {system.status}
@@ -763,8 +856,8 @@ export default function BiometricPage() {
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem
                             onClick={() => {
-                              setSelectedSystem(system)
-                              setIsViewDialogOpen(true)
+                              setSelectedSystem(system);
+                              setIsViewDialogOpen(true);
                             }}
                           >
                             <Eye className="mr-2 h-4 w-4" />
@@ -791,7 +884,7 @@ export default function BiometricPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })}
             </TableBody>
           </Table>
@@ -804,7 +897,8 @@ export default function BiometricPage() {
           <DialogHeader>
             <DialogTitle>Biometric System Details</DialogTitle>
             <DialogDescription>
-              View authentication system specifications, enrolled user count, access permissions, and synchronization status
+              View authentication system specifications, enrolled user count,
+              access permissions, and synchronization status
             </DialogDescription>
           </DialogHeader>
           {selectedSystem && (
@@ -823,7 +917,7 @@ export default function BiometricPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Brand</Label>
@@ -864,7 +958,11 @@ export default function BiometricPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Access Level</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    <Badge className={getAccessLevelBadgeColor(selectedSystem.accessLevel)}>
+                    <Badge
+                      className={getAccessLevelBadgeColor(
+                        selectedSystem.accessLevel,
+                      )}
+                    >
                       {getAccessLevelLabel(selectedSystem.accessLevel)}
                     </Badge>
                   </div>
@@ -887,7 +985,7 @@ export default function BiometricPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Utilization</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {selectedSystem.maxUsers && selectedSystem.enrolledUsers 
+                    {selectedSystem.maxUsers && selectedSystem.enrolledUsers
                       ? `${Math.round((selectedSystem.enrolledUsers / selectedSystem.maxUsers) * 100)}%`
                       : "N/A"}
                   </div>
@@ -896,7 +994,9 @@ export default function BiometricPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Installation Date</Label>
+                  <Label className="text-sm font-medium">
+                    Installation Date
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {formatDate(selectedSystem.installationDate)}
                   </div>
@@ -904,7 +1004,9 @@ export default function BiometricPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Warranty Until</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    {selectedSystem.warrantyUntil ? formatDate(selectedSystem.warrantyUntil) : "No warranty"}
+                    {selectedSystem.warrantyUntil
+                      ? formatDate(selectedSystem.warrantyUntil)
+                      : "No warranty"}
                   </div>
                 </div>
               </div>
@@ -913,13 +1015,17 @@ export default function BiometricPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Status</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    <Badge className={getStatusBadgeColor(selectedSystem.status)}>
+                    <Badge
+                      className={getStatusBadgeColor(selectedSystem.status)}
+                    >
                       {selectedSystem.status}
                     </Badge>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Firmware Version</Label>
+                  <Label className="text-sm font-medium">
+                    Firmware Version
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {selectedSystem.firmwareVersion || "Not specified"}
                   </div>
@@ -928,7 +1034,9 @@ export default function BiometricPage() {
 
               {selectedSystem.integrationSystem && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Integration System</Label>
+                  <Label className="text-sm font-medium">
+                    Integration System
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {selectedSystem.integrationSystem}
                   </div>
@@ -946,7 +1054,9 @@ export default function BiometricPage() {
 
               {selectedSystem.maintenanceContract && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Maintenance Contract</Label>
+                  <Label className="text-sm font-medium">
+                    Maintenance Contract
+                  </Label>
                   <div className="text-sm p-2 bg-muted rounded">
                     {selectedSystem.maintenanceContract}
                   </div>
@@ -964,12 +1074,15 @@ export default function BiometricPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewDialogOpen(false)}
+            >
               Close
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

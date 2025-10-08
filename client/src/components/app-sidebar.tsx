@@ -1,7 +1,23 @@
-import { Building2, Users, Laptop, MapPin, BarChart3, Cable, Fingerprint, Calendar, Settings, Wrench, Shield, LogOut, DollarSign, FileCheck, TrendingUp } from "lucide-react"
-import { Link, useLocation } from "wouter"
-import { apiRequest, queryClient } from "@/lib/queryClient"
-import { useToast } from "@/hooks/use-toast"
+import {
+  Building2,
+  Users,
+  Laptop,
+  MapPin,
+  BarChart3,
+  Cable,
+  Fingerprint,
+  Calendar,
+  Settings,
+  Wrench,
+  Shield,
+  LogOut,
+  DollarSign,
+  FileCheck,
+  TrendingUp,
+} from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   Sidebar,
@@ -12,7 +28,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // Main navigation items for BODYCRAFT MDM System
 const navigationItems = [
@@ -28,7 +44,7 @@ const navigationItems = [
   },
   {
     title: "Employees",
-    url: "/employees", 
+    url: "/employees",
     icon: Users,
   },
   {
@@ -56,7 +72,7 @@ const navigationItems = [
     url: "/compliance",
     icon: FileCheck,
   },
-]
+];
 
 // Integration management items
 const integrationItems = [
@@ -66,11 +82,11 @@ const integrationItems = [
     icon: Cable,
   },
   {
-    title: "Biometric Systems", 
+    title: "Biometric Systems",
     url: "/biometric",
     icon: Fingerprint,
   },
-]
+];
 
 // Reports and settings
 const systemItems = [
@@ -94,35 +110,38 @@ const systemItems = [
     url: "/settings",
     icon: Settings,
   },
-]
+];
 
 export function AppSidebar() {
-  const [location, setLocation] = useLocation()
-  const { toast } = useToast()
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const handleLogout = async () => {
     try {
-      await apiRequest("POST", "/api/auth/logout")
-      
-      queryClient.clear()
-      
+      await apiRequest("POST", "/api/auth/logout");
+
+      queryClient.clear();
+
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of the system",
-      })
-      
-      setLocation("/login")
+      });
+
+      setLocation("/login");
     } catch (error) {
       toast({
         title: "Logout failed",
         description: "An error occurred while logging out",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
-    <Sidebar data-testid="sidebar-main" className="border-0 bg-transparent backdrop-blur-xl">
+    <Sidebar
+      data-testid="sidebar-main"
+      className="border-0 bg-transparent backdrop-blur-xl"
+    >
       <SidebarContent className="bg-transparent backdrop-blur-xl">
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold flex items-center gap-2 text-white/90">
@@ -134,7 +153,10 @@ export function AppSidebar() {
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location === item.url}>
-                    <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
+                    <Link
+                      href={item.url}
+                      data-testid={`link-${item.title.toLowerCase().replace(" ", "-")}`}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -146,13 +168,18 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/70">Integrations</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/70">
+            Integrations
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {integrationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location === item.url}>
-                    <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
+                    <Link
+                      href={item.url}
+                      data-testid={`link-${item.title.toLowerCase().replace(" ", "-")}`}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -164,13 +191,18 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/70">System</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/70">
+            System
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {systemItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location === item.url}>
-                    <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(' ', '-')}`}>
+                    <Link
+                      href={item.url}
+                      data-testid={`link-${item.title.toLowerCase().replace(" ", "-")}`}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -178,7 +210,10 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout} data-testid="button-logout">
+                <SidebarMenuButton
+                  onClick={handleLogout}
+                  data-testid="button-logout"
+                >
                   <LogOut className="h-4 w-4" />
                   <span>Logout</span>
                 </SidebarMenuButton>
@@ -188,5 +223,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

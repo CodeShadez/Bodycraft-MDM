@@ -1,5 +1,5 @@
-import { createHash } from 'crypto';
-import { XMLParser } from 'fast-xml-parser';
+import { createHash } from "crypto";
+import { XMLParser } from "fast-xml-parser";
 
 interface HikvisionConfig {
   baseUrl: string;
@@ -20,7 +20,7 @@ export class HikvisionClient {
 
   constructor(baseUrl: string, username: string, password: string) {
     this.config = {
-      baseUrl: baseUrl.replace(/\/$/, ''),
+      baseUrl: baseUrl.replace(/\/$/, ""),
       username,
       password,
     };
@@ -28,29 +28,29 @@ export class HikvisionClient {
 
   private async makeRequest(
     endpoint: string,
-    method: 'GET' | 'POST' | 'PUT' = 'GET',
+    method: "GET" | "POST" | "PUT" = "GET",
     body?: string,
-    isRetry = false
+    isRetry = false,
   ): Promise<Response> {
     const url = `${this.config.baseUrl}${endpoint}`;
-    
+
     const response = await fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/xml',
+        "Content-Type": "application/xml",
       },
       body,
     });
 
     if (response.status === 401 && !isRetry) {
-      const wwwAuth = response.headers.get('www-authenticate');
-      if (wwwAuth && wwwAuth.includes('Digest')) {
+      const wwwAuth = response.headers.get("www-authenticate");
+      if (wwwAuth && wwwAuth.includes("Digest")) {
         const authHeader = this.generateDigestAuth(method, endpoint, wwwAuth);
         return fetch(url, {
           method,
           headers: {
-            'Content-Type': 'application/xml',
-            'Authorization': authHeader,
+            "Content-Type": "application/xml",
+            Authorization: authHeader,
           },
           body,
         });
@@ -60,21 +60,29 @@ export class HikvisionClient {
     return response;
   }
 
-  private generateDigestAuth(method: string, uri: string, wwwAuth: string): string {
+  private generateDigestAuth(
+    method: string,
+    uri: string,
+    wwwAuth: string,
+  ): string {
     const params = this.parseDigestAuth(wwwAuth);
-    const ha1 = this.md5(`${this.config.username}:${params.realm}:${this.config.password}`);
+    const ha1 = this.md5(
+      `${this.config.username}:${params.realm}:${this.config.password}`,
+    );
     const ha2 = this.md5(`${method}:${uri}`);
-    
+
     let response: string;
-    if (params.qop === 'auth' || params.qop === 'auth-int') {
-      const nc = '00000001';
+    if (params.qop === "auth" || params.qop === "auth-int") {
+      const nc = "00000001";
       const cnonce = this.generateCnonce();
-      response = this.md5(`${ha1}:${params.nonce}:${nc}:${cnonce}:${params.qop}:${ha2}`);
-      
-      return `Digest username="${this.config.username}", realm="${params.realm}", nonce="${params.nonce}", uri="${uri}", qop=${params.qop}, nc=${nc}, cnonce="${cnonce}", response="${response}"${params.opaque ? `, opaque="${params.opaque}"` : ''}`;
+      response = this.md5(
+        `${ha1}:${params.nonce}:${nc}:${cnonce}:${params.qop}:${ha2}`,
+      );
+
+      return `Digest username="${this.config.username}", realm="${params.realm}", nonce="${params.nonce}", uri="${uri}", qop=${params.qop}, nc=${nc}, cnonce="${cnonce}", response="${response}"${params.opaque ? `, opaque="${params.opaque}"` : ""}`;
     } else {
       response = this.md5(`${ha1}:${params.nonce}:${ha2}`);
-      return `Digest username="${this.config.username}", realm="${params.realm}", nonce="${params.nonce}", uri="${uri}", response="${response}"${params.opaque ? `, opaque="${params.opaque}"` : ''}`;
+      return `Digest username="${this.config.username}", realm="${params.realm}", nonce="${params.nonce}", uri="${uri}", response="${response}"${params.opaque ? `, opaque="${params.opaque}"` : ""}`;
     }
   }
 
@@ -82,16 +90,16 @@ export class HikvisionClient {
     const params: any = {};
     const regex = /(\w+)[:=]\s*"?([^",]+)"?/g;
     let match;
-    
+
     while ((match = regex.exec(wwwAuth)) !== null) {
       params[match[1]] = match[2];
     }
-    
+
     return params;
   }
 
   private md5(str: string): string {
-    return createHash('md5').update(str).digest('hex');
+    return createHash("md5").update(str).digest("hex");
   }
 
   private generateCnonce(): string {
@@ -99,19 +107,21 @@ export class HikvisionClient {
   }
 
   async getDeviceInfo(): Promise<any> {
-    const response = await this.makeRequest('/ISAPI/System/deviceInfo');
+    const response = await this.makeRequest("/ISAPI/System/deviceInfo");
     const text = await response.text();
     return this.parseXmlResponse(text);
   }
 
   async getSystemStatus(): Promise<any> {
-    const response = await this.makeRequest('/ISAPI/System/status');
+    const response = await this.makeRequest("/ISAPI/System/status");
     const text = await response.text();
     return this.parseXmlResponse(text);
   }
 
   async getSnapshot(channel: number = 1): Promise<Buffer> {
-    const response = await this.makeRequest(`/ISAPI/Streaming/channels/${channel}/picture`);
+    const response = await this.makeRequest(
+      `/ISAPI/Streaming/channels/${channel}/picture`,
+    );
     if (!response.ok) {
       throw new Error(`Failed to get snapshot: ${response.statusText}`);
     }
@@ -119,19 +129,26 @@ export class HikvisionClient {
     return Buffer.from(arrayBuffer);
   }
 
-  getRtspUrl(channel: number = 1, streamType: 'main' | 'sub' = 'main'): string {
-    const streamId = streamType === 'main' ? `${channel}01` : `${channel}02`;
+  getRtspUrl(channel: number = 1, streamType: "main" | "sub" = "main"): string {
+    const streamId = streamType === "main" ? `${channel}01` : `${channel}02`;
     const port = 554;
-    const host = this.config.baseUrl.replace(/^https?:\/\//, '');
+    const host = this.config.baseUrl.replace(/^https?:\/\//, "");
     return `rtsp://${this.config.username}:${this.config.password}@${host}:${port}/Streaming/Channels/${streamId}`;
   }
 
-  getHttpPreviewUrl(channel: number = 1, streamType: 'main' | 'sub' = 'main'): string {
-    const streamId = streamType === 'main' ? `${channel}01` : `${channel}02`;
+  getHttpPreviewUrl(
+    channel: number = 1,
+    streamType: "main" | "sub" = "main",
+  ): string {
+    const streamId = streamType === "main" ? `${channel}01` : `${channel}02`;
     return `${this.config.baseUrl}/ISAPI/Streaming/channels/${streamId}/httpPreview`;
   }
 
-  async searchRecordings(startTime: Date, endTime: Date, channel: number = 1): Promise<any> {
+  async searchRecordings(
+    startTime: Date,
+    endTime: Date,
+    channel: number = 1,
+  ): Promise<any> {
     const searchXml = `<?xml version="1.0" encoding="UTF-8"?>
 <CMSearchDescription>
   <searchID>C${Date.now()}</searchID>
@@ -151,7 +168,11 @@ export class HikvisionClient {
   </metadataList>
 </CMSearchDescription>`;
 
-    const response = await this.makeRequest('/ISAPI/ContentMgmt/search', 'POST', searchXml);
+    const response = await this.makeRequest(
+      "/ISAPI/ContentMgmt/search",
+      "POST",
+      searchXml,
+    );
     const text = await response.text();
     return this.parseXmlResponse(text);
   }
@@ -160,13 +181,13 @@ export class HikvisionClient {
     const trackId = `${channel}01`;
     const start = this.formatDateTime(startTime);
     const end = this.formatDateTime(endTime);
-    const host = this.config.baseUrl.replace(/^https?:\/\//, '');
+    const host = this.config.baseUrl.replace(/^https?:\/\//, "");
     return `rtsp://${this.config.username}:${this.config.password}@${host}:554/Streaming/tracks/${trackId}?starttime=${start}&endtime=${end}`;
   }
 
   async checkCameraStatus(): Promise<{ online: boolean; lastOnline?: Date }> {
     try {
-      const response = await this.makeRequest('/ISAPI/System/status');
+      const response = await this.makeRequest("/ISAPI/System/status");
       if (response.ok) {
         return { online: true, lastOnline: new Date() };
       }
@@ -178,11 +199,11 @@ export class HikvisionClient {
 
   private formatDateTime(date: Date): string {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   }
 
@@ -194,7 +215,7 @@ export class HikvisionClient {
       parseAttributeValue: true,
       trimValues: true,
     });
-    
+
     try {
       return parser.parse(xml);
     } catch (error) {

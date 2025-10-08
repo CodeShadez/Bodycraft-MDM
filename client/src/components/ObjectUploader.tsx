@@ -15,7 +15,7 @@ interface ObjectUploaderProps {
     url: string;
   }>;
   onComplete?: (
-    result: UploadResult<Record<string, unknown>, Record<string, unknown>>
+    result: UploadResult<Record<string, unknown>, Record<string, unknown>>,
   ) => void;
   buttonClassName?: string;
   children: ReactNode;
@@ -39,7 +39,16 @@ export function ObjectUploader({
       restrictions: {
         maxNumberOfFiles,
         maxFileSize,
-        allowedFileTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx', '.xls', '.xlsx'],
+        allowedFileTypes: [
+          ".pdf",
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".doc",
+          ".docx",
+          ".xls",
+          ".xlsx",
+        ],
       },
       autoProceed: false,
     })
@@ -50,13 +59,13 @@ export function ObjectUploader({
       .on("complete", (result) => {
         onComplete?.(result);
         setShowModal(false);
-      })
+      }),
   );
 
   return (
     <div>
-      <Button 
-        onClick={() => setShowModal(true)} 
+      <Button
+        onClick={() => setShowModal(true)}
         className={buttonClassName}
         data-testid="button-upload-invoice"
       >

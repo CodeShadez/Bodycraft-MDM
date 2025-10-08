@@ -1,12 +1,12 @@
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { 
-  Shield, 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Shield,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
   Download,
   Upload,
   MoreHorizontal,
@@ -24,28 +24,28 @@ import {
   Fingerprint,
   Settings,
   Archive,
-  History
-} from "lucide-react"
+  History,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -54,7 +54,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,56 +62,67 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Progress } from "@/components/ui/progress"
-import { useToast } from "@/hooks/use-toast"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ObjectUploader } from "@/components/ObjectUploader"
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 interface ComplianceRecord {
-  id: number
-  taskName: string
-  taskType: "backup" | "security_audit" | "policy_review" | "system_update" | "data_retention" | "access_review"
-  description: string
-  category: "data_backup" | "security" | "compliance" | "maintenance" | "governance"
-  priority: "low" | "medium" | "high" | "critical"
-  status: "pending" | "in_progress" | "completed" | "overdue" | "exempted"
-  assignedTo: number | null
-  assignedToName: string | null
-  locationId: number | null
-  locationName: string | null
-  dueDate: string
-  completionDate: string | null
-  evidenceFiles: string[] | null
-  complianceScore: number | null
-  riskLevel: string | null
-  regulatoryFramework: string | null
-  notes: string | null
-  createdBy: number
-  createdByName: string | null
-  createdAt: string
-  updatedAt: string
-  isOverdue: boolean
-  daysUntilDue: number
+  id: number;
+  taskName: string;
+  taskType:
+    | "backup"
+    | "security_audit"
+    | "policy_review"
+    | "system_update"
+    | "data_retention"
+    | "access_review";
+  description: string;
+  category:
+    | "data_backup"
+    | "security"
+    | "compliance"
+    | "maintenance"
+    | "governance";
+  priority: "low" | "medium" | "high" | "critical";
+  status: "pending" | "in_progress" | "completed" | "overdue" | "exempted";
+  assignedTo: number | null;
+  assignedToName: string | null;
+  locationId: number | null;
+  locationName: string | null;
+  dueDate: string;
+  completionDate: string | null;
+  evidenceFiles: string[] | null;
+  complianceScore: number | null;
+  riskLevel: string | null;
+  regulatoryFramework: string | null;
+  notes: string | null;
+  createdBy: number;
+  createdByName: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isOverdue: boolean;
+  daysUntilDue: number;
 }
 
 interface Asset {
-  assetId: string
-  modelName: string
-  brand: string
-  assetType: string
-  status: "available" | "assigned" | "maintenance" | "retired"
-  locationId: number | null
+  assetId: string;
+  modelName: string;
+  brand: string;
+  assetType: string;
+  status: "available" | "assigned" | "maintenance" | "retired";
+  locationId: number | null;
 }
 
 interface Location {
-  id: number
-  outletName: string
-  city: string
-  state: string
+  id: number;
+  outletName: string;
+  city: string;
+  state: string;
 }
 
 // Status color mapping
@@ -119,8 +130,8 @@ const statusColors: Record<string, string> = {
   pending: "bg-yellow-400",
   completed: "bg-green-400",
   overdue: "bg-red-400",
-  exempted: "bg-gray-500"
-}
+  exempted: "bg-gray-500",
+};
 
 // Type color mapping
 const typeColors: Record<string, string> = {
@@ -129,8 +140,8 @@ const typeColors: Record<string, string> = {
   policy_review: "bg-purple-400",
   system_update: "bg-orange-500",
   data_retention: "bg-cyan-500",
-  access_review: "bg-pink-500"
-}
+  access_review: "bg-pink-500",
+};
 
 // Category icons
 const categoryIcons: Record<string, any> = {
@@ -138,262 +149,320 @@ const categoryIcons: Record<string, any> = {
   security: Shield,
   compliance: FileText,
   maintenance: Settings,
-  governance: Building2
-}
+  governance: Building2,
+};
 
 export default function CompliancePage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [locationFilter, setLocationFilter] = useState<string>("all")
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [selectedRecord, setSelectedRecord] = useState<ComplianceRecord | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false)
-  
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<ComplianceRecord | null>(
+    null,
+  );
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch data from API
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ["/api/assets"],
-  })
+  });
 
   const { data: locations } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
-  })
+  });
 
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/users"],
-  })
+  });
 
   // Fetch compliance tasks from real API
   const { data: compliance, isLoading: isLoadingCompliance } = useQuery<any[]>({
     queryKey: ["/api/compliance/tasks"],
-  })
+  });
 
   // Create compliance task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: any) => {
-      const response = await fetch('/api/compliance/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/compliance/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(taskData),
-        credentials: 'include'
-      })
+        credentials: "include",
+      });
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to create task')
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create task");
       }
-      return response.json()
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks'] })
-      toast({ title: "Success", description: "Compliance task created successfully" })
-      setIsCreateDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/tasks"] });
+      toast({
+        title: "Success",
+        description: "Compliance task created successfully",
+      });
+      setIsCreateDialogOpen(false);
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to create task", 
-        variant: "destructive" 
-      })
-    }
-  })
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create task",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Update compliance task mutation
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: any }) => {
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const response = await fetch(`/api/compliance/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-        credentials: 'include'
-      })
+        credentials: "include",
+      });
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to update task')
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update task");
       }
-      return response.json()
+      return response.json();
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks', variables.id, 'audit-trail'] })
-      toast({ title: "Success", description: "Task updated successfully" })
-      setIsEditDialogOpen(false)
-      setIsCompleteDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/tasks"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/compliance/tasks", variables.id, "audit-trail"],
+      });
+      toast({ title: "Success", description: "Task updated successfully" });
+      setIsEditDialogOpen(false);
+      setIsCompleteDialogOpen(false);
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to update task", 
-        variant: "destructive" 
-      })
-    }
-  })
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update task",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Delete compliance task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/compliance/tasks/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      })
+        method: "DELETE",
+        credentials: "include",
+      });
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to delete task')
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete task");
       }
-      return response.json()
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks'] })
-      toast({ title: "Success", description: "Task deleted successfully" })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/tasks"] });
+      toast({ title: "Success", description: "Task deleted successfully" });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to delete task", 
-        variant: "destructive" 
-      })
-    }
-  })
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete task",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Evidence upload mutation
   const uploadEvidenceMutation = useMutation({
-    mutationFn: async ({ taskId, fileName, fileUrl, fileType, fileSize }: { taskId: number, fileName: string, fileUrl: string, fileType: string, fileSize: number }) => {
+    mutationFn: async ({
+      taskId,
+      fileName,
+      fileUrl,
+      fileType,
+      fileSize,
+    }: {
+      taskId: number;
+      fileName: string;
+      fileUrl: string;
+      fileType: string;
+      fileSize: number;
+    }) => {
       const response = await fetch(`/api/compliance/tasks/${taskId}/evidence`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fileName, fileUrl, fileType, fileSize }),
-        credentials: 'include'
-      })
+        credentials: "include",
+      });
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to upload evidence')
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload evidence");
       }
-      return response.json()
+      return response.json();
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['/api/compliance/tasks', variables.taskId, 'audit-trail'] })
-      toast({ title: "Success", description: "Evidence uploaded successfully" })
+      queryClient.invalidateQueries({ queryKey: ["/api/compliance/tasks"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/compliance/tasks", variables.taskId, "audit-trail"],
+      });
+      toast({
+        title: "Success",
+        description: "Evidence uploaded successfully",
+      });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to upload evidence", 
-        variant: "destructive" 
-      })
-    }
-  })
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload evidence",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch audit trail for selected task
   const { data: auditTrail } = useQuery<any[]>({
-    queryKey: ['/api/compliance/tasks', selectedRecord?.id, 'audit-trail'],
+    queryKey: ["/api/compliance/tasks", selectedRecord?.id, "audit-trail"],
     enabled: !!selectedRecord?.id && isViewDialogOpen,
-  })
+  });
 
   // Function to get upload parameters for object storage
   const getUploadParameters = async () => {
-    const response = await fetch('/api/object-storage/upload-url', {
-      method: 'POST',
-      credentials: 'include'
-    })
+    const response = await fetch("/api/object-storage/upload-url", {
+      method: "POST",
+      credentials: "include",
+    });
     if (!response.ok) {
-      throw new Error('Failed to get upload URL')
+      throw new Error("Failed to get upload URL");
     }
-    const data = await response.json()
+    const data = await response.json();
     return {
-      method: 'PUT' as const,
-      url: data.url
-    }
-  }
+      method: "PUT" as const,
+      url: data.url,
+    };
+  };
 
   // Helper function to get compliance status
   const getComplianceStatus = (record: ComplianceRecord) => {
-    if (record.isOverdue) return "overdue"
-    return record.status
-  }
+    if (record.isOverdue) return "overdue";
+    return record.status;
+  };
 
   // Filter compliance records
-  const filteredCompliance = compliance?.filter(record => {
-    const status = record.isOverdue ? 'overdue' : record.status
-    
-    const matchesSearch = 
-      record.taskName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.assignedToName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.locationName?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === "all" || status === statusFilter
-    const matchesType = typeFilter === "all" || record.taskType === typeFilter
-    const matchesCategory = categoryFilter === "all" || record.category === categoryFilter
-    const matchesLocation = locationFilter === "all" || record.locationId?.toString() === locationFilter
-    
-    return matchesSearch && matchesStatus && matchesType && matchesCategory && matchesLocation
-  }) || []
+  const filteredCompliance =
+    compliance?.filter((record) => {
+      const status = record.isOverdue ? "overdue" : record.status;
+
+      const matchesSearch =
+        record.taskName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.assignedToName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        record.locationName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = statusFilter === "all" || status === statusFilter;
+      const matchesType =
+        typeFilter === "all" || record.taskType === typeFilter;
+      const matchesCategory =
+        categoryFilter === "all" || record.category === categoryFilter;
+      const matchesLocation =
+        locationFilter === "all" ||
+        record.locationId?.toString() === locationFilter;
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesType &&
+        matchesCategory &&
+        matchesLocation
+      );
+    }) || [];
 
   // Helper functions
   const getAssetInfo = (assetId: string | null) => {
-    if (!assetId) return null
-    return assets?.find(asset => asset.assetId === assetId)
-  }
+    if (!assetId) return null;
+    return assets?.find((asset) => asset.assetId === assetId);
+  };
 
   const getLocationName = (locationId: number | null) => {
-    if (!locationId) return "All Locations"
-    const location = locations?.find(loc => loc.id === locationId)
-    return location ? `${location.outletName}, ${location.city}` : "Unknown"
-  }
+    if (!locationId) return "All Locations";
+    const location = locations?.find((loc) => loc.id === locationId);
+    return location ? `${location.outletName}, ${location.city}` : "Unknown";
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "completed": return "bg-green-100 text-green-800"
-      case "pending": return "bg-yellow-100 text-yellow-800" 
-      case "overdue": return "bg-red-100 text-red-800"
-      case "exempted": return "bg-gray-100 text-gray-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "overdue":
+        return "bg-red-100 text-red-800";
+      case "exempted":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "backup": return HardDrive
-      case "security_audit": return Shield
-      case "policy_review": return FileText
-      case "system_update": return Monitor
-      case "data_retention": return Archive
-      case "access_review": return Key
-      default: return Settings
+      case "backup":
+        return HardDrive;
+      case "security_audit":
+        return Shield;
+      case "policy_review":
+        return FileText;
+      case "system_update":
+        return Monitor;
+      case "data_retention":
+        return Archive;
+      case "access_review":
+        return Key;
+      default:
+        return Settings;
     }
-  }
+  };
 
   // Calculate compliance metrics
-  const totalRecords = compliance?.length || 0
-  const completedRecords = compliance?.filter(r => r.status === 'completed').length || 0
-  const pendingRecords = compliance?.filter(r => r.status === 'pending').length || 0
-  const overdueRecords = compliance?.filter(r => r.isOverdue).length || 0
-  const complianceRate = totalRecords > 0 ? Math.round((completedRecords / totalRecords) * 100) : 0
+  const totalRecords = compliance?.length || 0;
+  const completedRecords =
+    compliance?.filter((r) => r.status === "completed").length || 0;
+  const pendingRecords =
+    compliance?.filter((r) => r.status === "pending").length || 0;
+  const overdueRecords = compliance?.filter((r) => r.isOverdue).length || 0;
+  const complianceRate =
+    totalRecords > 0 ? Math.round((completedRecords / totalRecords) * 100) : 0;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <SidebarTrigger data-testid="button-sidebar-toggle" className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md" />
-      
+      <SidebarTrigger
+        data-testid="button-sidebar-toggle"
+        className="mb-4 text-white/80 hover:text-white hover:bg-white/10 rounded-md"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Backup & Compliance</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Backup & Compliance
+          </h1>
           <p className="text-white/70">
-            Monitor compliance activities and backup verification across all locations
+            Monitor compliance activities and backup verification across all
+            locations
           </p>
         </div>
         <div className="flex gap-2">
@@ -405,7 +474,10 @@ export default function CompliancePage() {
             <Download className="h-4 w-4" />
             Export Report
           </Button>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -419,22 +491,28 @@ export default function CompliancePage() {
                   Add a new compliance monitoring task or backup verification
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={(e) => {
-                e.preventDefault()
-                const formData = new FormData(e.currentTarget)
-                const assignedToValue = formData.get('assignedTo') as string;
-                const data = {
-                  taskName: formData.get('taskName') as string,
-                  taskType: formData.get('taskType') as string,
-                  category: formData.get('category') as string,
-                  description: formData.get('description') as string,
-                  priority: formData.get('priority') as string,
-                  locationId: parseInt(formData.get('locationId') as string),
-                  dueDate: formData.get('dueDate') as string,
-                  assignedTo: assignedToValue && assignedToValue !== 'unassigned' ? parseInt(assignedToValue) : null,
-                }
-                createTaskMutation.mutate(data)
-              }} className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const assignedToValue = formData.get("assignedTo") as string;
+                  const data = {
+                    taskName: formData.get("taskName") as string,
+                    taskType: formData.get("taskType") as string,
+                    category: formData.get("category") as string,
+                    description: formData.get("description") as string,
+                    priority: formData.get("priority") as string,
+                    locationId: parseInt(formData.get("locationId") as string),
+                    dueDate: formData.get("dueDate") as string,
+                    assignedTo:
+                      assignedToValue && assignedToValue !== "unassigned"
+                        ? parseInt(assignedToValue)
+                        : null,
+                  };
+                  createTaskMutation.mutate(data);
+                }}
+                className="space-y-4"
+              >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="taskType">Task Type *</Label>
@@ -443,12 +521,24 @@ export default function CompliancePage() {
                         <SelectValue placeholder="Select task type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="backup">Backup Verification</SelectItem>
-                        <SelectItem value="security_audit">Security Audit</SelectItem>
-                        <SelectItem value="policy_review">Policy Review</SelectItem>
-                        <SelectItem value="system_update">System Update</SelectItem>
-                        <SelectItem value="data_retention">Data Retention</SelectItem>
-                        <SelectItem value="access_review">Access Review</SelectItem>
+                        <SelectItem value="backup">
+                          Backup Verification
+                        </SelectItem>
+                        <SelectItem value="security_audit">
+                          Security Audit
+                        </SelectItem>
+                        <SelectItem value="policy_review">
+                          Policy Review
+                        </SelectItem>
+                        <SelectItem value="system_update">
+                          System Update
+                        </SelectItem>
+                        <SelectItem value="data_retention">
+                          Data Retention
+                        </SelectItem>
+                        <SelectItem value="access_review">
+                          Access Review
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -512,8 +602,11 @@ export default function CompliancePage() {
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                       <SelectContent>
-                        {locations?.map(location => (
-                          <SelectItem key={location.id} value={location.id.toString()}>
+                        {locations?.map((location) => (
+                          <SelectItem
+                            key={location.id}
+                            value={location.id.toString()}
+                          >
                             {location.outletName}, {location.city}
                           </SelectItem>
                         ))}
@@ -525,12 +618,7 @@ export default function CompliancePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="dueDate">Due Date *</Label>
-                    <Input
-                      id="dueDate"
-                      name="dueDate"
-                      type="date"
-                      required
-                    />
+                    <Input id="dueDate" name="dueDate" type="date" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="assignedTo">Assigned To</Label>
@@ -540,7 +628,7 @@ export default function CompliancePage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {users?.map(user => (
+                        {users?.map((user) => (
                           <SelectItem key={user.id} value={user.id.toString()}>
                             {user.fullName} ({user.role})
                           </SelectItem>
@@ -551,16 +639,18 @@ export default function CompliancePage() {
                 </div>
 
                 <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setIsCreateDialogOpen(false)}
                     disabled={createTaskMutation.isPending}
                   >
                     Cancel
                   </Button>
                   <Button type="submit" disabled={createTaskMutation.isPending}>
-                    {createTaskMutation.isPending ? "Creating..." : "Create Compliance Task"}
+                    {createTaskMutation.isPending
+                      ? "Creating..."
+                      : "Create Compliance Task"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -577,7 +667,9 @@ export default function CompliancePage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{totalRecords}</div>
+            <div className="text-2xl font-bold text-white/90">
+              {totalRecords}
+            </div>
             <p className="text-xs text-muted-foreground">
               All compliance tasks
             </p>
@@ -590,10 +682,10 @@ export default function CompliancePage() {
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{completedRecords}</div>
-            <p className="text-xs text-muted-foreground">
-              Tasks completed
-            </p>
+            <div className="text-2xl font-bold text-white/90">
+              {completedRecords}
+            </div>
+            <p className="text-xs text-muted-foreground">Tasks completed</p>
           </CardContent>
         </Card>
 
@@ -603,20 +695,24 @@ export default function CompliancePage() {
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{overdueRecords}</div>
-            <p className="text-xs text-muted-foreground">
-              Past due date
-            </p>
+            <div className="text-2xl font-bold text-white/90">
+              {overdueRecords}
+            </div>
+            <p className="text-xs text-muted-foreground">Past due date</p>
           </CardContent>
         </Card>
 
         <Card className="glass-card border-0 glass-card border-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Compliance Rate
+            </CardTitle>
             <Shield className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white/90">{complianceRate}%</div>
+            <div className="text-2xl font-bold text-white/90">
+              {complianceRate}%
+            </div>
             <div className="mt-2">
               <Progress value={complianceRate} className="h-2" />
             </div>
@@ -691,8 +787,11 @@ export default function CompliancePage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Locations</SelectItem>
-                  {locations?.map(location => (
-                    <SelectItem key={location.id} value={location.id.toString()}>
+                  {locations?.map((location) => (
+                    <SelectItem
+                      key={location.id}
+                      value={location.id.toString()}
+                    >
                       {location.outletName}
                     </SelectItem>
                   ))}
@@ -700,9 +799,10 @@ export default function CompliancePage() {
               </Select>
             </div>
           </div>
-          
+
           <div className="text-sm text-muted-foreground">
-            Showing {filteredCompliance.length} of {compliance?.length || 0} compliance records
+            Showing {filteredCompliance.length} of {compliance?.length || 0}{" "}
+            compliance records
           </div>
         </CardContent>
       </Card>
@@ -725,9 +825,9 @@ export default function CompliancePage() {
             </TableHeader>
             <TableBody>
               {filteredCompliance.map((record) => {
-                const status = getComplianceStatus(record)
-                const TypeIcon = getTypeIcon(record.taskType)
-                
+                const status = getComplianceStatus(record);
+                const TypeIcon = getTypeIcon(record.taskType);
+
                 return (
                   <TableRow key={record.id}>
                     <TableCell>
@@ -743,10 +843,12 @@ export default function CompliancePage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div 
+                        <div
                           className={`w-2 h-2 rounded-full ${typeColors[record.taskType]}`}
                         />
-                        <span className="capitalize">{record.taskType.replace('_', ' ')}</span>
+                        <span className="capitalize">
+                          {record.taskType.replace("_", " ")}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -761,8 +863,8 @@ export default function CompliancePage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={getStatusBadgeColor(status)}
                       >
                         {status}
@@ -777,10 +879,13 @@ export default function CompliancePage() {
                       {record.assignedToName || "Unassigned"}
                     </TableCell>
                     <TableCell>
-                      {record.evidenceFiles && record.evidenceFiles.length > 0 ? (
+                      {record.evidenceFiles &&
+                      record.evidenceFiles.length > 0 ? (
                         <div className="flex items-center gap-1 text-green-600">
                           <CheckCircle className="h-3 w-3" />
-                          <span className="text-xs">{record.evidenceFiles.length} file(s)</span>
+                          <span className="text-xs">
+                            {record.evidenceFiles.length} file(s)
+                          </span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1 text-gray-400">
@@ -800,8 +905,8 @@ export default function CompliancePage() {
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem
                             onClick={() => {
-                              setSelectedRecord(record)
-                              setIsViewDialogOpen(true)
+                              setSelectedRecord(record);
+                              setIsViewDialogOpen(true);
                             }}
                           >
                             <Eye className="mr-2 h-4 w-4" />
@@ -809,8 +914,8 @@ export default function CompliancePage() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
-                              setSelectedRecord(record)
-                              setIsEditDialogOpen(true)
+                              setSelectedRecord(record);
+                              setIsEditDialogOpen(true);
                             }}
                           >
                             <Edit className="mr-2 h-4 w-4" />
@@ -819,8 +924,8 @@ export default function CompliancePage() {
                           {!record.completionDate && (
                             <DropdownMenuItem
                               onClick={() => {
-                                setSelectedRecord(record)
-                                setIsCompleteDialogOpen(true)
+                                setSelectedRecord(record);
+                                setIsCompleteDialogOpen(true);
                               }}
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
@@ -828,7 +933,7 @@ export default function CompliancePage() {
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-red-600"
                             onClick={() => deleteTaskMutation.mutate(record.id)}
                           >
@@ -839,7 +944,7 @@ export default function CompliancePage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })}
             </TableBody>
           </Table>
@@ -861,19 +966,25 @@ export default function CompliancePage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Task Type</Label>
                   <div className="text-sm p-2 bg-muted rounded capitalize">
-                    {selectedRecord.taskType.replace('_', ' ')}
+                    {selectedRecord.taskType.replace("_", " ")}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Priority</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    <Badge variant={selectedRecord.priority === 'critical' ? 'destructive' : 'secondary'}>
+                    <Badge
+                      variant={
+                        selectedRecord.priority === "critical"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                    >
                       {selectedRecord.priority}
                     </Badge>
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Task Name</Label>
                 <div className="text-sm p-2 bg-muted rounded font-medium">
@@ -895,7 +1006,9 @@ export default function CompliancePage() {
                     {formatDate(selectedRecord.dueDate)}
                     {selectedRecord.daysUntilDue !== undefined && (
                       <div className="text-xs text-muted-foreground mt-1">
-                        {selectedRecord.daysUntilDue >= 0 ? `${selectedRecord.daysUntilDue} days remaining` : `${Math.abs(selectedRecord.daysUntilDue)} days overdue`}
+                        {selectedRecord.daysUntilDue >= 0
+                          ? `${selectedRecord.daysUntilDue} days remaining`
+                          : `${Math.abs(selectedRecord.daysUntilDue)} days overdue`}
                       </div>
                     )}
                   </div>
@@ -903,7 +1016,11 @@ export default function CompliancePage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Status</Label>
                   <div className="text-sm p-2 bg-muted rounded">
-                    <Badge className={getStatusBadgeColor(getComplianceStatus(selectedRecord))}>
+                    <Badge
+                      className={getStatusBadgeColor(
+                        getComplianceStatus(selectedRecord),
+                      )}
+                    >
                       {getComplianceStatus(selectedRecord)}
                     </Badge>
                   </div>
@@ -938,9 +1055,9 @@ export default function CompliancePage() {
                         uploadEvidenceMutation.mutate({
                           taskId: selectedRecord.id,
                           fileName: file.name,
-                          fileUrl: file.uploadURL.split('?')[0],
-                          fileType: file.type || 'application/octet-stream',
-                          fileSize: file.size
+                          fileUrl: file.uploadURL.split("?")[0],
+                          fileType: file.type || "application/octet-stream",
+                          fileSize: file.size,
                         });
                       }
                     }}
@@ -951,18 +1068,22 @@ export default function CompliancePage() {
                   </ObjectUploader>
                 </div>
                 <div className="border rounded-md p-3 bg-muted/50">
-                  {selectedRecord.evidenceFiles && selectedRecord.evidenceFiles.length > 0 ? (
+                  {selectedRecord.evidenceFiles &&
+                  selectedRecord.evidenceFiles.length > 0 ? (
                     <div className="space-y-2">
                       {selectedRecord.evidenceFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-background rounded border"
+                        >
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm">{file}</span>
                           </div>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
-                            onClick={() => window.open(file, '_blank')}
+                            onClick={() => window.open(file, "_blank")}
                             data-testid={`button-download-evidence-${index}`}
                           >
                             <Download className="h-3 w-3" />
@@ -996,20 +1117,27 @@ export default function CompliancePage() {
                   {auditTrail && auditTrail.length > 0 ? (
                     <div className="space-y-3">
                       {auditTrail.map((entry, index) => (
-                        <div key={index} className="text-sm border-l-2 border-primary/30 pl-3 pb-2" data-testid={`audit-trail-entry-${index}`}>
+                        <div
+                          key={index}
+                          className="text-sm border-l-2 border-primary/30 pl-3 pb-2"
+                          data-testid={`audit-trail-entry-${index}`}
+                        >
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium capitalize text-primary">
-                              {entry.action.replace('_', ' ')}
+                              {entry.action.replace("_", " ")}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {new Date(entry.timestamp).toLocaleString('en-IN', { 
-                                day: '2-digit',
-                                month: 'short', 
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: true
-                              })}
+                              {new Date(entry.timestamp).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                },
+                              )}
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -1033,12 +1161,15 @@ export default function CompliancePage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewDialogOpen(false)}
+            >
               Close
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
